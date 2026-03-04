@@ -1,0 +1,231 @@
+{% extends "base.html" %}
+{% load wagtailcore_tags wagtailimages_tags %}
+
+{% block title %}{{ page.title }} - {{ block.super }}{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="bg-gradient-to-r from-virtu-gold to-yellow-600 text-white py-20">
+    <div class="container mx-auto px-4">
+        <div class="max-w-4xl mx-auto text-center">
+            {% if page.hero_imagem %}
+            <div class="mb-8 rounded-lg overflow-hidden shadow-2xl">
+                {% image page.hero_imagem fill-1200x400 as hero_img %}
+                <img src="{{ hero_img.url }}" 
+                     alt="{{ page.hero_imagem.title }}" 
+                     class="w-full object-cover">
+            </div>
+            {% endif %}
+            
+            <h1 class="text-5xl md:text-6xl font-bold mb-6">
+                {{ page.hero_titulo|default:"Nossos Empreendimentos" }}
+            </h1>
+            
+            {% if page.hero_subtitulo %}
+            <p class="text-xl md:text-2xl mb-8 opacity-90">
+                {{ page.hero_subtitulo }}
+            </p>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<!-- Seção de Projetos -->
+<section class="py-16 bg-gray-50">
+    <div class="container mx-auto px-4">
+        <h2 class="text-4xl font-bold text-center mb-12 text-gray-800">
+            {{ page.secao_projetos_titulo|default:"Conheça nossos projetos" }}
+        </h2>
+        
+        {% with empreendimentos=page.get_children.live %}
+        {% if empreendimentos %}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {% for empreendimento in empreendimentos %}
+            <article class="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition">
+                {% with emp=empreendimento.specific %}
+                
+                {% if emp.imagem_principal %}
+                <div class="relative h-64 overflow-hidden">
+                    {% image emp.imagem_principal fill-500x400 as img %}
+                    <img src="{{ img.url }}" 
+                         alt="{{ empreendimento.title }}" 
+                         class="w-full h-full object-cover">
+                    
+                    {% if emp.status %}
+                    <span class="absolute top-4 right-4 bg-virtu-gold text-white px-3 py-1 rounded-full text-sm font-semibold">
+                        {{ emp.status.nome }}
+                    </span>
+                    {% endif %}
+                </div>
+                {% endif %}
+                
+                <div class="p-6">
+                    <h3 class="text-2xl font-bold mb-3 text-gray-800">
+                        {{ empreendimento.title }}
+                    </h3>
+                    
+                    {% if emp.subtitulo %}
+                    <p class="text-virtu-gold text-sm font-semibold mb-2">
+                        {{ emp.subtitulo }}
+                    </p>
+                    {% endif %}
+                    
+                    {% if emp.cidade %}
+                    <p class="text-gray-600 mb-2 flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                  d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                  d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        {{ emp.cidade }}
+                    </p>
+                    {% endif %}
+                    
+                    {% if emp.descricao_curta %}
+                    <p class="text-gray-600 mb-4">
+                        {{ emp.descricao_curta|truncatewords:20 }}
+                    </p>
+                    {% endif %}
+                    
+                    <div class="flex items-center justify-between pt-4 border-t border-gray-200">
+                        {% if emp.metragem_a_partir %}
+                        <span class="text-sm text-gray-500">
+                            A partir de {{ emp.metragem_a_partir }} m²
+                        </span>
+                        {% endif %}
+                        
+                        {% if emp.preco_a_partir %}
+                        <span class="text-lg font-bold text-virtu-gold">
+                            R$ {{ emp.preco_a_partir|floatformat:2 }}
+                        </span>
+                        {% endif %}
+                    </div>
+                    
+                    <a href="{% pageurl empreendimento %}" 
+                       class="mt-4 block w-full text-center bg-virtu-gold text-white py-2 rounded-lg font-semibold hover:bg-opacity-90 transition">
+                        Ver Detalhes
+                    </a>
+                </div>
+                
+                {% endwith %}
+            </article>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-12">
+            <svg class="w-24 h-24 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                      d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+            </svg>
+            <p class="text-xl text-gray-500">Nenhum empreendimento disponível no momento.</p>
+            <p class="text-gray-400 mt-2">Novos projetos serão adicionados em breve!</p>
+        </div>
+        {% endif %}
+        {% endwith %}
+    </div>
+</section>
+
+<!-- Seção de Formulário de Contato -->
+{% if page.form_titulo %}
+<section class="py-16 bg-white">
+    <div class="container mx-auto px-4">
+        <div class="max-w-2xl mx-auto">
+            <h2 class="text-4xl font-bold text-center mb-4 text-gray-800">
+                {{ page.form_titulo }}
+            </h2>
+            
+            <p class="text-center text-gray-600 mb-8">
+                Preencha o formulário abaixo e entraremos em contato com você
+            </p>
+            
+            <form method="POST" action="" class="bg-gray-50 p-8 rounded-lg shadow-lg">
+                {% csrf_token %}
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                        <label for="nome" class="block text-gray-700 font-semibold mb-2">
+                            Nome Completo *
+                        </label>
+                        <input type="text" 
+                               id="nome" 
+                               name="nome" 
+                               required 
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-virtu-gold">
+                    </div>
+                    
+                    <div>
+                        <label for="email" class="block text-gray-700 font-semibold mb-2">
+                            E-mail *
+                        </label>
+                        <input type="email" 
+                               id="email" 
+                               name="email" 
+                               required 
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-virtu-gold">
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                        <label for="telefone" class="block text-gray-700 font-semibold mb-2">
+                            Telefone *
+                        </label>
+                        <input type="tel" 
+                               id="telefone" 
+                               name="telefone" 
+                               required 
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-virtu-gold">
+                    </div>
+                    
+                    <div>
+                        <label for="interesse" class="block text-gray-700 font-semibold mb-2">
+                            Interesse
+                        </label>
+                        <select id="interesse" 
+                                name="interesse" 
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-virtu-gold">
+                            <option value="">Selecione...</option>
+                            <option value="compra">Comprar</option>
+                            <option value="informacoes">Mais Informações</option>
+                            <option value="visita">Agendar Visita</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="mb-6">
+                    <label for="mensagem" class="block text-gray-700 font-semibold mb-2">
+                        Mensagem
+                    </label>
+                    <textarea id="mensagem" 
+                              name="mensagem" 
+                              rows="5" 
+                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-virtu-gold"></textarea>
+                </div>
+                
+                <button type="submit" 
+                        class="w-full bg-virtu-gold text-white py-3 rounded-lg font-semibold hover:bg-opacity-90 transition">
+                    Enviar Mensagem
+                </button>
+            </form>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- CTA Final -->
+<section class="py-16 bg-gradient-to-r from-virtu-gold to-yellow-600 text-white">
+    <div class="container mx-auto px-4 text-center">
+        <h2 class="text-3xl md:text-4xl font-bold mb-4">
+            Pronto para encontrar seu imóvel ideal?
+        </h2>
+        <p class="text-xl mb-8 opacity-90">
+            Entre em contato conosco e descubra as melhores oportunidades
+        </p>
+        <a href="/contato/" 
+           class="inline-block bg-white text-virtu-gold px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition">
+            Fale Conosco
+        </a>
+    </div>
+</section>
+{% endblock %}
