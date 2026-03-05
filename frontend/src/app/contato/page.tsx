@@ -24,7 +24,7 @@ export default function ContatoPage() {
   return (
     <>
       {/* Hero */}
-      <section className="bg-virtu-dark pt-32 pb-20">
+      <section className="bg-virtu-dark pt-24 md:pt-32 pb-12 md:pb-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.h1
             initial={{ opacity: 0, y: 30 }}

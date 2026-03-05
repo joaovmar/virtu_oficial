@@ -59,8 +59,8 @@ export default function EmpreendimentosPage() {
               <h1 className="font-display text-4xl lg:text-5xl text-white mt-4 mb-4">
                 Terras de Verano
               </h1>
-              <p className="text-white/80">
-                Lançamento virtú e Perplan urbanismo na Zona Sul de Ribeirão Preto
+              <p className="text-white/80 max-w-lg">
+                Lançamento virtú e Perplan urbanismo na Zona Sul de Ribeirão Preto.
               </p>
             </motion.div>
             <ContactForm className="max-w-md ml-auto" />
@@ -79,11 +79,10 @@ export default function EmpreendimentosPage() {
           <div className="flex flex-wrap gap-3 mb-12">
             <button
               onClick={() => handleCidadeFilter(null)}
-              className={`px-6 py-2 rounded-full text-sm font-medium transition-colors ${
-                cidadeAtiva === null
+              className={`px-6 py-2 rounded-full text-sm font-medium transition-colors ${cidadeAtiva === null
                   ? 'bg-virtu-gold text-white'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
+                }`}
             >
               Geral
             </button>
@@ -91,11 +90,10 @@ export default function EmpreendimentosPage() {
               <button
                 key={cidade.id}
                 onClick={() => handleCidadeFilter(cidade.id)}
-                className={`px-6 py-2 rounded-full text-sm font-medium transition-colors ${
-                  cidadeAtiva === cidade.id
+                className={`px-6 py-2 rounded-full text-sm font-medium transition-colors ${cidadeAtiva === cidade.id
                     ? 'bg-virtu-gold text-white'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
+                  }`}
               >
                 {cidade.nome}
               </button>

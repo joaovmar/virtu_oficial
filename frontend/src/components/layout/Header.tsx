@@ -27,18 +27,16 @@ export default function Header() {
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled ? 'bg-white shadow-md py-3' : 'bg-transparent py-5'
-      }`}
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? 'bg-white shadow-md py-3' : 'bg-transparent py-5'
+        }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center">
             <span
-              className={`font-display text-2xl italic ${
-                isScrolled ? 'text-virtu-dark' : 'text-white'
-              }`}
+              className={`font-display text-2xl italic ${isScrolled ? 'text-virtu-dark' : 'text-white'
+                }`}
             >
               virtú
             </span>
@@ -50,16 +48,15 @@ export default function Header() {
               <Link
                 key={link.href}
                 href={link.href}
-                className={`text-sm transition-colors hover:text-virtu-gold ${
-                  isScrolled ? 'text-virtu-dark' : 'text-white'
-                }`}
+                className={`text-sm transition-colors hover:text-virtu-gold ${isScrolled ? 'text-virtu-dark' : 'text-white'
+                  }`}
               >
                 {link.label}
               </Link>
             ))}
             <Link
               href="/encontre-seu-imovel"
-              className="bg-virtu-gold text-white px-6 py-2.5 rounded-full text-sm font-medium hover:bg-virtu-gold-dark transition-colors"
+              className="bg-virtu-green text-white px-6 py-2.5 rounded-full text-sm font-medium hover:bg-virtu-teal-light transition-colors"
             >
               encontre seu imóvel
             </Link>

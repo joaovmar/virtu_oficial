@@ -1,9 +1,9 @@
 'use client';
 
-import { ButtonHTMLAttributes, ReactNode } from 'react';
-import { motion } from 'framer-motion';
+import { ReactNode } from 'react';
+import { motion, HTMLMotionProps } from 'framer-motion';
 
-interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+interface ButtonProps extends HTMLMotionProps<"button"> {
   variant?: 'primary' | 'secondary' | 'outline';
   size?: 'sm' | 'md' | 'lg';
   children: ReactNode;
@@ -22,7 +22,7 @@ export default function Button({
     'inline-flex items-center justify-center font-medium rounded-full transition-all duration-300';
 
   const variants = {
-    primary: 'bg-virtu-gold text-white hover:bg-virtu-gold-dark',
+    primary: 'bg-virtu-gold text-white hover:bg-virtu-gold-hover',
     secondary: 'bg-virtu-dark text-white hover:bg-gray-800',
     outline: 'border-2 border-virtu-gold text-virtu-gold hover:bg-virtu-gold hover:text-white',
   };
@@ -37,9 +37,8 @@ export default function Button({
     <motion.button
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
-      className={`${baseStyles} ${variants[variant]} ${sizes[size]} ${className} ${
-        isLoading ? 'opacity-70 cursor-not-allowed' : ''
-      }`}
+      className={`${baseStyles} ${variants[variant]} ${sizes[size]} ${className} ${isLoading ? 'opacity-70 cursor-not-allowed' : ''
+        }`}
       disabled={isLoading}
       {...props}
     >

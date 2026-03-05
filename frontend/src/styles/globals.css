@@ -5,12 +5,35 @@
 @tailwind utilities;
 
 :root {
-  --virtu-gold: #C9A96E;
-  --virtu-gold-dark: #b8985d;
+  --virtu-gold: #C5A96F;
+  --virtu-gold-hover: #b59a60;
   --virtu-dark: #1a1a1a;
-  --virtu-cream: #f5f0e8;
-  --virtu-teal: #2C6E6A;
+  --virtu-cream: #F7F5F2;
+  --virtu-teal: #1C3E35;
+  --virtu-teal-dark: #153028;
+  --virtu-teal-light: #2F5C5A;
+  --virtu-green: #3B8B88;
 }
+
+.bg-curved-green {
+  background-color: var(--virtu-teal);
+  background-image: radial-gradient(circle at 0% 0%, var(--virtu-teal-light) 0%, transparent 50%), radial-gradient(circle at 100% 100%, var(--virtu-teal-dark) 0%, transparent 50%);
+  position: relative;
+  overflow: hidden;
+}
+
+.bg-curved-green::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url("data:image/svg+xml,%3Csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0,100 C150,200 350,0 500,100 C650,200 850,0 1000,100 L1000,0 L0,0 Z' fill='rgba(255,255,255,0.03)'/%3E%3C/svg%3E") no-repeat center center;
+  background-size: cover;
+  pointer-events: none;
+}
+
 
 * {
   margin: 0;

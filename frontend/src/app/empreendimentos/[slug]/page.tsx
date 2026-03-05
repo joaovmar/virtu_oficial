@@ -3,13 +3,12 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Image from 'next/image';
-import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Play, MapPin, Bed, Maximize, DollarSign, CheckCircle, Star, Calendar, Building } from 'lucide-react';
+import { MapPin, Bed, Maximize, Car } from 'lucide-react';
 import { getEmpreendimento, EmpreendimentoDetalhe } from '@/lib/api';
 import ContactForm from '@/components/ui/ContactForm';
-import Button from '@/components/ui/Button';
-import GaleriaCarrossel from '@/components/ui/GaleriaCarrossel';
+import FuturosLancamentosSection from '@/components/sections/FuturosLancamentosSection';
+import LeadCaptureSection from '@/components/sections/LeadCaptureSection';
 
 export default function EmpreendimentoDetalhePage() {
   const params = useParams();
@@ -44,229 +43,174 @@ export default function EmpreendimentoDetalhePage() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center pt-20">
         <h1 className="font-display text-3xl text-virtu-dark mb-4">Empreendimento não encontrado</h1>
-        <Link href="/empreendimentos">
-          <Button>Ver todos os empreendimentos</Button>
-        </Link>
       </div>
     );
   }
 
   return (
     <>
-      {/* Hero */}
-      <section className="relative h-[50vh] lg:h-[60vh]">
-        {emp.imagem_hero ? (
-          <Image 
-            src={emp.imagem_hero.url} 
-            alt={emp.imagem_hero.alt || emp.title} 
-            fill 
-            className="object-cover" 
-            priority
-          />
-        ) : emp.imagem_principal ? (
-          <Image 
-            src={emp.imagem_principal.url} 
-            alt={emp.imagem_principal.alt || emp.title} 
-            fill 
-            className="object-cover" 
-            priority
-          />
-        ) : (
-          <div className="w-full h-full bg-gradient-to-br from-virtu-dark to-virtu-teal" />
-        )}
-        <div className="absolute inset-0 bg-black/40" />
-      </section>
+      {/* 1. Hero Section com Form */}
+      <section className="relative h-screen min-h-[700px] flex items-center pt-20 pb-12">
+        <div className="absolute inset-0 z-0">
+          {emp.imagem_hero ? (
+            <Image
+              src={emp.imagem_hero.url}
+              alt={emp.imagem_hero.alt || emp.title}
+              fill
+              className="object-cover"
+              priority
+            />
+          ) : emp.imagem_principal ? (
+            <Image
+              src={emp.imagem_principal.url}
+              alt={emp.imagem_principal.alt || emp.title}
+              fill
+              className="object-cover"
+              priority
+            />
+          ) : (
+            <div className="w-full h-full bg-gradient-to-br from-virtu-dark to-virtu-teal" />
+          )}
+          <div className="absolute inset-0 bg-black/40" />
+        </div>
 
-      {/* Info + Form */}
-      <section className="py-12 lg:py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-12">
-            <div>
-              {emp.logo && (
-                <div className="mb-6">
-                  <Image 
-                    src={emp.logo.url} 
-                    alt={emp.logo.alt || emp.title} 
-                    width={200} 
-                    height={80} 
-                    className="object-contain" 
-                  />
-                </div>
-              )}
-              
-              <h1 className="font-display text-3xl lg:text-4xl text-virtu-dark mb-2">
-                {emp.subtitulo || (
-                  <>Pensando e construindo seu <span className="text-virtu-gold italic">futuro</span> com excelência!</>
-                )}
-              </h1>
-              
-              {emp.descricao_curta && (
-                <p className="text-gray-600 mt-4">{emp.descricao_curta}</p>
-              )}
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full flex flex-col lg:flex-row gap-12 justify-between items-center h-full">
+          {/* Esquerda: Textos Hero */}
+          <div className="text-white lg:w-1/2 mt-12 lg:mt-0">
+            {emp.logo && (
+              <Image
+                src={emp.logo.url}
+                alt={emp.logo.alt || emp.title}
+                width={280}
+                height={100}
+                className="object-contain mb-8 filter brightness-0 invert"
+              />
+            )}
+            <h1 className="font-display text-4xl lg:text-6xl text-white mb-2 leading-tight">
+              {emp.title}
+            </h1>
+            {(emp.bairro || emp.cidade) && (
+              <p className="font-sans font-medium text-lg lg:text-xl uppercase tracking-widest text-virtu-gold mb-6">
+                {[emp.bairro, `${emp.cidade?.nome || 'Ribeirão Preto'} - ${emp.cidade?.estado || 'SP'}`].filter(Boolean).join(' | ')}
+              </p>
+            )}
+            <h2 className="font-display text-3xl lg:text-5xl italic font-light opacity-90 max-w-xl">
+              {emp.subtitulo || "Perto de tudo que inspira você."}
+            </h2>
+          </div>
 
-              {emp.preco_a_partir && (
-                <p className="text-virtu-gold text-xl font-medium mt-4">
-                  a partir de R$ {Number(emp.preco_a_partir).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                </p>
-              )}
-
-              {emp.descricao && (
-                <div 
-                  className="mt-6 text-gray-600 prose prose-sm max-w-none" 
-                  dangerouslySetInnerHTML={{ __html: emp.descricao }} 
-                />
-              )}
-            </div>
-            <div>
-              <ContactForm title="Saiba mais!" empreendimentoId={emp.id} />
+          {/* Direita: Form */}
+          <div className="lg:w-[450px] w-full">
+            <div className="bg-white/10 backdrop-blur-md rounded-3xl p-8 border border-white/20 shadow-2xl">
+              <h3 className="text-white font-sans font-bold text-2xl mb-6 text-center">Saiba mais!</h3>
+              <ContactForm empreendimentoId={emp.id} className="[&_label]:text-white [&_input]:bg-white/80 [&_button]:mt-4" />
             </div>
           </div>
         </div>
       </section>
 
-      {/* Galeria em Carrossel */}
+      {/* 2. Galeria: Detalhes que inspiram */}
       {emp.galeria_imagens && emp.galeria_imagens.length > 0 && (
-        <div className="bg-gray-50">
-          <GaleriaCarrossel imagens={emp.galeria_imagens} titulo="Galeria" />
-        </div>
-      )}
+        <section className="py-16 md:py-24 bg-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 className="font-display text-5xl text-virtu-green mb-16">
+              Detalhes que <span className="italic">inspiram</span>
+            </h2>
 
-      {/* Características */}
-      <section className="py-12 border-t border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-wrap justify-center gap-8 lg:gap-12">
-            {emp.preco_a_partir && (
-              <div className="flex items-center gap-3">
-                <DollarSign className="w-6 h-6 text-virtu-gold" />
-                <span className="text-gray-700">a partir de R$ {Number(emp.preco_a_partir).toLocaleString('pt-BR')}</span>
+            {/* Simple Grid Placeholder matching mockup layout - 1 large left, 2 stacked right */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 h-[600px]">
+              <div className="relative rounded-2xl overflow-hidden shadow-lg h-full">
+                <Image src={emp.galeria_imagens[0]?.imagem?.url || '/placeholder.jpg'} alt="Galeria 1" fill className="object-cover" />
               </div>
-            )}
-            {emp.metragem_a_partir && (
-              <div className="flex items-center gap-3">
-                <Maximize className="w-6 h-6 text-virtu-gold" />
-                <span className="text-gray-700">a partir de {emp.metragem_a_partir}m²</span>
-              </div>
-            )}
-            {emp.dormitorios && (
-              <div className="flex items-center gap-3">
-                <Bed className="w-6 h-6 text-virtu-gold" />
-                <span className="text-gray-700">{emp.dormitorios}</span>
-              </div>
-            )}
-            {emp.caracteristicas_resumo && (
-              <div className="flex items-center gap-3">
-                <CheckCircle className="w-6 h-6 text-virtu-gold" />
-                <span className="text-gray-700">{emp.caracteristicas_resumo}</span>
-              </div>
-            )}
-          </div>
-        </div>
-      </section>
-
-      {/* Diferenciais */}
-      {emp.diferenciais && emp.diferenciais.length > 0 && (
-        <section className="py-12 bg-virtu-cream">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 className="font-display text-3xl text-center text-virtu-dark mb-8">Diferenciais</h2>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-              {emp.diferenciais.map((dif, index) => (
-                <motion.div
-                  key={dif.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.1 }}
-                  className="bg-white p-6 rounded-xl text-center shadow-sm"
-                >
-                  {dif.icone ? (
-                    <div className="w-12 h-12 mx-auto mb-3 relative">
-                      <Image src={dif.icone.url} alt={dif.icone.alt || dif.nome} fill className="object-contain" />
-                    </div>
-                  ) : (
-                    <Star className="w-12 h-12 mx-auto mb-3 text-virtu-gold" />
+              <div className="flex flex-col gap-4 h-full">
+                <div className="relative rounded-2xl overflow-hidden shadow-lg flex-1">
+                  {emp.galeria_imagens[1]?.imagem && (
+                    <Image src={emp.galeria_imagens[1].imagem.url} alt="Galeria 2" fill className="object-cover" />
                   )}
-                  <h3 className="font-medium text-virtu-dark">{dif.nome}</h3>
-                  {dif.descricao && (
-                    <p className="text-sm text-gray-500 mt-2">{dif.descricao}</p>
+                </div>
+                <div className="relative rounded-2xl overflow-hidden shadow-lg flex-1">
+                  {emp.galeria_imagens[2]?.imagem && (
+                    <Image src={emp.galeria_imagens[2].imagem.url} alt="Galeria 3" fill className="object-cover" />
                   )}
-                </motion.div>
-              ))}
+                </div>
+              </div>
             </div>
           </div>
         </section>
       )}
 
-      {/* Plantas */}
+      {/* 3. Planta Humanizada */}
       {emp.plantas && emp.plantas.length > 0 && (
-        <section className="py-12">
+        <section className="py-16 md:py-24 bg-virtu-cream">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 className="font-display text-3xl text-center text-virtu-dark mb-8">Conheça nossa planta!</h2>
-            
+            <div className="text-center mb-16">
+              <span className="font-sans font-medium uppercase tracking-[0.2em] text-gray-500">Conheça nossa</span>
+              <h2 className="font-display text-5xl md:text-6xl text-virtu-green">
+                planta <span className="italic text-virtu-gold">humanizada!</span>
+              </h2>
+            </div>
+
             {/* Tabs de plantas */}
-            <div className="flex justify-center gap-4 mb-8 flex-wrap">
+            <div className="flex justify-center gap-2 mb-12 flex-wrap max-w-max mx-auto bg-white p-2 rounded-full shadow-sm">
               {emp.plantas.map((planta, index) => (
                 <button
                   key={planta.id}
                   onClick={() => setPlantaAtiva(index)}
-                  className={`px-6 py-2 rounded-full text-sm font-medium transition-colors ${
-                    plantaAtiva === index
-                      ? 'bg-virtu-gold text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
+                  className={`px-8 py-3 rounded-full text-sm font-bold uppercase tracking-wider transition-all ${plantaAtiva === index
+                    ? 'bg-virtu-gold text-white shadow-md'
+                    : 'text-gray-500 hover:text-virtu-dark'
+                    }`}
                 >
                   {planta.nome}
                 </button>
               ))}
             </div>
 
-            {/* Conteúdo da planta ativa */}
-            <div className="grid lg:grid-cols-2 gap-8 items-center">
-              {emp.plantas[plantaAtiva]?.imagem && (
-                <motion.div 
-                  key={plantaAtiva}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="relative aspect-square rounded-xl overflow-hidden bg-white shadow-lg"
-                >
-                  <Image
-                    src={emp.plantas[plantaAtiva].imagem!.url}
-                    alt={emp.plantas[plantaAtiva].imagem!.alt || emp.plantas[plantaAtiva].nome}
-                    fill
-                    className="object-contain p-4"
-                  />
-                </motion.div>
-              )}
-              <div>
-                <h3 className="font-display text-2xl text-virtu-dark mb-4">{emp.plantas[plantaAtiva]?.nome}</h3>
-                
-                <div className="flex flex-wrap gap-4 mb-6">
-                  {emp.plantas[plantaAtiva]?.dormitorios && (
-                    <div className="flex items-center gap-2 text-gray-600">
-                      <Bed className="w-5 h-5 text-virtu-gold" />
-                      <span>{emp.plantas[plantaAtiva].dormitorios} dormitórios</span>
-                    </div>
-                  )}
-                  {emp.plantas[plantaAtiva]?.metragem && (
-                    <div className="flex items-center gap-2 text-gray-600">
-                      <Maximize className="w-5 h-5 text-virtu-gold" />
-                      <span>{emp.plantas[plantaAtiva].metragem}m²</span>
-                    </div>
-                  )}
-                </div>
-
-                {emp.plantas[plantaAtiva]?.descricao && (
-                  <p className="text-gray-600 mb-4">{emp.plantas[plantaAtiva].descricao}</p>
+            {/* Conteúdo da planta */}
+            <div className="flex flex-col lg:flex-row gap-12 items-center">
+              <div className="lg:w-1/3 flex flex-col gap-8">
+                {emp.plantas[plantaAtiva]?.metragem && (
+                  <div className="flex items-center gap-4 text-virtu-green">
+                    <Maximize className="w-8 h-8 opacity-70" />
+                    <span className="font-sans font-medium text-4xl">{emp.plantas[plantaAtiva].metragem}m²</span>
+                  </div>
                 )}
+                {emp.plantas[plantaAtiva]?.dormitorios && (
+                  <div className="flex items-center gap-4 text-virtu-green whitespace-pre-line">
+                    <Bed className="w-8 h-8 opacity-70" />
+                    <span className="font-sans font-medium text-3xl">{emp.plantas[plantaAtiva].dormitorios}</span>
+                  </div>
+                )}
+                {emp.plantas[plantaAtiva]?.caracteristicas?.some(c => c.toLowerCase().includes('vaga')) && (
+                  <div className="flex items-center gap-4 text-virtu-green">
+                    <Car className="w-8 h-8 opacity-70" />
+                    <span className="font-sans font-medium text-3xl">
+                      {emp.plantas[plantaAtiva].caracteristicas.find(c => c.toLowerCase().includes('vaga'))}
+                    </span>
+                  </div>
+                )}
+              </div>
 
-                {emp.plantas[plantaAtiva]?.caracteristicas && emp.plantas[plantaAtiva].caracteristicas.length > 0 && (
-                  <ul className="space-y-2">
-                    {emp.plantas[plantaAtiva].caracteristicas.map((car, i) => (
-                      <li key={i} className="flex items-start gap-2">
-                        <span className="text-virtu-gold mt-1">•</span>
-                        <span className="text-gray-700">{car}</span>
-                      </li>
-                    ))}
-                  </ul>
+              <div className="lg:w-2/3 w-full">
+                {emp.plantas[plantaAtiva]?.imagem ? (
+                  <motion.div
+                    key={plantaAtiva}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.5 }}
+                    className="relative w-full h-[500px]"
+                  >
+                    <Image
+                      src={emp.plantas[plantaAtiva].imagem!.url}
+                      alt={emp.plantas[plantaAtiva].imagem!.alt || emp.plantas[plantaAtiva].nome}
+                      fill
+                      className="object-contain"
+                    />
+                  </motion.div>
+                ) : (
+                  <div className="w-full h-[500px] bg-white/50 rounded-2xl flex items-center justify-center border-2 border-dashed border-gray-300">
+                    <span className="text-gray-400">Imagem da planta não disponível</span>
+                  </div>
                 )}
               </div>
             </div>
@@ -274,131 +218,42 @@ export default function EmpreendimentoDetalhePage() {
         </section>
       )}
 
-      {/* Vídeo */}
-      {emp.video_url && (
-        <section className="py-16 bg-gray-50">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 className="font-display text-3xl text-center text-virtu-dark mb-8">vídeo {emp.title}</h2>
-            <div className="relative aspect-video rounded-2xl overflow-hidden bg-gray-900 shadow-xl">
-              {emp.video_thumbnail ? (
-                <Image 
-                  src={emp.video_thumbnail.url} 
-                  alt={emp.video_thumbnail.alt || `Vídeo ${emp.title}`} 
-                  fill 
-                  className="object-cover" 
-                />
-              ) : (
-                <div className="w-full h-full bg-gradient-to-br from-virtu-dark to-virtu-teal" />
-              )}
-              <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                <a
-                  href={emp.video_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-20 h-20 rounded-full bg-white/90 flex items-center justify-center hover:bg-white hover:scale-110 transition-all shadow-lg"
-                >
-                  <Play className="w-8 h-8 text-virtu-gold ml-1" />
-                </a>
-              </div>
-            </div>
+      {/* 4. Localização */}
+      <section className="py-16 md:py-24 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center flex flex-col items-center">
+          <div className="w-16 h-16 rounded-full bg-virtu-cream flex items-center justify-center mb-6 shadow-sm">
+            <MapPin className="w-8 h-8 text-virtu-gold" />
           </div>
-        </section>
-      )}
+          <h2 className="font-display text-5xl text-virtu-dark mb-4">Localização</h2>
+          <p className="text-xl font-light text-gray-500 mb-12 uppercase tracking-wide">
+            {emp.bairro ? `Região da ${emp.bairro}` : 'Localização privilegiada'} - {emp.cidade?.nome || 'Ribeirão Preto'} / {emp.cidade?.estado || 'SP'}
+          </p>
 
-      {/* Cronograma de Obra */}
-      {emp.andamentos_obra && emp.andamentos_obra.length > 0 && (
-        <section className="py-12">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 className="font-display text-3xl text-center text-virtu-dark mb-8">Cronograma de obra</h2>
-            <div className="space-y-4">
-              {emp.andamentos_obra.map((etapa, index) => (
-                <div key={etapa.id} className="bg-white rounded-xl p-4 shadow-sm">
-                  <div className="flex justify-between mb-2">
-                    <span className="text-gray-700">{etapa.titulo}</span>
-                    <span className="text-sm font-medium text-virtu-gold">{etapa.percentual}%</span>
-                  </div>
-                  <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                    <motion.div
-                      initial={{ width: 0 }}
-                      whileInView={{ width: `${etapa.percentual}%` }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 1, delay: index * 0.1 }}
-                      className="h-full bg-virtu-gold rounded-full"
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
+          <div className="relative w-full h-[500px] rounded-3xl overflow-hidden shadow-xl border-4 border-white">
+            <Image src="/map-placeholder.jpg" alt="Mapa" fill className="object-cover" />
           </div>
-        </section>
-      )}
-
-      {/* Fotos da Obra */}
-      {emp.fotos_obra && emp.fotos_obra.length > 0 && (
-        <section className="py-12 bg-gray-50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 className="font-display text-3xl text-center text-virtu-dark mb-8">Andamento das obras</h2>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              {emp.fotos_obra.map((foto) => (
-                <motion.div 
-                  key={foto.id} 
-                  whileHover={{ scale: 1.02 }}
-                  className="relative aspect-[4/3] rounded-xl overflow-hidden shadow-sm"
-                >
-                  {foto.imagem && (
-                    <Image 
-                      src={foto.imagem.url} 
-                      alt={foto.descricao || 'Foto da obra'} 
-                      fill 
-                      className="object-cover" 
-                    />
-                  )}
-                  {foto.data_captura && (
-                    <div className="absolute bottom-2 left-2 bg-black/60 text-white text-xs px-2 py-1 rounded flex items-center gap-1">
-                      <Calendar className="w-3 h-3" />
-                      {new Date(foto.data_captura).toLocaleDateString('pt-BR')}
-                    </div>
-                  )}
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* Localização */}
-      {(emp.endereco || emp.localizacao || emp.bairro) && (
-        <section className="py-12">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 className="font-display text-3xl text-virtu-dark mb-6">Localização</h2>
-            <div className="flex flex-col items-center gap-2">
-              <div className="flex items-center gap-2 text-gray-600">
-                <MapPin className="w-5 h-5 text-virtu-gold" />
-                <span>{emp.endereco || emp.localizacao}</span>
-              </div>
-              {emp.bairro && emp.cidade && (
-                <p className="text-gray-500">
-                  {emp.bairro} - {emp.cidade.nome}/{emp.cidade.estado}
-                </p>
-              )}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* CTA Final */}
-      <section className="py-20 bg-virtu-teal">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="font-display text-3xl lg:text-4xl text-white mb-8">
-            Vamos conversar sobre o seu <span className="italic">futuro!</span>
-          </h2>
-          <Link href="/contato">
-            <Button variant="outline" className="border-white text-white hover:bg-white hover:text-virtu-teal">
-              Conheça mais
-            </Button>
-          </Link>
         </div>
       </section>
+
+      {/* 5. Viva o extraordinário */}
+      <section className="relative h-[400px] flex items-center justify-center">
+        <Image src="/extraordinario-bg.jpg" alt="Viva o extraordinário" fill className="object-cover" />
+        <div className="absolute inset-0 bg-black/30" />
+        <h2 className="relative z-10 font-display text-5xl md:text-7xl text-white italic">
+          Viva o <span className="font-medium text-virtu-gold">extraordinário.</span>
+        </h2>
+      </section>
+
+      {/* 6. Futuros Lançamentos */}
+      <FuturosLancamentosSection />
+
+      {/* 7. Lead Capture */}
+      <div className="bg-curved-green py-16 md:py-24 -mt-16 pt-24 md:pt-32">
+        <LeadCaptureSection
+          titulo={`${emp.title}\n${emp.cidade?.nome || ''} - ${emp.cidade?.estado || ''}`}
+          imagemFundo={emp.imagem_hero?.url || emp.imagem_principal?.url}
+        />
+      </div>
     </>
   );
 }
