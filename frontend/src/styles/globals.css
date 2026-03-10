@@ -1,40 +1,33 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@100;200;300;400;500;600;700;800&family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&family=Montserrat:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* ================================================================
+   DESIGN TOKENS - Extraídos diretamente do Figma
+   ================================================================ */
 :root {
-  --virtu-gold: #C5A96F;
-  --virtu-gold-hover: #b59a60;
-  --virtu-dark: #1a1a1a;
-  --virtu-cream: #F7F5F2;
-  --virtu-teal: #1C3E35;
-  --virtu-teal-dark: #153028;
-  --virtu-teal-light: #2F5C5A;
-  --virtu-green: #3B8B88;
+  /* Cores primárias do Figma */
+  --virtu-green: #348981;       /* #1 virtú */
+  --virtu-dark: #282828;        /* #2 virtú */
+  --virtu-gold: #c1a784;        /* dourado */
+  --virtu-green-dark: #1e3d34;  /* verde escuro "virtú." */
+  
+  /* Cores secundárias */
+  --virtu-text-gray: #414141;
+  --virtu-text-muted: #858585;
+  --virtu-text-light: #c0c0c0;
+  --virtu-placeholder: #c9c9c9;
+  --virtu-bg-light: #fbfbfb;
+  --virtu-border-light: #eeeeee;
+  --virtu-overlay: rgba(20, 20, 20, 0.67);
+  --virtu-video-overlay: rgba(0, 0, 0, 0.6);
 }
 
-.bg-curved-green {
-  background-color: var(--virtu-teal);
-  background-image: radial-gradient(circle at 0% 0%, var(--virtu-teal-light) 0%, transparent 50%), radial-gradient(circle at 100% 100%, var(--virtu-teal-dark) 0%, transparent 50%);
-  position: relative;
-  overflow: hidden;
-}
-
-.bg-curved-green::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: url("data:image/svg+xml,%3Csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0,100 C150,200 350,0 500,100 C650,200 850,0 1000,100 L1000,0 L0,0 Z' fill='rgba(255,255,255,0.03)'/%3E%3C/svg%3E") no-repeat center center;
-  background-size: cover;
-  pointer-events: none;
-}
-
-
+/* ================================================================
+   BASE STYLES
+   ================================================================ */
 * {
   margin: 0;
   padding: 0;
@@ -46,65 +39,95 @@ html {
 }
 
 body {
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Sora', sans-serif;
   color: var(--virtu-dark);
   background-color: #fff;
   line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Newsreader para títulos display itálicos */
+.font-display {
+  font-family: 'Newsreader', serif;
+}
+
+/* Montserrat para copyright */
+.font-copyright {
+  font-family: 'Montserrat', sans-serif;
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: 'Playfair Display', serif;
-  font-weight: 400;
+  font-family: 'Sora', sans-serif;
+  font-weight: 300;
 }
 
-.font-display {
-  font-family: 'Playfair Display', serif;
-}
-
-/* Custom scrollbar */
+/* ================================================================
+   SCROLLBAR
+   ================================================================ */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
 }
-
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: #f5f5f5;
 }
-
 ::-webkit-scrollbar-thumb {
   background: var(--virtu-gold);
-  border-radius: 4px;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #b09472;
 }
 
-/* Animations */
+/* Hide scrollbar for carousels */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* ================================================================
+   GRADIENTS - From Figma
+   ================================================================ */
+.gradient-cta {
+  background: linear-gradient(to right, #348981, #c1a784);
+}
+.gradient-cta-reverse {
+  background: linear-gradient(to right, #c1a784, #348981);
+}
+
+/* ================================================================
+   ANIMATIONS
+   ================================================================ */
 @keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
 }
-
 .animate-fade-in-up {
   animation: fadeInUp 0.6s ease-out forwards;
 }
 
-/* Rich text styling */
-.rich-text p {
-  margin-bottom: 1rem;
+/* ================================================================
+   SELECTION & FOCUS
+   ================================================================ */
+::selection {
+  background-color: var(--virtu-gold);
+  color: white;
+}
+:focus-visible {
+  outline: 2px solid var(--virtu-gold);
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 
-.rich-text ul, .rich-text ol {
-  margin-left: 1.5rem;
-  margin-bottom: 1rem;
-}
-
-.rich-text li {
-  margin-bottom: 0.5rem;
-}
-
-.rich-text strong {
-  color: var(--virtu-gold);
-}
+/* ================================================================
+   RICH TEXT (conteúdo do CMS)
+   ================================================================ */
+.rich-text p { margin-bottom: 1rem; }
+.rich-text ul, .rich-text ol { margin-left: 1.5rem; margin-bottom: 1rem; }
+.rich-text li { margin-bottom: 0.5rem; }
+.rich-text strong { color: var(--virtu-gold); font-weight: 600; }
+.rich-text a { color: var(--virtu-gold); text-decoration: underline; text-underline-offset: 3px; }
+.rich-text a:hover { color: #b09472; }

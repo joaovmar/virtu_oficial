@@ -98,18 +98,30 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Wagtail
+# =============================================================================
+# WAGTAIL - Branding Virtú
+# =============================================================================
 WAGTAIL_SITE_NAME = 'Virtú'
 WAGTAILADMIN_BASE_URL = config('WAGTAILADMIN_BASE_URL', default='http://localhost:8000')
 
+# Wagtail branding customization
+WAGTAIL_ADMIN_CUSTOM_CSS = ['css/wagtail-custom.css']
+
+# Cores do admin (Wagtail 5+)
+WAGTAILADMIN_NOTIFICATION_USE_HTML = True
+
+# =============================================================================
 # DRF
+# =============================================================================
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 12,
     'DEFAULT_PERMISSION_CLASSES': ['rest_framework.permissions.AllowAny'],
 }
 
+# =============================================================================
 # CORS
+# =============================================================================
 CORS_ALLOWED_ORIGINS = config(
     'CORS_ALLOWED_ORIGINS',
     default='http://localhost:3000,http://127.0.0.1:3000',

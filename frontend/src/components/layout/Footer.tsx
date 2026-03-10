@@ -1,83 +1,111 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Facebook, Instagram, Linkedin } from 'lucide-react';
+import { getConfiguracoes, ConfiguracaoSite } from '@/lib/api';
 
-interface FooterProps {
-  config?: {
-    email: string;
-    telefone: string;
-    facebook?: string;
-    instagram?: string;
-    linkedin?: string;
-    copyright_texto: string;
-  };
-}
+/**
+ * Footer / Rodapé - Figma: "rodapé" (node 1:120)
+ * Background: #fbfbfb, border: #eee
+ * Headings: Sora Regular 22px, cor: #c0c0c0, tracking: -0.22px
+ * Links: Sora SemiBold 22px, cor: #858585, tracking: -0.22px
+ * Copyright: Montserrat Medium 22px, cor: #858585, tracking: -0.22px
+ * Logo: logo-fundo branco PNG
+ */
 
-export default function Footer({ config }: FooterProps) {
-  const defaultConfig = {
-    email: 'contato@virtu.com.br',
-    telefone: '(11) 99999-9999',
-    copyright_texto: '© 2025 Todos os direitos reservados - virtú',
-    ...config,
-  };
+export default function Footer() {
+  const [config, setConfig] = useState<ConfiguracaoSite | null>(null);
+
+  useEffect(() => {
+    async function fetchConfig() {
+      try {
+        const data = await getConfiguracoes();
+        setConfig(data);
+      } catch {
+        // Use defaults silently
+      }
+    }
+    fetchConfig();
+  }, []);
+
+  const email = config?.email || 'contato@virtu.com.br';
+  const telefone = config?.telefone || '(11) 99999-9999';
+  const copyright = config?.copyright_texto || '© 2025 Todos os direitos reservados - virtú';
 
   return (
-    <footer className="bg-white py-16">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
+    <footer
+      className="bg-virtu-bg border-t border-virtu-border"
+      style={{ paddingTop: '80px', paddingBottom: '50px' }}
+    >
+      <div className="max-w-[1720px] mx-auto px-8 lg:px-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-20">
           {/* Logo */}
           <div>
-            <Link href="/" className="font-display text-3xl italic text-virtu-dark">
-              virtú
+            <Link href="/">
+              <Image
+                src="/virtu-logo-white.svg"
+                alt="Virtú"
+                width={196}
+                height={76}
+                className="brightness-0"
+              />
             </Link>
-            <p className="mt-2 text-sm text-gray-500">
-              incorporações e urbanismo
-            </p>
           </div>
 
-          {/* Navegação */}
+          {/* Navegação - Figma: heading #c0c0c0, links #858585 */}
           <div>
-            <h4 className="font-medium text-gray-400 mb-4 text-sm">Navegação</h4>
-            <nav className="flex flex-col gap-2">
-              <Link href="/" className="text-virtu-dark hover:text-virtu-gold transition-colors">
-                Home
-              </Link>
-              <Link href="/empreendimentos" className="text-virtu-dark hover:text-virtu-gold transition-colors">
-                Empreendimentos
-              </Link>
-              <Link href="/a-virtu" className="text-virtu-dark hover:text-virtu-gold transition-colors">
-                A Virtú
-              </Link>
-              <Link href="/blog" className="text-virtu-dark hover:text-virtu-gold transition-colors">
-                Blog
-              </Link>
-              <Link href="/contato" className="text-virtu-dark hover:text-virtu-gold transition-colors">
-                Fale conosco
-              </Link>
+            <h4 className="font-sans font-normal text-[22px] tracking-[-0.22px] text-virtu-light mb-5">
+              Navegação
+            </h4>
+            <nav className="flex flex-col gap-3.5">
+              {[
+                { href: '/', label: 'Home' },
+                { href: '/empreendimentos', label: 'Empreendimentos' },
+                { href: '/a-virtu', label: 'A Virtú' },
+                { href: '/blog', label: 'Blog' },
+                { href: '/contato', label: 'Fale conosco' },
+              ].map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="font-sans font-semibold text-[22px] tracking-[-0.22px] text-virtu-muted hover:text-virtu-green transition-colors"
+                >
+                  {link.label}
+                </Link>
+              ))}
             </nav>
           </div>
 
           {/* Contato */}
           <div>
-            <h4 className="font-medium text-gray-400 mb-4 text-sm">Contato</h4>
-            <div className="flex flex-col gap-2">
+            <h4 className="font-sans font-normal text-[22px] tracking-[-0.22px] text-virtu-light mb-5">
+              Contato
+            </h4>
+            <div className="flex flex-col gap-3.5">
               <a
-                href={`mailto:${defaultConfig.email}`}
-                className="text-virtu-dark hover:text-virtu-gold transition-colors"
+                href={`mailto:${email}`}
+                className="font-sans font-semibold text-[22px] tracking-[-0.22px] text-virtu-muted hover:text-virtu-green transition-colors"
               >
-                {defaultConfig.email}
+                {email}
               </a>
               <a
-                href={`tel:${defaultConfig.telefone.replace(/\D/g, '')}`}
-                className="text-virtu-dark hover:text-virtu-gold transition-colors"
+                href={`tel:${telefone.replace(/\D/g, '')}`}
+                className="font-sans font-semibold text-[22px] tracking-[-0.22px] text-virtu-muted hover:text-virtu-green transition-colors"
               >
-                {defaultConfig.telefone}
+                {telefone}
               </a>
-              <Link href="/contato" className="text-virtu-dark hover:text-virtu-gold transition-colors">
+              <Link
+                href="/contato"
+                className="font-sans font-semibold text-[22px] tracking-[-0.22px] text-virtu-muted hover:text-virtu-green transition-colors"
+              >
                 Fale conosco
               </Link>
-              <Link href="/politica-privacidade" className="text-virtu-dark hover:text-virtu-gold transition-colors">
+              <Link
+                href="/politica-privacidade"
+                className="font-sans font-semibold text-[22px] tracking-[-0.22px] text-virtu-muted hover:text-virtu-green transition-colors"
+              >
                 Política de privacidade
               </Link>
             </div>
@@ -85,45 +113,46 @@ export default function Footer({ config }: FooterProps) {
 
           {/* Redes Sociais */}
           <div>
-            <h4 className="font-medium text-gray-400 mb-4 text-sm">Acompanhe a Virtú!</h4>
-            <div className="flex gap-4">
-              {defaultConfig.facebook && (
-                <a
-                  href={defaultConfig.facebook}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-10 h-10 rounded-full border border-virtu-dark flex items-center justify-center hover:bg-virtu-gold hover:border-virtu-gold hover:text-white transition-all"
-                >
-                  <Facebook size={18} />
-                </a>
-              )}
-              {defaultConfig.instagram && (
-                <a
-                  href={defaultConfig.instagram}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-10 h-10 rounded-full border border-virtu-dark flex items-center justify-center hover:bg-virtu-gold hover:border-virtu-gold hover:text-white transition-all"
-                >
-                  <Instagram size={18} />
-                </a>
-              )}
-              {defaultConfig.linkedin && (
-                <a
-                  href={defaultConfig.linkedin}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-10 h-10 rounded-full border border-virtu-dark flex items-center justify-center hover:bg-virtu-gold hover:border-virtu-gold hover:text-white transition-all"
-                >
-                  <Linkedin size={18} />
-                </a>
-              )}
+            <h4 className="font-sans font-normal text-[22px] tracking-[-0.22px] text-virtu-light mb-5">
+              Acompanhe a Virtú!
+            </h4>
+            <div className="flex gap-5">
+              <a
+                href={config?.facebook || '#'}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-virtu-muted hover:text-virtu-green transition-colors"
+                aria-label="Facebook"
+              >
+                <Facebook size={24} />
+              </a>
+              <a
+                href={config?.instagram || '#'}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-virtu-muted hover:text-virtu-green transition-colors"
+                aria-label="Instagram"
+              >
+                <Instagram size={24} />
+              </a>
+              <a
+                href={config?.linkedin || '#'}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-virtu-muted hover:text-virtu-green transition-colors"
+                aria-label="LinkedIn"
+              >
+                <Linkedin size={24} />
+              </a>
             </div>
           </div>
         </div>
 
-        {/* Copyright */}
-        <div className="mt-12 pt-8 border-t border-gray-300 text-center">
-          <p className="text-sm text-gray-500">{defaultConfig.copyright_texto}</p>
+        {/* Copyright - Figma: Montserrat Medium 22px #858585 */}
+        <div className="mt-16 text-center">
+          <p className="font-copyright font-medium text-[22px] tracking-[-0.22px] text-virtu-muted">
+            {copyright}
+          </p>
         </div>
       </div>
     </footer>

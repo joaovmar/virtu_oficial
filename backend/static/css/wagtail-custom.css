@@ -1,0 +1,53 @@
+/*
+ * Wagtail Admin - Customização Virtú
+ * Cores do Figma: #348981 (verde), #c1a784 (dourado), #282828 (dark), #1e3d34 (verde escuro)
+ */
+
+:root {
+  --w-color-primary: #348981 !important;
+  --w-color-primary-200: #2a6f68 !important;
+  --w-color-secondary: #c1a784 !important;
+  --w-color-secondary-100: #d4c4a8 !important;
+  --w-color-secondary-50: #f0e9dc !important;
+  --w-color-secondary-75: #e2d5be !important;
+  --w-color-accent: #348981 !important;
+}
+
+/* Sidebar */
+.sidebar, [data-side-panel], aside.nav-wrapper {
+  background-color: #1e3d34 !important;
+}
+.sidebar .menu-item:hover, .sidebar a:hover {
+  background-color: #348981 !important;
+}
+.sidebar .menu-item.active, .sidebar .menu-item--active {
+  background-color: #348981 !important;
+}
+
+/* Primary buttons */
+.button-primary, .button--primary, .action-save, .button.bicolor {
+  background-color: #348981 !important;
+  border-color: #348981 !important;
+}
+.button-primary:hover, .button--primary:hover, .action-save:hover {
+  background-color: #2a6f68 !important;
+}
+
+/* Links */
+a { color: #348981; }
+a:hover { color: #2a6f68; }
+
+/* Tabs */
+.tab-nav a.active, .w-tabs [role="tab"][aria-selected="true"] {
+  border-bottom-color: #348981 !important;
+  color: #348981 !important;
+}
+
+/* Focus */
+*:focus-visible { outline-color: #c1a784 !important; }
+
+/* Login */
+.login .submit-group button { background-color: #348981 !important; }
+
+/* Dashboard */
+.nice-padding h2 { color: #1e3d34; }
