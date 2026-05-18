@@ -17,7 +17,7 @@ const defaultDepoimentos: Depoimento[] = [
     nome: 'Luiza Silva',
     cargo: 'moradora',
     foto: null,
-    texto: 'Excelente atendimento e qualidade excepcional. Recomendo a Virtú para quem busca o melhor.',
+    texto: 'Excelente atendimento e qualidade excepcional. Recomendo a virtú para quem busca o melhor.',
     avaliacao: 5,
   },
   {
@@ -25,7 +25,7 @@ const defaultDepoimentos: Depoimento[] = [
     nome: 'Luiza Silva',
     cargo: 'moradora',
     foto: null,
-    texto: 'Excelente atendimento e qualidade excepcional. Recomendo a Virtú para quem busca o melhor.',
+    texto: 'Excelente atendimento e qualidade excepcional. Recomendo a virtú para quem busca o melhor.',
     avaliacao: 5,
   },
   {
@@ -33,7 +33,7 @@ const defaultDepoimentos: Depoimento[] = [
     nome: 'Luiza Silva',
     cargo: 'moradora',
     foto: null,
-    texto: 'Excelente atendimento e qualidade excepcional. Recomendo a Virtú para quem busca o melhor.',
+    texto: 'Excelente atendimento e qualidade excepcional. Recomendo a virtú para quem busca o melhor.',
     avaliacao: 5,
   },
   {
@@ -41,7 +41,7 @@ const defaultDepoimentos: Depoimento[] = [
     nome: 'Luiza Silva',
     cargo: 'moradora',
     foto: null,
-    texto: 'Excelente atendimento e qualidade excepcional. Recomendo a Virtú para quem busca o melhor.',
+    texto: 'Excelente atendimento e qualidade excepcional. Recomendo a virtú para quem busca o melhor.',
     avaliacao: 5,
   },
 ];

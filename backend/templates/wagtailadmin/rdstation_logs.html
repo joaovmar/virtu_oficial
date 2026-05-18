@@ -1,0 +1,177 @@
+{% extends "wagtailadmin/generic/base.html" %}
+{% load i18n %}
+
+{% block titletag %}Logs RD Station — Virtú{% endblock %}
+
+{% block content %}
+<div class="nice-padding">
+
+  <header class="w-slim-header">
+    <div class="w-slim-header__main">
+      <h1 class="w-header__title">
+        <span class="w-header__title-icon">
+          <svg class="icon icon-list-ul" aria-hidden="true"><use href="#icon-list-ul"></use></svg>
+        </span>
+        📊 Logs RD Station
+      </h1>
+    </div>
+  </header>
+
+  <style>
+    .rdlog-info { background:#e8f4f8; border:1px solid #bee3f8; border-radius:8px;
+      padding:12px 18px; margin:16px 0; font-size:13px; color:#2c5282; line-height:1.7; }
+    .rdlog-summary { display:flex; gap:14px; margin:16px 0; flex-wrap:wrap; }
+    .rdlog-card { background:#fff; border:1px solid #e2e8f0; border-radius:10px;
+      padding:12px 22px; min-width:100px; text-align:center;
+      box-shadow:0 1px 4px rgba(0,0,0,.06); }
+    .rdlog-card .num { font-size:28px; font-weight:800; line-height:1; }
+    .rdlog-card .lbl { font-size:11px; color:#888; margin-top:3px; text-transform:uppercase; }
+    .c-total{color:#2d3748} .c-ok{color:#1a7a4a} .c-err{color:#c0392b} .c-warn{color:#b8860b}
+    .rdlog-filters { display:flex; gap:10px; flex-wrap:wrap; align-items:center;
+      background:#f7fafc; border:1px solid #e2e8f0; border-radius:8px;
+      padding:10px 14px; margin:16px 0; }
+    .rdlog-filters label { font-size:12px; color:#555; font-weight:600; }
+    .rdlog-filters select, .rdlog-filters input[type=text] {
+      padding:4px 10px; border:1px solid #ccc; border-radius:6px; font-size:13px; }
+    .rdlog-filters .btn-filter { padding:5px 16px; background:#348981; color:#fff;
+      border:none; border-radius:6px; cursor:pointer; font-size:13px; font-weight:600; }
+    .rdlog-filters .btn-filter:hover { background:#1e3d34; }
+    .rdlog-table { width:100%; border-collapse:collapse; font-size:13px; margin-top:8px; }
+    .rdlog-table th { background:#1e3d34; color:#fff; padding:8px 12px;
+      text-align:left; font-weight:600; white-space:nowrap; }
+    .rdlog-table td { padding:7px 12px; border-bottom:1px solid #edf2f7; vertical-align:top; }
+    .rdlog-table tr:hover td { background:#f7fafc; }
+    .badge { display:inline-block; padding:2px 9px; border-radius:10px;
+      font-size:11px; font-weight:700; white-space:nowrap; }
+    .badge-ok   { background:#d4edda; color:#1a7a4a; }
+    .badge-err  { background:#fde8e8; color:#c0392b; }
+    .badge-warn { background:#fff3cd; color:#856404; }
+    .causa { font-size:12px; color:#4a5568; background:#fffbeb;
+      border-left:3px solid #f6ad55; padding:3px 8px; border-radius:0 4px 4px 0;
+      margin-top:3px; line-height:1.5; max-width:360px; }
+    .causa-ok { background:#f0fff4; border-color:#68d391; color:#276749; }
+    .http-ok  { color:#1a7a4a; font-weight:700; font-family:monospace; }
+    .http-err { color:#c0392b; font-weight:700; font-family:monospace; }
+    .rdlog-empty { text-align:center; padding:48px; color:#a0aec0; font-size:15px; }
+    details summary { cursor:pointer; color:#348981; font-size:11px; margin-top:4px; }
+    details pre { font-size:11px; background:#f7fafc; border:1px solid #e2e8f0;
+      border-radius:4px; padding:7px; overflow-x:auto; max-width:420px;
+      white-space:pre-wrap; word-break:break-all; margin-top:3px; }
+    .clear-link { font-size:12px; color:#c0392b; text-decoration:none; margin-left:6px; }
+  </style>
+
+  {# Info box #}
+  <div class="rdlog-info">
+    <strong>📌 Como usar:</strong><br>
+    • <strong>✅ Sucesso</strong> — lead registrado no RD Station normalmente.<br>
+    • <strong>❌ Falha</strong> — envio falhou. Leia a <em>Causa Provável</em> e repasse à TI se persistir.<br>
+    • <strong>⚠️ Inativo</strong> — RD Station desabilitado ou sem token.
+      Acesse <strong>Configurações › RD Station › API Token</strong> para ativar.
+  </div>
+
+  {# Resumo #}
+  <div class="rdlog-summary">
+    <div class="rdlog-card"><div class="num c-total">{{ totals.total }}</div><div class="lbl">Total</div></div>
+    <div class="rdlog-card"><div class="num c-ok">{{ totals.sucessos }}</div><div class="lbl">✅ Sucessos</div></div>
+    <div class="rdlog-card"><div class="num c-err">{{ totals.falhas }}</div><div class="lbl">❌ Falhas</div></div>
+    <div class="rdlog-card"><div class="num c-warn">{{ totals.inativos }}</div><div class="lbl">⚠️ Inativos</div></div>
+  </div>
+
+  {# Filtros #}
+  <form method="get" class="rdlog-filters">
+    <label>Status:</label>
+    <select name="status">
+      <option value=""       {% if not status_filter          %}selected{% endif %}>Todos</option>
+      <option value="sucesso"{% if status_filter == 'sucesso' %}selected{% endif %}>✅ Sucesso</option>
+      <option value="falha"  {% if status_filter == 'falha'   %}selected{% endif %}>❌ Falha</option>
+      <option value="inativo"{% if status_filter == 'inativo' %}selected{% endif %}>⚠️ Inativo</option>
+    </select>
+    <label>Período:</label>
+    <select name="dias">
+      <option value="1"  {% if dias_filter == 1   %}selected{% endif %}>Hoje</option>
+      <option value="7"  {% if dias_filter == 7   %}selected{% endif %}>7 dias</option>
+      <option value="30" {% if dias_filter == 30  %}selected{% endif %}>30 dias</option>
+      <option value="90" {% if dias_filter == 90  %}selected{% endif %}>90 dias</option>
+      <option value="365"{% if dias_filter == 365 %}selected{% endif %}>1 ano</option>
+    </select>
+    <label>E-mail:</label>
+    <input type="text" name="email" value="{{ email_filter }}" placeholder="buscar..."/>
+    <button type="submit" class="btn-filter">Filtrar</button>
+    {% if status_filter or email_filter or dias_filter != 7 %}
+      <a href="?" class="clear-link">✕ Limpar</a>
+    {% endif %}
+  </form>
+
+  {# Tabela #}
+  {% if logs %}
+  <div style="overflow-x:auto">
+  <table class="rdlog-table">
+    <thead><tr>
+      <th>Data/Hora</th>
+      <th>Status</th>
+      <th>E-mail</th>
+      <th>Nome</th>
+      <th>Página / ID Conversão</th>
+      <th>HTTP</th>
+      <th>Causa Provável &amp; Ação</th>
+    </tr></thead>
+    <tbody>
+    {% for log in logs %}
+    <tr>
+      <td style="white-space:nowrap;font-size:12px;color:#718096;">
+        {{ log.criado_em|date:"d/m/Y" }}<br>
+        <span style="font-size:11px;">{{ log.criado_em|date:"H:i:s" }}</span>
+      </td>
+      <td>
+        <span class="badge {% if log.status == 'sucesso' %}badge-ok{% elif log.status == 'falha' %}badge-err{% else %}badge-warn{% endif %}">
+          {% if log.status == 'sucesso' %}✅ Sucesso{% elif log.status == 'falha' %}❌ Falha{% else %}⚠️ Inativo{% endif %}
+        </span>
+      </td>
+      <td style="font-size:12px;max-width:180px;word-break:break-all;">
+        {{ log.email_lead|default:"—" }}
+        {% if log.lead %}
+          <br><a href="/admin/snippets/core/lead/{{ log.lead.id }}/"
+            target="_blank" style="font-size:11px;color:#348981;">ver lead →</a>
+        {% endif %}
+      </td>
+      <td style="font-size:12px;max-width:130px;">{{ log.nome_lead|default:"—" }}</td>
+      <td style="font-size:11px;color:#4a5568;max-width:180px;">
+        {% if log.pagina_origem %}<code style="background:#f0f0f0;padding:1px 5px;border-radius:3px;">{{ log.pagina_origem }}</code><br>{% endif %}
+        {% if log.identificador_conversao %}<span style="color:#348981;font-weight:600;">{{ log.identificador_conversao }}</span>{% endif %}
+      </td>
+      <td style="text-align:center;">
+        {% if log.http_status_code %}
+          <span class="{% if log.http_status_code < 300 %}http-ok{% else %}http-err{% endif %}">{{ log.http_status_code }}</span>
+        {% else %}<span style="color:#a0aec0;font-size:12px;">—</span>{% endif %}
+      </td>
+      <td style="max-width:360px;">
+        {% if log.causa_provavel %}
+          <div class="causa {% if log.status == 'sucesso' %}causa-ok{% endif %}">{{ log.causa_provavel }}</div>
+        {% elif log.status == 'sucesso' %}
+          <span style="color:#1a7a4a;font-size:12px;">Lead registrado com sucesso.</span>
+        {% else %}
+          <span style="color:#a0aec0;font-size:12px;">Sem detalhes.</span>
+        {% endif %}
+        {% if log.mensagem_erro %}
+          <details><summary>🔧 Erro técnico (repassar à TI)</summary><pre>{{ log.mensagem_erro }}</pre></details>
+        {% endif %}
+        {% if log.resposta_api and log.status != 'sucesso' %}
+          <details><summary>📄 Resposta da API RD</summary><pre>{{ log.resposta_api }}</pre></details>
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  {% if logs|length == 200 %}
+    <p style="text-align:center;font-size:12px;color:#a0aec0;margin-top:12px;">
+      Exibindo os 200 mais recentes. Use os filtros para refinar.
+    </p>
+  {% endif %}
+  {% else %}
+    <div class="rdlog-empty">🎉 Nenhum registro encontrado para os filtros selecionados.</div>
+  {% endif %}
+
+</div>
+{% endblock %}

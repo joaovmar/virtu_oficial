@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% load wagtailcore_tags wagtailimages_tags %}
+
+{% block title %}{{ page.title }} - Virtú{% endblock %}
+
+{% block content %}
+<div style="max-width:900px;margin:40px auto;padding:20px;font-family:Sora,sans-serif;">
+  <p style="color:#348981;font-size:14px;margin-bottom:8px;">Preview do Wagtail — O site real é renderizado pelo Next.js</p>
+  
+  {% if page.imagem_principal %}
+    {% image page.imagem_principal fill-900x400 as hero %}
+    <img src="{{ hero.url }}" alt="{{ page.title }}" style="width:100%;border-radius:16px;margin-bottom:24px;">
+  {% endif %}
+
+  <h1 style="font-size:36px;color:#282828;margin-bottom:8px;">{{ page.title }}</h1>
+  
+  {% if page.subtitulo %}
+    <h2 style="font-size:20px;color:#c1a784;font-weight:300;margin-bottom:16px;">{{ page.subtitulo }}</h2>
+  {% endif %}
+
+  {% if page.cidade %}
+    <p style="color:#858585;margin-bottom:8px;">📍 {{ page.cidade }}</p>
+  {% endif %}
+
+  {% if page.status %}
+    <span style="background:#c1a784;color:white;padding:4px 12px;border-radius:20px;font-size:13px;">{{ page.status.nome }}</span>
+  {% endif %}
+
+  {% if page.descricao %}
+    <div style="margin-top:24px;color:#414141;line-height:1.6;">{{ page.descricao|richtext }}</div>
+  {% endif %}
+
+  {% if page.preco_a_partir %}
+    <p style="margin-top:16px;font-size:18px;color:#348981;font-weight:600;">A partir de R$ {{ page.preco_a_partir }}</p>
+  {% endif %}
+
+  {% if page.metragem_a_partir %}
+    <p style="color:#858585;">A partir de {{ page.metragem_a_partir }} m²</p>
+  {% endif %}
+
+  {% if page.dormitorios %}
+    <p style="color:#858585;">{{ page.dormitorios }}</p>
+  {% endif %}
+</div>
+{% endblock %}

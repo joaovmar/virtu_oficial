@@ -2,18 +2,19 @@ import type { Metadata } from 'next';
 import '@/styles/globals.css';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import TrackingScripts from '@/components/tracking/TrackingScripts';
 
 export const metadata: Metadata = {
-  title: 'Virtú | Incorporações e Urbanismo',
+  title: 'virtú | Incorporações e Urbanismo',
   description:
     'O seu futuro é o nosso propósito. Empreendimentos de médio e alto padrão em Ribeirão Preto e região.',
-  keywords: ['Virtú', 'incorporadora', 'urbanismo', 'empreendimentos', 'Ribeirão Preto', 'imóveis'],
+  keywords: ['virtú', 'incorporadora', 'urbanismo', 'empreendimentos', 'Ribeirão Preto', 'imóveis'],
   openGraph: {
-    title: 'Virtú | Incorporações e Urbanismo',
+    title: 'virtú | Incorporações e Urbanismo',
     description: 'O seu futuro é o nosso propósito.',
     type: 'website',
     locale: 'pt_BR',
-    siteName: 'Virtú',
+    siteName: 'virtú',
   },
 };
 
@@ -26,6 +27,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       </head>
       <body className="antialiased font-sans">
+        {/* Tracking: GTM, RD Station, Meta Pixel, GA4 — configurável via Wagtail */}
+        <TrackingScripts />
         <Header />
         <main className="min-h-screen">{children}</main>
         <Footer />

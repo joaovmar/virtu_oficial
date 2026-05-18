@@ -1,0 +1,98 @@
+# =============================================================================
+# Virtú - Docker Compose (Produção / Staging)
+#
+# Arquitetura:
+#   Nginx (HTTPS) → Frontend Next.js (porta 8088) → Backend Django (interno)
+#   O Next.js faz proxy das chamadas /api/* e /media/* para o backend
+#
+# Para subir:   docker compose up -d --build
+# Para parar:   docker compose down
+# Para logs:    docker compose logs -f
+# Para rebuild: docker compose up -d --build --force-recreate
+# =============================================================================
+
+services:
+  # ---------------------------------------------------------------------------
+  # PostgreSQL
+  # ---------------------------------------------------------------------------
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:-virtu_db}
+      POSTGRES_USER: ${DB_USER:-virtu_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-virtu_pass_2024}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "${POSTGRES_PORT:-5433}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-virtu_user} -d ${DB_NAME:-virtu_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # ---------------------------------------------------------------------------
+  # Backend Django + Wagtail (Gunicorn)
+  # Não exposto publicamente — acessado apenas pelo frontend via rede Docker
+  # ---------------------------------------------------------------------------
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - DJANGO_SETTINGS_MODULE=virtu.settings.production
+      - SECRET_KEY=${SECRET_KEY:-change-me-in-production-use-strong-key}
+      - DEBUG=${DEBUG:-False}
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS:-localhost,127.0.0.1,backend,brio-staging-web.com.br,virtu.com.br,www.virtu.com.br}
+      - DB_NAME=${DB_NAME:-virtu_db}
+      - DB_USER=${DB_USER:-virtu_user}
+      - DB_PASSWORD=${DB_PASSWORD:-virtu_pass_2024}
+      - DB_HOST=db
+      - DB_PORT=5432
+      - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS:-https://brio-staging-web.com.br,http://localhost:3000,http://localhost:8088}
+      - WAGTAILADMIN_BASE_URL=${WAGTAILADMIN_BASE_URL:-https://brio-staging-web.com.br}
+      - DJANGO_SUPERUSER_USERNAME=${DJANGO_SUPERUSER_USERNAME:-admin}
+      - DJANGO_SUPERUSER_EMAIL=${DJANGO_SUPERUSER_EMAIL:-admin@virtu.com.br}
+      - DJANGO_SUPERUSER_PASSWORD=${DJANGO_SUPERUSER_PASSWORD:-admin123}
+      - GUNICORN_WORKERS=${GUNICORN_WORKERS:-3}
+      - SESSION_COOKIE_SECURE=${SESSION_COOKIE_SECURE:-False}
+    volumes:
+      - backend_media:/app/media
+      - backend_static:/app/staticfiles
+    # Backend só acessível internamente — frontend faz o proxy
+    # Descomente a linha abaixo se precisar acessar o admin diretamente
+    # ports:
+    #   - "${BACKEND_PORT:-8010}:8000"
+
+  # ---------------------------------------------------------------------------
+  # Frontend Next.js (Standalone)
+  # Porta 8088 exposta — Nginx aponta para cá
+  # ---------------------------------------------------------------------------
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        # URL RELATIVA — o browser chama /api/v1/... que o Next.js faz proxy interno
+        - NEXT_PUBLIC_API_URL=/api/v1
+    restart: unless-stopped
+    depends_on:
+      - backend
+    environment:
+      - BACKEND_INTERNAL_URL=http://backend:8000
+      - NEXT_PUBLIC_API_URL=/api/v1
+    ports:
+      - "${FRONTEND_PORT:-8088}:3000"
+
+volumes:
+  postgres_data:
+    name: virtu_postgres_data
+  backend_media:
+    name: virtu_backend_media
+  backend_static:
+    name: virtu_backend_static

@@ -209,6 +209,83 @@ class ConfiguracaoSite(models.Model):
         verbose_name="Texto do Copyright"
     )
 
+    # Imagem de fundo do banner CTA "Breve lançamento"
+    banner_cta_imagem = models.ForeignKey(
+        'wagtailimages.Image',
+        null=True, blank=True,
+        on_delete=models.SET_NULL,
+        related_name='+',
+        verbose_name="Imagem de Fundo do Banner CTA",
+        help_text="Imagem aérea/paisagem usada como fundo no banner 'Breve lançamento'"
+    )
+
+    # Grafismo decorativo (SVG/imagem que aparece atrás dos formulários)
+    grafismo_imagem = models.ForeignKey(
+        'wagtailimages.Image',
+        null=True, blank=True,
+        on_delete=models.SET_NULL,
+        related_name='+',
+        verbose_name="Grafismo Decorativo",
+        help_text="Imagem/SVG do grafismo que aparece atrás dos formulários de lead"
+    )
+
+    # =====================================================================
+    # INTEGRAÇÕES - Google Tag Manager
+    # =====================================================================
+    gtm_ativo = models.BooleanField(
+        default=False, verbose_name="GTM Ativo",
+        help_text="Ativar Google Tag Manager no site"
+    )
+    gtm_container_id = models.CharField(
+        max_length=20, blank=True, verbose_name="GTM Container ID",
+        help_text="Ex: GTM-XXXXXXX"
+    )
+
+    # =====================================================================
+    # INTEGRAÇÕES - RD Station
+    # =====================================================================
+    rdstation_ativo = models.BooleanField(
+        default=False, verbose_name="RD Station Ativo",
+        help_text="Ativar integração com RD Station"
+    )
+    rdstation_public_token = models.CharField(
+        max_length=100, blank=True, verbose_name="RD Station Token Público",
+        help_text="Token público para o tracking JS (seguro para o frontend)"
+    )
+    rdstation_api_token = models.CharField(
+        max_length=200, blank=True, verbose_name="RD Station API Token (PRIVADO)",
+        help_text="⚠️ NUNCA exposto no frontend. Usado apenas server-side para enviar conversões."
+    )
+    rdstation_conversao_identificador = models.CharField(
+        max_length=100, blank=True, default="site-virtu",
+        verbose_name="Identificador de Conversão",
+        help_text="Identificador da conversão no RD Station (ex: site-virtu)"
+    )
+
+    # =====================================================================
+    # INTEGRAÇÕES - Meta Pixel (Facebook/Instagram)
+    # =====================================================================
+    meta_pixel_ativo = models.BooleanField(
+        default=False, verbose_name="Meta Pixel Ativo",
+        help_text="Ativar Meta Pixel (Facebook/Instagram Ads)"
+    )
+    meta_pixel_id = models.CharField(
+        max_length=50, blank=True, verbose_name="Meta Pixel ID",
+        help_text="Ex: 123456789012345"
+    )
+
+    # =====================================================================
+    # INTEGRAÇÕES - Google Analytics 4
+    # =====================================================================
+    ga4_ativo = models.BooleanField(
+        default=False, verbose_name="GA4 Ativo",
+        help_text="Ativar Google Analytics 4"
+    )
+    ga4_measurement_id = models.CharField(
+        max_length=20, blank=True, verbose_name="GA4 Measurement ID",
+        help_text="Ex: G-XXXXXXXXXX"
+    )
+
     class Meta:
         verbose_name = "Configuração do Site"
         verbose_name_plural = "Configurações do Site"
@@ -230,6 +307,28 @@ class ConfiguracaoSite(models.Model):
             FieldPanel('youtube'),
         ], heading="Redes Sociais"),
         FieldPanel('copyright_texto'),
+        MultiFieldPanel([
+            FieldPanel('banner_cta_imagem'),
+            FieldPanel('grafismo_imagem'),
+        ], heading="Banner CTA (Breve Lançamento)"),
+        MultiFieldPanel([
+            FieldPanel('gtm_ativo'),
+            FieldPanel('gtm_container_id'),
+        ], heading="🔧 Google Tag Manager"),
+        MultiFieldPanel([
+            FieldPanel('rdstation_ativo'),
+            FieldPanel('rdstation_public_token'),
+            FieldPanel('rdstation_api_token'),
+            FieldPanel('rdstation_conversao_identificador'),
+        ], heading="🔧 RD Station"),
+        MultiFieldPanel([
+            FieldPanel('meta_pixel_ativo'),
+            FieldPanel('meta_pixel_id'),
+        ], heading="🔧 Meta Pixel (Facebook)"),
+        MultiFieldPanel([
+            FieldPanel('ga4_ativo'),
+            FieldPanel('ga4_measurement_id'),
+        ], heading="🔧 Google Analytics 4"),
     ]
 
 
@@ -252,6 +351,29 @@ class EtapaJornadaBlock(blocks.StructBlock):
 # =============================================================================
 # WAGTAIL PAGES
 # =============================================================================
+
+class HeroBannerImagem(Orderable):
+    """Imagens do carrossel do hero da Home"""
+    page = ParentalKey(
+        'HomePage',
+        on_delete=models.CASCADE,
+        related_name='hero_banners'
+    )
+    imagem = models.ForeignKey(
+        'wagtailimages.Image',
+        on_delete=models.CASCADE,
+        related_name='+',
+        verbose_name="Imagem"
+    )
+    titulo = models.CharField(max_length=200, blank=True, verbose_name="T\u00edtulo sobre a imagem")
+    subtitulo = models.CharField(max_length=300, blank=True, verbose_name="Subt\u00edtulo")
+
+    panels = [FieldPanel('imagem'), FieldPanel('titulo'), FieldPanel('subtitulo')]
+
+    class Meta:
+        verbose_name = "Banner do Hero"
+        verbose_name_plural = "Banners do Hero"
+
 
 class HomePage(Page):
     """Página Inicial do Site"""
@@ -331,7 +453,8 @@ class HomePage(Page):
         MultiFieldPanel([
             FieldPanel('hero_titulo'),
             FieldPanel('hero_imagem'),
-        ], heading="Hero Banner"),
+            InlinePanel('hero_banners', label="Imagens do Carrossel (Hero)", min_num=0),
+        ], heading="Hero Banner / Carrossel"),
         MultiFieldPanel([
             FieldPanel('secao_futuro_titulo'),
             FieldPanel('secao_futuro_texto'),
@@ -715,20 +838,50 @@ class SobreNosPage(Page):
         verbose_name="Imagem do CTA"
     )
 
+    # Ícones de Missão/Visão/Valores
+    missao_icone = models.ForeignKey(
+        'wagtailimages.Image', null=True, blank=True,
+        on_delete=models.SET_NULL, related_name='+',
+        verbose_name="Ícone da Missão"
+    )
+    visao_icone = models.ForeignKey(
+        'wagtailimages.Image', null=True, blank=True,
+        on_delete=models.SET_NULL, related_name='+',
+        verbose_name="Ícone da Visão"
+    )
+    valores_icone = models.ForeignKey(
+        'wagtailimages.Image', null=True, blank=True,
+        on_delete=models.SET_NULL, related_name='+',
+        verbose_name="Ícone dos Valores"
+    )
+    mvv_background = models.ForeignKey(
+        'wagtailimages.Image', null=True, blank=True,
+        on_delete=models.SET_NULL, related_name='+',
+        verbose_name="Background Missão/Visão/Valores"
+    )
+
     content_panels = Page.content_panels + [
         MultiFieldPanel([FieldPanel('hero_titulo'), FieldPanel('hero_imagem')], heading="Hero"),
         MultiFieldPanel([FieldPanel('historia_titulo'), FieldPanel('historia_texto')], heading="Nossa História"),
         MultiFieldPanel([
             FieldPanel('video_titulo'), FieldPanel('video_url'), FieldPanel('video_thumbnail')
         ], heading="Vídeo Institucional"),
-        MultiFieldPanel([FieldPanel('missao_titulo'), FieldPanel('missao_texto')], heading="Missão"),
-        MultiFieldPanel([FieldPanel('visao_titulo'), FieldPanel('visao_texto')], heading="Visão"),
-        MultiFieldPanel([FieldPanel('valores_titulo'), FieldPanel('valores_texto')], heading="Valores"),
+        MultiFieldPanel([
+            FieldPanel('missao_titulo'), FieldPanel('missao_texto'), FieldPanel('missao_icone'),
+        ], heading="Missão"),
+        MultiFieldPanel([
+            FieldPanel('visao_titulo'), FieldPanel('visao_texto'), FieldPanel('visao_icone'),
+        ], heading="Visão"),
+        MultiFieldPanel([
+            FieldPanel('valores_titulo'), FieldPanel('valores_texto'), FieldPanel('valores_icone'),
+        ], heading="Valores"),
+        FieldPanel('mvv_background'),
         MultiFieldPanel([FieldPanel('politica_titulo'), FieldPanel('politica_texto')], heading="Política de Qualidade"),
         MultiFieldPanel([
             FieldPanel('cta_titulo'), FieldPanel('cta_subtitulo'),
             FieldPanel('cta_botao_texto'), FieldPanel('cta_imagem')
         ], heading="CTA Final"),
+        InlinePanel('selos_qualidade', label="Selos de Qualidade"),
     ]
 
     parent_page_types = ['HomePage']
@@ -736,6 +889,31 @@ class SobreNosPage(Page):
 
     class Meta:
         verbose_name = "Página Sobre Nós"
+
+
+class SeloQualidade(Orderable):
+    """Selo de qualidade exibido na página Sobre Nós"""
+    page = ParentalKey(
+        SobreNosPage,
+        on_delete=models.CASCADE,
+        related_name='selos_qualidade'
+    )
+    nome = models.CharField(max_length=200, verbose_name="Nome do Selo")
+    imagem = models.ForeignKey(
+        'wagtailimages.Image',
+        on_delete=models.CASCADE,
+        related_name='+',
+        verbose_name="Imagem do Selo"
+    )
+
+    panels = [FieldPanel('nome'), FieldPanel('imagem')]
+
+    class Meta:
+        verbose_name = "Selo de Qualidade"
+        verbose_name_plural = "Selos de Qualidade"
+
+    def __str__(self):
+        return self.nome
 
 
 class ContatoPage(Page):
@@ -848,6 +1026,44 @@ class Lead(models.Model):
 
     def __str__(self):
         return f"{self.nome} - {self.email}"
+
+
+class RDStationLog(models.Model):
+    """
+    Log de envios ao RD Station.
+    Visível no Wagtail para o time de MKT verificar falhas e repassar à TI.
+    """
+    STATUS_CHOICES = [
+        ('sucesso', '✅ Sucesso'),
+        ('falha', '❌ Falha'),
+        ('inativo', '⚠️ Inativo (RD desativado ou sem token)'),
+    ]
+
+    lead = models.ForeignKey(
+        Lead, null=True, blank=True,
+        on_delete=models.SET_NULL,
+        related_name='rd_logs',
+        verbose_name='Lead relacionado'
+    )
+    email_lead = models.EmailField(blank=True, verbose_name='E-mail do Lead')
+    nome_lead = models.CharField(max_length=200, blank=True, verbose_name='Nome do Lead')
+    pagina_origem = models.CharField(max_length=500, blank=True, verbose_name='Página de Origem')
+    identificador_conversao = models.CharField(max_length=200, blank=True, verbose_name='Identificador de Conversão')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='falha', verbose_name='Status')
+    http_status_code = models.IntegerField(null=True, blank=True, verbose_name='Código HTTP da Resposta')
+    resposta_api = models.TextField(blank=True, verbose_name='Resposta da API RD Station')
+    mensagem_erro = models.TextField(blank=True, verbose_name='Mensagem de Erro')
+    causa_provavel = models.TextField(blank=True, verbose_name='Causa Provável (para MKT repassar à TI)')
+    payload_enviado = models.JSONField(null=True, blank=True, verbose_name='Payload Enviado')
+    criado_em = models.DateTimeField(auto_now_add=True, verbose_name='Data/Hora')
+
+    class Meta:
+        verbose_name = 'Log RD Station'
+        verbose_name_plural = 'Logs RD Station'
+        ordering = ['-criado_em']
+
+    def __str__(self):
+        return f'[{self.get_status_display()}] {self.email_lead} — {self.criado_em.strftime("%d/%m/%Y %H:%M")}'
 
 
 class Newsletter(models.Model):

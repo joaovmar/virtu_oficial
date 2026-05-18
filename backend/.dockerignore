@@ -1,0 +1,15 @@
+.venv
+amb-virtual_virtu
+virtual-virtu_oficial
+__pycache__
+*.pyc
+*.pyo
+db.sqlite3
+.env
+logs/
+media/
+staticfiles/
+.git
+*.egg-info
+.mypy_cache
+.pytest_cache

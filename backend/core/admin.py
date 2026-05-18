@@ -9,7 +9,7 @@ from django.utils.html import format_html
 from django.http import HttpResponse
 import csv
 
-from .models import Lead, Newsletter, Diferencial
+from .models import Lead, Newsletter, Diferencial, RDStationLog
 
 
 @admin.register(Lead)
@@ -156,6 +156,40 @@ class DiferencialAdmin(admin.ModelAdmin):
     search_fields = ['nome', 'descricao']
     list_editable = ['ativo', 'ordem']
     ordering = ['ordem', 'nome']
+
+
+@admin.register(RDStationLog)
+class RDStationLogAdmin(admin.ModelAdmin):
+    """Admin de Logs RD Station — somente leitura."""
+    list_display  = ['criado_em', 'status_badge', 'email_lead', 'nome_lead',
+                     'identificador_conversao', 'http_status_code', 'pagina_origem']
+    list_filter   = ['status', 'criado_em']
+    search_fields = ['email_lead', 'nome_lead', 'pagina_origem']
+    readonly_fields = [
+        'lead', 'email_lead', 'nome_lead', 'pagina_origem',
+        'identificador_conversao', 'status', 'http_status_code',
+        'resposta_api', 'mensagem_erro', 'causa_provavel',
+        'payload_enviado', 'criado_em',
+    ]
+    date_hierarchy = 'criado_em'
+    ordering = ['-criado_em']
+
+    def status_badge(self, obj):
+        colors = {
+            'sucesso': '#27ae60',
+            'falha':   '#e74c3c',
+            'inativo': '#f39c12',
+        }
+        color = colors.get(obj.status, '#95a5a6')
+        return format_html(
+            '<span style="background:{};color:white;padding:2px 10px;border-radius:10px;font-size:11px;">{}</span>',
+            color, obj.get_status_display()
+        )
+    status_badge.short_description = 'Status'
+
+    def has_add_permission(self, request):    return False
+    def has_change_permission(self, request, obj=None): return False
+    def has_delete_permission(self, request, obj=None): return True
 
 
 # Customização do Admin Site

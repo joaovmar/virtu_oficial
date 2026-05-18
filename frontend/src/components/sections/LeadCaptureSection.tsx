@@ -1,148 +1,124 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useForm } from 'react-hook-form';
 import { motion } from 'framer-motion';
-import { createLead, LeadData } from '@/lib/api';
-
-/**
- * Lead Capture / Banner Empreendimento - Figma: node 1:141
- * Imagem: DJI_15_D (drone), com mask shape arredondado (44px corners)
- * Overlay: rgba(20,20,20,0.67)
- * "Cadastre-se e saiba mais!" - Sora SemiBold 30.315px, branco
- * Inputs: bg white, border #c1a784, rounded-[59.358px], Sora SemiBold
- * Labels: Sora SemiBold 20px, branco
- * Placeholders: #c9c9c9 Sora SemiBold 20px
- * Botão CTA: gradient from-[#348981] to-[#c1a784], rounded-[38.176px]
- * Texto esquerdo: "Breve lançamento" Sora Regular 24.375px
- * "Casas sobrado..." Sora Light 40px
- * Logos: Perplan + Virtú branco
- */
+import { createLead, getConfiguracoes, LeadData } from '@/lib/api';
 
 interface LeadCaptureSectionProps {
   titulo?: string;
   subtitulo?: string;
   imagemFundo?: string;
+  showGrafismo?: boolean;
 }
 
+/**
+ * Banner CTA "Breve lançamento" com formulário de lead.
+ * showGrafismo: quando true, exibe grafismo decorativo atrás do form (como no Figma Home)
+ */
 export default function LeadCaptureSection({
   titulo = 'Casas sobrado na\nregião da Vila do Golfe\nem Ribeirão Preto - SP',
   subtitulo = 'Breve lançamento',
-  imagemFundo = '/vila-do-golfe-bg.jpg',
+  imagemFundo,
+  showGrafismo = false,
 }: LeadCaptureSectionProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [bgImage, setBgImage] = useState(imagemFundo || '/vila-do-golfe-bg.jpg');
   const { register, handleSubmit, reset } = useForm<LeadData>();
+
+  useEffect(() => {
+    if (!imagemFundo) {
+      getConfiguracoes()
+        .then((config) => {
+          if (config.banner_cta_imagem?.url) setBgImage(config.banner_cta_imagem.url);
+        })
+        .catch(() => {});
+    } else {
+      setBgImage(imagemFundo);
+    }
+  }, [imagemFundo]);
 
   const onSubmit = async (data: LeadData) => {
     setIsSubmitting(true);
     try {
-      await createLead({
-        ...data,
-        origem: 'banner_home',
-        pagina_origem: typeof window !== 'undefined' ? window.location.pathname : '',
-      });
+      await createLead({ ...data, origem: 'banner_cta', pagina_origem: typeof window !== 'undefined' ? window.location.pathname : '' });
       setSubmitSuccess(true);
       reset();
-    } catch {
-      console.error('Erro ao enviar lead');
-    } finally {
-      setIsSubmitting(false);
-    }
+    } catch {} finally { setIsSubmitting(false); }
   };
 
-  const inputClasses =
-    'w-full px-6 py-3.5 bg-white border border-virtu-gold rounded-[59.358px] font-sans font-semibold text-[16px] md:text-[20px] text-virtu-dark placeholder:text-virtu-placeholder tracking-[-0.2px] focus:outline-none focus:ring-2 focus:ring-virtu-gold/40';
+  const inputCls = 'w-full px-4 md:px-5 py-2.5 md:py-3 bg-white border border-virtu-gold rounded-full font-sans font-semibold text-xs md:text-sm text-virtu-dark placeholder:text-virtu-placeholder tracking-tight focus:outline-none focus:ring-2 focus:ring-virtu-gold/40';
 
   return (
-    <section className="relative mx-4 sm:mx-8 lg:mx-14 my-8 rounded-[44px] overflow-hidden">
-      {/* Imagem de fundo */}
-      <Image src={imagemFundo} alt="Empreendimento" fill className="object-cover" />
-      {/* Overlay - Figma: rgba(20,20,20,0.67) */}
+    <section className="relative mx-3 sm:mx-6 lg:mx-14 my-6 md:my-10 rounded-2xl md:rounded-[44px] overflow-hidden">
+      <Image src={bgImage} alt="Empreendimento" fill className="object-cover" />
       <div className="absolute inset-0 bg-[rgba(20,20,20,0.67)]" />
 
-      <div className="relative z-10 px-8 lg:px-20 py-14 md:py-20 flex flex-col lg:flex-row gap-12 lg:gap-20 justify-between items-center">
-        {/* Esquerda: Info */}
-        <div className="text-white lg:w-1/2">
-          {/* Figma: Sora Regular 24.375px */}
-          <span className="font-sans font-normal text-[20px] md:text-[24.375px] tracking-[-0.24px] mb-3 block">
-            {subtitulo}
-          </span>
-          {/* Figma: Sora Light 40px */}
-          <h2 className="font-sans font-light text-[28px] md:text-[40px] leading-tight whitespace-pre-line">
-            {titulo}
-          </h2>
-          {/* Logos parceiros */}
-          <div className="flex items-center gap-6 mt-10">
-            <Image src="/perplan-logo-white.svg" alt="Perplan" width={213} height={85} className="object-contain opacity-90 h-[60px] md:h-[85px] w-auto" />
-            <Image src="/virtu-logo-white.svg" alt="Virtú" width={110} height={44} className="object-contain opacity-90 h-[32px] md:h-[44px] w-auto" />
+      {/* Grafismo decorativo — posicionado sobre o overlay, na metade direita */}
+      {showGrafismo && (
+        <div className="absolute inset-0 pointer-events-none z-[2] opacity-[0.11]" aria-hidden>
+          <svg viewBox="0 0 900 600" fill="none" className="absolute right-0 top-0 h-full w-1/2" preserveAspectRatio="xMaxYMid meet">
+            <circle cx="500" cy="300" r="420" stroke="white" strokeWidth="0.6" />
+            <circle cx="500" cy="300" r="330" stroke="white" strokeWidth="0.6" />
+            <circle cx="500" cy="300" r="240" stroke="white" strokeWidth="0.6" />
+            <circle cx="500" cy="300" r="150" stroke="white" strokeWidth="0.6" />
+            <circle cx="500" cy="300" r="70" stroke="white" strokeWidth="0.6" />
+            <path d="M500 -120 A420 420 0 0 1 920 300" stroke="white" strokeWidth="1.2" fill="none" />
+            <path d="M500 -30 A330 330 0 0 1 830 300" stroke="white" strokeWidth="1" fill="none" />
+            <line x1="80" y1="300" x2="920" y2="300" stroke="white" strokeWidth="0.4" />
+            <line x1="500" y1="-120" x2="500" y2="720" stroke="white" strokeWidth="0.4" />
+          </svg>
+        </div>
+      )}
+
+      <div className="relative z-[3] px-5 sm:px-8 lg:px-14 py-10 md:py-14 lg:py-20 flex flex-col lg:flex-row gap-8 lg:gap-14 justify-between items-center">
+        {/* Texto esquerda */}
+        <div className="text-white lg:w-1/2 text-center lg:text-left">
+          <span className="font-sans font-normal text-xs md:text-sm lg:text-base tracking-tight mb-1 md:mb-2 block">{subtitulo}</span>
+          <h2 className="font-sans font-light text-lg sm:text-xl md:text-2xl lg:text-3xl leading-tight whitespace-pre-line">{titulo}</h2>
+          <div className="flex items-center justify-center lg:justify-start gap-3 md:gap-5 mt-5 md:mt-8">
+            <Image src="/perplan-logo-white.svg" alt="Perplan" width={160} height={65} className="object-contain h-[28px] sm:h-[36px] md:h-[50px] w-auto" />
+            <Image src="/virtu-logo-white.svg" alt="virtú" width={85} height={34} className="object-contain h-[16px] sm:h-[20px] md:h-[28px] w-auto" />
           </div>
         </div>
 
-        {/* Direita: Form */}
-        <div className="lg:w-[420px] w-full">
-          {submitSuccess ? (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center text-white py-10">
-              <div className="w-14 h-14 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
-              <h3 className="font-sans font-semibold text-[24px] mb-2">Obrigado!</h3>
-              <p className="text-white/80 text-[16px] font-light">Em breve entraremos em contato.</p>
-            </motion.div>
-          ) : (
-            <>
-              {/* Figma: Sora SemiBold 30.315px */}
-              <h3 className="font-sans font-semibold text-[22px] md:text-[30.315px] text-white text-center tracking-[-0.3px] mb-6">
-                Cadastre-se e saiba mais!
-              </h3>
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-                <div>
-                  <label className="block font-sans font-semibold text-[16px] md:text-[20px] text-white tracking-[-0.2px] mb-1.5">
-                    Nome*
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Nome completo"
-                    className={inputClasses}
-                    {...register('nome', { required: true })}
-                  />
-                </div>
-                <div>
-                  <label className="block font-sans font-semibold text-[16px] md:text-[20px] text-white tracking-[-0.2px] mb-1.5">
-                    E-mail*
-                  </label>
-                  <input
-                    type="email"
-                    placeholder="E-mail"
-                    className={inputClasses}
-                    {...register('email', { required: true })}
-                  />
-                </div>
-                <div>
-                  <label className="block font-sans font-semibold text-[16px] md:text-[20px] text-white tracking-[-0.2px] mb-1.5">
-                    Telefone*
-                  </label>
-                  <input
-                    type="tel"
-                    placeholder="Telefone com DDD"
-                    className={inputClasses}
-                    {...register('telefone', { required: true })}
-                  />
-                </div>
-                {/* Botão - Figma: gradient from-[#348981] to-[#c1a784], rounded-[38.176px], Sora Light 20px */}
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="w-full py-3.5 rounded-[38.176px] font-sans font-light text-[16px] md:text-[20px] text-white bg-gradient-to-r from-virtu-green to-virtu-gold hover:opacity-90 transition-opacity disabled:opacity-60 mt-3"
-                >
-                  {isSubmitting ? 'Enviando...' : 'Fale com um especialista'}
-                </button>
-              </form>
-            </>
-          )}
+        {/* Form direita + grafismo decorativo */}
+        <div className="relative lg:w-[400px] w-full max-w-[400px]">
+
+          <div className="relative z-10">
+            {submitSuccess ? (
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center text-white py-6">
+                <p className="font-sans font-semibold text-lg mb-1">Obrigado!</p>
+                <p className="text-white/80 text-sm font-light">Entraremos em contato.</p>
+              </motion.div>
+            ) : (
+              <>
+                <h3 className="font-sans font-semibold text-base md:text-lg text-white text-center tracking-tight mb-4">
+                  Cadastre-se e saiba mais!
+                </h3>
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-2.5 md:space-y-3">
+                  <div>
+                    <label className="block font-sans font-semibold text-xs md:text-sm text-white tracking-tight mb-1">Nome*</label>
+                    <input type="text" placeholder="Nome completo" className={inputCls} {...register('nome', { required: true })} />
+                  </div>
+                  <div>
+                    <label className="block font-sans font-semibold text-xs md:text-sm text-white tracking-tight mb-1">E-mail*</label>
+                    <input type="email" placeholder="E-mail" className={inputCls} {...register('email', { required: true })} />
+                  </div>
+                  <div>
+                    <label className="block font-sans font-semibold text-xs md:text-sm text-white tracking-tight mb-1">Telefone*</label>
+                    <input type="tel" placeholder="Telefone com DDD" className={inputCls} {...register('telefone', { required: true })} />
+                  </div>
+                  <button type="submit" disabled={isSubmitting}
+                    className="w-full py-2.5 md:py-3 rounded-full font-sans font-light text-xs md:text-sm text-white bg-gradient-to-r from-virtu-green to-virtu-gold hover:opacity-90 transition-opacity disabled:opacity-60 mt-2">
+                    {isSubmitting ? 'Enviando...' : 'Fale com um especialista'}
+                  </button>
+                </form>
+              </>
+            )}
+          </div>
         </div>
       </div>
     </section>

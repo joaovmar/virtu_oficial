@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% load wagtailcore_tags wagtailimages_tags %}
+
+{% block title %}{{ page.title }} - Virtú{% endblock %}
+
+{% block content %}
+<div style="max-width:900px;margin:40px auto;padding:20px;font-family:Sora,sans-serif;">
+  <p style="color:#348981;font-size:14px;margin-bottom:8px;">Preview do Wagtail — O site real é renderizado pelo Next.js</p>
+  <h1 style="font-size:36px;color:#282828;">{{ page.title }}</h1>
+  {% if page.hero_imagem %}
+    {% image page.hero_imagem fill-900x400 as hero %}
+    <img src="{{ hero.url }}" alt="Sobre nós" style="width:100%;border-radius:16px;margin:24px 0;">
+  {% endif %}
+  {% if page.historia_texto %}
+    <div style="margin-top:24px;color:#414141;line-height:1.6;">{{ page.historia_texto|richtext }}</div>
+  {% endif %}
+</div>
+{% endblock %}

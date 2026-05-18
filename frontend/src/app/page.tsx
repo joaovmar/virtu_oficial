@@ -1,225 +1,190 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import Image from 'next/image';
-import Link from 'next/link';
-import { motion } from 'framer-motion';
-import { getHome, getDepoimentos, HomeData, Depoimento } from '@/lib/api';
-import JornadaSection from '@/components/sections/JornadaSection';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { getHome, HomeData } from '@/lib/api';
 import FuturosLancamentosSection from '@/components/sections/FuturosLancamentosSection';
-import DepoimentosSection from '@/components/sections/DepoimentosSection';
 import LeadCaptureSection from '@/components/sections/LeadCaptureSection';
-
-/**
- * HOME PAGE - Figma: "Web - 1º tiro - home" (node 1:97)
- * 
- * Seções:
- * 1. Hero banner (node 1:128) - "O seu futuro é o nosso propósito"
- * 2. "Pensamos no futuro" + texto (node 1:121)
- * 3. "Todos os caminhos se conectam a virtú." + vídeo (node 1:129)
- * 4. "Futuros lançamentos" (node 1:138 + 1:139)
- * 5. Banner empreendimento Lead Capture (node 1:141)
- */
 
 export default function HomePage() {
   const [data, setData] = useState<HomeData | null>(null);
-  const [depoimentos, setDepoimentos] = useState<Depoimento[]>([]);
   const [loading, setLoading] = useState(true);
+  const [heroIdx, setHeroIdx] = useState(0);
 
   useEffect(() => {
     async function fetchData() {
-      try {
-        const [homeData, depoimentosData] = await Promise.all([
-          getHome(),
-          getDepoimentos(true),
-        ]);
-        setData(homeData);
-        setDepoimentos(depoimentosData);
-      } catch (error) {
-        console.error('Erro ao carregar dados:', error);
-      } finally {
-        setLoading(false);
-      }
+      try { const homeData = await getHome(); setData(homeData); }
+      catch (e) { console.error('Erro:', e); }
+      finally { setLoading(false); }
     }
     fetchData();
   }, []);
 
+  // Hero carousel: uses hero_banners array if available, fallback to hero_imagem
+  const heroBanners = data?.hero_banners && data.hero_banners.length > 0
+    ? data.hero_banners
+    : data?.hero_imagem ? [{ imagem: data.hero_imagem, titulo: '', subtitulo: '' }] : [];
+
+  const goHero = useCallback((dir: number) => {
+    setHeroIdx(prev => {
+      const len = heroBanners.length || 1;
+      const n = prev + dir;
+      return n < 0 ? len - 1 : n >= len ? 0 : n;
+    });
+  }, [heroBanners.length]);
+
+  // Auto-slide hero
+  useEffect(() => {
+    if (heroBanners.length <= 1) return;
+    const t = setInterval(() => goHero(1), 5000);
+    return () => clearInterval(t);
+  }, [heroBanners.length, goHero]);
+
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-4 border-virtu-gold border-t-transparent" />
-      </div>
-    );
+    return <div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-10 w-10 border-4 border-virtu-gold border-t-transparent" /></div>;
   }
+
+  const activeHero = heroBanners[heroIdx];
 
   return (
     <>
       {/* ================================================================
-          1. HERO BANNER
-          Figma: 1920x1080, imagem bg, overlay gradient, texto centralizado
-          "O seu futuro é o nosso propósito"
-          Sora Light + Newsreader Medium Italic #c1a784
+          1. HERO — Carrossel full-width com setas + dots
           ================================================================ */}
-      <section className="relative h-screen min-h-[700px] flex flex-col items-center justify-end pb-24 md:pb-32">
-        <div className="absolute inset-0 z-0">
-          <Image
-            src={data?.hero_imagem?.url || '/familia-hero-bg.jpg'}
-            alt="Hero"
-            fill
-            className="object-cover"
-            priority
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
-        </div>
+      <section className="relative w-full h-[100svh] min-h-[500px] max-h-[960px]">
+        <AnimatePresence mode="wait">
+          <motion.div key={heroIdx} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.7 }} className="absolute inset-0">
+            {activeHero?.imagem?.url ? (
+              <Image src={activeHero.imagem.url} alt={activeHero.titulo || ''} fill className="object-cover" priority />
+            ) : (
+              <div className="w-full h-full bg-virtu-green-dark" />
+            )}
+          </motion.div>
+        </AnimatePresence>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
 
-        <div className="relative z-10 text-center flex flex-col items-center">
-          <motion.h1
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="text-white font-sans font-light text-[28px] md:text-[42px] tracking-[-0.4px]"
-          >
-            {data?.hero_titulo || 'O seu futuro é o nosso'}{' '}
-            <span className="font-display font-medium italic text-virtu-gold text-[40px] md:text-[65px]">
-              propósito
+        {/* Texto do hero */}
+        <div className="absolute inset-0 flex flex-col items-center justify-end pb-12 md:pb-20 px-6 z-10">
+          <motion.h1 key={`ht-${heroIdx}`} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-white text-center">
+            <span className="font-sans font-light text-lg sm:text-xl md:text-2xl lg:text-3xl tracking-tight">
+              {activeHero?.titulo || data?.hero_titulo || ''}
             </span>
+            {(activeHero?.subtitulo || (!activeHero?.titulo && data?.hero_titulo)) && (
+              <span className="font-display font-medium italic text-virtu-gold text-2xl sm:text-3xl md:text-4xl lg:text-5xl ml-2">
+                {activeHero?.subtitulo || 'propósito'}
+              </span>
+            )}
           </motion.h1>
-
-          {/* Seta scroll - Figma: grafismo-seta 1 (node 1:114) */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 1.2 }}
-            className="mt-10"
-          >
-            <svg width="27" height="28" viewBox="0 0 27 28" fill="none" className="animate-bounce opacity-70">
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.2 }} className="mt-6 md:mt-8">
+            <svg width="18" height="20" viewBox="0 0 27 28" fill="none" className="animate-bounce opacity-70">
               <path d="M13.5 2L13.5 26M13.5 26L25 14.5M13.5 26L2 14.5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </motion.div>
         </div>
+
+        {/* Setas do carrossel */}
+        {heroBanners.length > 1 && (
+          <>
+            <button onClick={() => goHero(-1)} className="absolute left-3 sm:left-5 md:left-8 top-1/2 -translate-y-1/2 z-20 w-10 h-10 md:w-12 md:h-12 rounded-full bg-white/10 hover:bg-white/25 backdrop-blur-sm flex items-center justify-center transition-colors" aria-label="Anterior">
+              <ChevronLeft className="w-5 h-5 md:w-6 md:h-6 text-white" strokeWidth={2} />
+            </button>
+            <button onClick={() => goHero(1)} className="absolute right-3 sm:right-5 md:right-8 top-1/2 -translate-y-1/2 z-20 w-10 h-10 md:w-12 md:h-12 rounded-full bg-white/10 hover:bg-white/25 backdrop-blur-sm flex items-center justify-center transition-colors" aria-label="Próximo">
+              <ChevronRight className="w-5 h-5 md:w-6 md:h-6 text-white" strokeWidth={2} />
+            </button>
+            <div className="absolute bottom-4 md:bottom-8 left-1/2 -translate-x-1/2 z-20 flex gap-2 md:gap-2.5">
+              {heroBanners.map((_, i) => (
+                <button key={i} onClick={() => setHeroIdx(i)} className={`h-2 md:h-2.5 rounded-full transition-all duration-300 ${i === heroIdx ? 'bg-white w-6 md:w-8' : 'bg-white/40 w-2 md:w-2.5'}`} aria-label={`Slide ${i + 1}`} />
+              ))}
+            </div>
+          </>
+        )}
       </section>
 
-      {/* ================================================================
-          2. "Pensamos no futuro" + texto
-          Figma: 1ª dobra - home (node 1:121)
-          Título: Sora ExtraLight 42px #282828 + Newsreader Medium Italic 128px #c1a784
-          Texto: Sora Light 20px #282828, tracking: -0.2px
-          ================================================================ */}
-      <section className="py-20 md:py-32 bg-white">
-        <div className="max-w-[1460px] mx-auto px-6 lg:px-12">
-          <div className="flex flex-col lg:flex-row gap-12 lg:gap-20 items-start">
-            {/* Título esquerdo - Figma: 344px largo */}
-            <motion.div
-              initial={{ opacity: 0, x: -30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              className="lg:w-[344px] shrink-0"
-            >
-              <p className="font-sans font-extralight text-[42px] text-virtu-dark leading-none">
-                {data?.secao_futuro_titulo || 'Pensamos no'}
-              </p>
-              <p className="font-display font-medium italic text-[128px] text-virtu-gold leading-[0.85] -mt-2">
-                futuro
-              </p>
-            </motion.div>
-
-            {/* Texto direito - Figma: Sora Light 20px tracking -0.2px */}
-            <motion.div
-              initial={{ opacity: 0, x: 30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              className="flex-1"
-            >
-              <div
-                className="font-sans font-light text-[20px] text-virtu-dark leading-[1.474] tracking-[-0.2px] [&_p]:mb-5"
-                dangerouslySetInnerHTML={{
-                  __html:
-                    data?.secao_futuro_texto ||
-                    '<p>A virtú tem um propósito claro: desenvolver empreendimentos com responsabilidade, sensibilidade e visão de futuro. O nome carrega aquilo em que acreditamos — a virtude como essência de tudo o que fazemos.</p><p>Nosso propósito é atender com excelência e superar as expectativas dos nossos clientes, por meio de empreendimentos entregues com qualidade e foco em valorização de longo prazo.</p>',
-                }}
-              />
-            </motion.div>
-          </div>
-
-          {/* Banner institucional com imagem - Figma: Mask group arredondado */}
+      {/* 2. "Pensamos no futuro" */}
+      <section className="py-10 md:py-14 lg:py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12">
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="mt-20 relative w-full h-[400px] md:h-[465px] rounded-[44px] overflow-hidden"
+            transition={{ duration: 0.6 }}
+            className="flex flex-col lg:flex-row gap-6 lg:gap-16 items-start"
           >
-            <Image
-              src={data?.banner_institucional_imagem?.url || '/engineer-bg.jpg'}
-              alt="Banner institucional"
-              fill
-              className="object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-black/50" />
-            <div className="absolute inset-y-0 right-0 flex items-center pr-10 md:pr-20 max-w-[50%]">
-              <h3 className="text-white font-sans font-light text-[28px] md:text-[42px] text-right leading-tight tracking-[-0.4px]">
-                {data?.banner_institucional_texto || 'criar lugares onde a vida acontece.'}
-              </h3>
+            <div className="lg:w-[300px] shrink-0">
+              <p className="font-sans font-extralight text-xl md:text-2xl lg:text-3xl text-virtu-dark leading-none">
+                {data?.secao_futuro_titulo || ''}
+              </p>
+              <p className="font-display font-medium italic text-5xl md:text-6xl lg:text-8xl text-virtu-gold leading-[0.85] -mt-1">
+                futuro
+              </p>
+            </div>
+            <div className="flex-1">
+              {data?.secao_futuro_texto && (
+                <div className="font-sans font-light text-sm md:text-base text-virtu-dark leading-relaxed tracking-tight [&_p]:mb-4"
+                  dangerouslySetInnerHTML={{ __html: data.secao_futuro_texto }} />
+              )}
             </div>
           </motion.div>
+
+          {/* Banner institucional */}
+          {data?.banner_institucional_imagem && (
+            <motion.div
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.7, delay: 0.1 }}
+              className="mt-10 md:mt-14 lg:mt-16 relative w-full h-[220px] sm:h-[280px] md:h-[360px] lg:h-[420px] rounded-2xl md:rounded-[44px] overflow-hidden"
+            >
+              <Image src={data.banner_institucional_imagem.url} alt="" fill className="object-cover" />
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-black/50" />
+              {data.banner_institucional_texto && (
+                <div className="absolute inset-y-0 right-0 flex items-center pr-4 sm:pr-8 md:pr-14 max-w-[55%] md:max-w-[45%]">
+                  <h3 className="text-white font-sans font-light text-base sm:text-lg md:text-2xl lg:text-3xl text-right leading-tight tracking-tight">
+                    {data.banner_institucional_texto}
+                  </h3>
+                </div>
+              )}
+            </motion.div>
+          )}
         </div>
       </section>
 
-      {/* ================================================================
-          3. "Todos os caminhos se conectam a virtú." + Vídeo
-          Figma: Group 66 (node 1:129)
-          Texto: Sora ExtraLight 50px #348981, "virtú." Sora Bold #1e3d34
-          Vídeo: rounded-[44px], overlay rgba(0,0,0,0.6), texto Sora SemiBold 55.565px
-          ================================================================ */}
-      <section className="py-16 md:py-24 bg-white overflow-hidden">
-        <div className="max-w-[1672px] mx-auto px-6 lg:px-12">
-          <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
-            {/* Texto - Figma: 321px x 252px, Sora ExtraLight 50px */}
+      {/* 3. Vídeo + "Todos os caminhos" */}
+      <section className="py-8 md:py-10 lg:py-14 bg-white overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12">
+          <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-14">
             <motion.div
               initial={{ opacity: 0, x: -40 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              className="lg:w-[321px] shrink-0"
+              transition={{ duration: 0.6 }}
+              className="lg:w-[280px] shrink-0 text-center lg:text-left"
             >
-              <h2 className="font-sans font-extralight text-[36px] lg:text-[50px] text-virtu-green leading-[1.1]">
-                Todos os<br />
-                caminhos<br />
-                se conectam<br />
-                a <span className="font-bold text-virtu-green-dark">virtú.</span>
+              <h2 className="font-sans font-extralight text-2xl md:text-3xl lg:text-4xl text-virtu-green leading-[1.15]">
+                Todos os<br />caminhos<br />se conectam<br />a <span className="font-bold text-virtu-green-dark">virtú.</span>
               </h2>
             </motion.div>
-
-            {/* Vídeo - Figma: 886x474, rounded-[44px] */}
             <motion.div
               initial={{ opacity: 0, x: 40 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
               className="flex-1 w-full"
             >
-              <div className="rounded-[44px] overflow-hidden aspect-video relative bg-black flex items-center justify-center cursor-pointer group">
-                <Image
-                  src="/video-thumb.jpg"
-                  alt="Vídeo institucional"
-                  fill
-                  className="object-cover opacity-50 group-hover:opacity-60 transition-opacity duration-500"
-                />
-                {/* Overlay - Figma: rgba(0,0,0,0.6) */}
+              <div className="rounded-2xl md:rounded-[44px] overflow-hidden aspect-video relative bg-black flex items-center justify-center cursor-pointer group">
+                <Image src="/video-thumb.jpg" alt="" fill className="object-cover opacity-50 group-hover:opacity-60 transition-opacity duration-500" />
                 <div className="absolute inset-0 bg-[rgba(0,0,0,0.6)] group-hover:bg-[rgba(0,0,0,0.5)] transition-colors" />
-
-                <div className="relative z-10 text-center flex flex-col items-center">
-                  {/* Figma: Sora SemiBold 55.565px */}
-                  <h3 className="text-white font-sans font-semibold text-[28px] md:text-[55px] tracking-[-0.56px] text-center mb-6 leading-tight">
+                <div className="relative z-10 text-center flex flex-col items-center px-4">
+                  <h3 className="text-white font-sans font-semibold text-base sm:text-xl md:text-2xl lg:text-3xl tracking-tight text-center mb-3 md:mb-5 leading-tight">
                     vídeo institucional virtú
                   </h3>
-                  {/* Play button - Figma: triângulo rotacionado */}
-                  <motion.div
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="w-16 h-16 md:w-24 md:h-24 flex items-center justify-center"
-                  >
-                    <svg width="69" height="93" viewBox="0 0 69 93" fill="none">
+                  <div className="w-10 h-10 md:w-16 md:h-16 flex items-center justify-center">
+                    <svg viewBox="0 0 69 93" fill="none" className="w-5 h-7 md:w-8 md:h-11">
                       <path d="M69 46.5L0 93L0 0L69 46.5Z" fill="white" fillOpacity="0.8"/>
                     </svg>
-                  </motion.div>
+                  </div>
                 </div>
               </div>
             </motion.div>
@@ -227,24 +192,14 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ================================================================
-          4. "Futuros lançamentos"
-          Figma: Sora Light 50px #282828 + Newsreader Medium Italic 75px #348981
-          + Banner - futuros lançamentos (node 1:139)
-          ================================================================ */}
+      {/* 4. Futuros Lançamentos */}
       <FuturosLancamentosSection />
 
-      {/* ================================================================
-          5. Banner Empreendimento - Lead Capture
-          Figma: banner empreendimento - empreendimentos (node 1:141)
-          ================================================================ */}
+      {/* 5. Lead Capture — com grafismo */}
       <LeadCaptureSection
-        titulo={
-          data?.empreendimento_destaque
-            ? `${data.empreendimento_destaque.title}\n${data.empreendimento_destaque.cidade?.nome || ''} - ${data.empreendimento_destaque.cidade?.estado || ''}`
-            : undefined
-        }
+        titulo={data?.empreendimento_destaque ? `${data.empreendimento_destaque.title}\n${data.empreendimento_destaque.cidade?.nome || ''} - ${data.empreendimento_destaque.cidade?.estado || ''}` : undefined}
         imagemFundo={data?.empreendimento_destaque?.imagem_principal?.url}
+        showGrafismo={true}
       />
     </>
   );

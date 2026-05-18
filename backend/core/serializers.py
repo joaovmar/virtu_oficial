@@ -8,7 +8,8 @@ from .models import (
     Cidade, StatusEmpreendimento, Parceiro, Diferencial, Depoimento, ConfiguracaoSite,
     HomePage, EmpreendimentosIndexPage, EmpreendimentoPage, SobreNosPage,
     Planta, GaleriaImagem, AndamentoObra, FotoObra,
-    Lead, Newsletter
+    Lead, Newsletter,
+    HeroBannerImagem, SeloQualidade,
 )
 
 
@@ -85,9 +86,34 @@ class DepoimentoSerializer(serializers.ModelSerializer):
 
 
 class ConfiguracaoSerializer(serializers.ModelSerializer):
+    """
+    Serializer PÚBLICO para configurações do site.
+    SEGURANÇA: Exclui rdstation_api_token que NUNCA deve ser exposto no frontend.
+    """
+    banner_cta_imagem = serializers.SerializerMethodField()
+
     class Meta:
         model = ConfiguracaoSite
-        fields = '__all__'
+        exclude = ['rdstation_api_token']  # ⚠️ Token privado NUNCA exposto
+
+    def get_banner_cta_imagem(self, obj):
+        return get_image_url(obj.banner_cta_imagem)
+
+
+class TrackingSerializer(serializers.Serializer):
+    """
+    Serializer que retorna APENAS IDs públicos de tracking.
+    Usado pelo frontend para injetar scripts GTM, RD Station JS, Meta Pixel, GA4.
+    Nenhuma credencial privada (api_token, secret) é incluída.
+    """
+    gtm_ativo = serializers.BooleanField()
+    gtm_container_id = serializers.CharField(allow_blank=True)
+    rdstation_ativo = serializers.BooleanField()
+    rdstation_public_token = serializers.CharField(allow_blank=True)
+    meta_pixel_ativo = serializers.BooleanField()
+    meta_pixel_id = serializers.CharField(allow_blank=True)
+    ga4_ativo = serializers.BooleanField()
+    ga4_measurement_id = serializers.CharField(allow_blank=True)
 
 
 # =============================================================================
@@ -216,6 +242,7 @@ class EmpreendimentoDetalheSerializer(serializers.ModelSerializer):
 
 class HomePageSerializer(serializers.ModelSerializer):
     hero_imagem = serializers.SerializerMethodField()
+    hero_banners = serializers.SerializerMethodField()
     secao_futuro_imagem = serializers.SerializerMethodField()
     banner_institucional_imagem = serializers.SerializerMethodField()
     etapas_jornada = serializers.SerializerMethodField()
@@ -230,7 +257,8 @@ class HomePageSerializer(serializers.ModelSerializer):
             'secao_jornada_titulo', 'etapas_jornada',
             'empreendimento_destaque', 'banner_destaque_texto',
             'secao_depoimentos_titulo',
-            'cta_titulo', 'cta_botao_texto'
+            'cta_titulo', 'cta_botao_texto',
+            'hero_banners',
         ]
 
     def get_hero_imagem(self, obj):
@@ -255,11 +283,26 @@ class HomePageSerializer(serializers.ModelSerializer):
                 })
         return result
 
+    def get_hero_banners(self, obj):
+        banners = []
+        for b in obj.hero_banners.all():
+            banners.append({
+                'imagem': get_image_url(b.imagem),
+                'titulo': b.titulo,
+                'subtitulo': b.subtitulo,
+            })
+        return banners
+
 
 class SobreNosSerializer(serializers.ModelSerializer):
     hero_imagem = serializers.SerializerMethodField()
     video_thumbnail = serializers.SerializerMethodField()
     cta_imagem = serializers.SerializerMethodField()
+    missao_icone = serializers.SerializerMethodField()
+    visao_icone = serializers.SerializerMethodField()
+    valores_icone = serializers.SerializerMethodField()
+    mvv_background = serializers.SerializerMethodField()
+    selos_qualidade = serializers.SerializerMethodField()
 
     class Meta:
         model = SobreNosPage
@@ -271,7 +314,9 @@ class SobreNosSerializer(serializers.ModelSerializer):
             'visao_titulo', 'visao_texto',
             'valores_titulo', 'valores_texto',
             'politica_titulo', 'politica_texto',
-            'cta_titulo', 'cta_subtitulo', 'cta_botao_texto', 'cta_imagem'
+            'cta_titulo', 'cta_subtitulo', 'cta_botao_texto', 'cta_imagem',
+            'missao_icone', 'visao_icone', 'valores_icone', 'mvv_background',
+            'selos_qualidade',
         ]
 
     def get_hero_imagem(self, obj):
@@ -283,10 +328,43 @@ class SobreNosSerializer(serializers.ModelSerializer):
     def get_cta_imagem(self, obj):
         return get_image_url(obj.cta_imagem)
 
+    def get_missao_icone(self, obj):
+        return get_image_url(obj.missao_icone)
+
+    def get_visao_icone(self, obj):
+        return get_image_url(obj.visao_icone)
+
+    def get_valores_icone(self, obj):
+        return get_image_url(obj.valores_icone)
+
+    def get_mvv_background(self, obj):
+        return get_image_url(obj.mvv_background)
+
+    def get_selos_qualidade(self, obj):
+        selos = []
+        for s in obj.selos_qualidade.all():
+            selos.append({
+                'nome': s.nome,
+                'imagem': get_image_url(s.imagem),
+            })
+        return selos
+
 
 # =============================================================================
 # SERIALIZERS DE LEAD/NEWSLETTER
 # =============================================================================
+
+class EmpreendimentosIndexPageSerializer(serializers.ModelSerializer):
+    hero_imagem = serializers.SerializerMethodField()
+
+    class Meta:
+        from .models import EmpreendimentosIndexPage
+        model = EmpreendimentosIndexPage
+        fields = ['hero_titulo', 'hero_subtitulo', 'hero_imagem', 'form_titulo', 'secao_projetos_titulo']
+
+    def get_hero_imagem(self, obj):
+        return get_image_url(obj.hero_imagem)
+
 
 class LeadSerializer(serializers.ModelSerializer):
     class Meta:

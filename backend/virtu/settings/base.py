@@ -99,6 +99,69 @@ MEDIA_ROOT = BASE_DIR / 'media'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # =============================================================================
+# LOGGING — Captura erros do RD Station em arquivo + console
+# =============================================================================
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '[{asctime}] {levelname} {name}: {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+        'rdstation_file': {
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': str(BASE_DIR / 'logs' / 'rdstation.log'),
+            'maxBytes': 5 * 1024 * 1024,  # 5MB
+            'backupCount': 5,
+            'formatter': 'verbose',
+            'encoding': 'utf-8',
+        },
+        'django_file': {
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': str(BASE_DIR / 'logs' / 'django.log'),
+            'maxBytes': 10 * 1024 * 1024,  # 10MB
+            'backupCount': 3,
+            'formatter': 'verbose',
+            'encoding': 'utf-8',
+        },
+    },
+    'loggers': {
+        'core.rdstation': {
+            'handlers': ['console', 'rdstation_file'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'django': {
+            'handlers': ['console', 'django_file'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
+        'django.request': {
+            'handlers': ['console', 'django_file'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+    },
+}
+
+# =============================================================================
+# UPLOAD LIMITS - Resolve erro 413 (Request Entity Too Large)
+# =============================================================================
+DATA_UPLOAD_MAX_MEMORY_SIZE = 50 * 1024 * 1024       # 50MB (Django body parser)
+FILE_UPLOAD_MAX_MEMORY_SIZE = 50 * 1024 * 1024       # 50MB (Django file handler)
+
+# =============================================================================
 # WAGTAIL - Branding Virtú
 # =============================================================================
 WAGTAIL_SITE_NAME = 'Virtú'
@@ -109,6 +172,14 @@ WAGTAIL_ADMIN_CUSTOM_CSS = ['css/wagtail-custom.css']
 
 # Cores do admin (Wagtail 5+)
 WAGTAILADMIN_NOTIFICATION_USE_HTML = True
+
+# Upload de imagens - limites e formatos aceitos
+WAGTAILIMAGES_MAX_UPLOAD_SIZE = 50 * 1024 * 1024     # 50MB por imagem
+WAGTAILIMAGES_MAX_IMAGE_PIXELS = 50_000_000            # ~7000x7000px
+WAGTAILIMAGES_EXTENSIONS = ['gif', 'jpg', 'jpeg', 'png', 'webp', 'svg', 'bmp', 'tiff']
+
+# Documentos
+WAGTAILDOCS_EXTENSIONS = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'svg', 'zip']
 
 # =============================================================================
 # DRF

@@ -4,12 +4,12 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { DollarSign, Maximize, BedDouble, Waves, ChevronLeft, ChevronRight } from 'lucide-react';
+import { DollarSign, Maximize, BedDouble, Waves } from 'lucide-react';
 import { getEmpreendimento, EmpreendimentoDetalhe } from '@/lib/api';
 import ContactForm from '@/components/ui/ContactForm';
 import GaleriaCarrossel from '@/components/ui/GaleriaCarrossel';
 import VideoPlayer from '@/components/ui/VideoPlayer';
-import CTASection from '@/components/sections/CTASection';
+import LeadCaptureSection from '@/components/sections/LeadCaptureSection';
 
 export default function EmpreendimentoDetalhePage() {
   const params = useParams();
@@ -20,197 +20,128 @@ export default function EmpreendimentoDetalhePage() {
 
   useEffect(() => {
     async function fetchData() {
-      try {
-        const data = await getEmpreendimento(slug);
-        setEmp(data);
-      } catch (error) {
-        console.error('Erro:', error);
-      } finally {
-        setLoading(false);
-      }
+      try { const data = await getEmpreendimento(slug); setEmp(data); }
+      catch (e) { console.error(e); }
+      finally { setLoading(false); }
     }
     if (slug) fetchData();
   }, [slug]);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center pt-20">
-        <div className="animate-spin rounded-full h-12 w-12 border-4 border-virtu-gold border-t-transparent" />
-      </div>
-    );
-  }
+  if (loading) return <div className="min-h-screen flex items-center justify-center pt-20"><div className="animate-spin rounded-full h-10 w-10 border-4 border-virtu-gold border-t-transparent" /></div>;
+  if (!emp) return <div className="min-h-screen flex flex-col items-center justify-center pt-20"><h1 className="font-sans text-xl text-virtu-dark">Empreendimento não encontrado</h1></div>;
 
-  if (!emp) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center pt-20">
-        <h1 className="font-display text-3xl text-virtu-dark mb-4">Empreendimento não encontrado</h1>
-      </div>
-    );
-  }
-
-  // Extrair video ID do YouTube
-  const videoId = emp.video_url?.includes('youtube')
-    ? emp.video_url.split('v=')[1]?.split('&')[0]
-    : emp.video_url?.includes('youtu.be')
-    ? emp.video_url.split('/').pop()
-    : '';
+  const videoId = emp.video_url?.includes('youtube') ? emp.video_url.split('v=')[1]?.split('&')[0] : emp.video_url?.includes('youtu.be') ? emp.video_url.split('/').pop() : '';
+  const plantaAtual = emp.plantas?.[plantaAtiva];
 
   return (
     <>
-      {/* ================================================================
-          1. HERO: Banner + Info + Formulário
-          ================================================================ */}
-      <section className="relative">
-        {/* Banner superior */}
-        <div className="relative h-[350px] md:h-[450px] mx-4 md:mx-14 mt-2 rounded-b-[2rem] overflow-hidden">
-          {emp.imagem_hero ? (
-            <Image src={emp.imagem_hero.url} alt={emp.title} fill className="object-cover" priority />
-          ) : emp.imagem_principal ? (
-            <Image src={emp.imagem_principal.url} alt={emp.title} fill className="object-cover" priority />
-          ) : (
-            <div className="w-full h-full bg-gradient-to-br from-virtu-dark to-virtu-teal" />
-          )}
-          <div className="absolute inset-0 bg-black/30" />
-        </div>
-
-        {/* Conteúdo sobreposto */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-20 relative z-10 pb-12">
-          <div className="grid lg:grid-cols-2 gap-12 items-start">
-            {/* Esquerda: Info */}
-            <div className="pt-28 md:pt-32">
-              {emp.logo && (
-                <Image
-                  src={emp.logo.url}
-                  alt={emp.title}
-                  width={300}
-                  height={100}
-                  className="object-contain mb-6"
-                />
-              )}
-              <h1 className="font-display text-3xl md:text-4xl text-virtu-dark mb-2">
-                {emp.subtitulo || 'Pensando e construindo seu futuro com excelência!'}
-              </h1>
-              <div
-                className="text-gray-600 font-sans font-light text-sm md:text-base leading-relaxed mt-4 max-w-lg [&_p]:mb-3"
-                dangerouslySetInnerHTML={{ __html: emp.descricao }}
-              />
-              {emp.preco_a_partir && (
-                <p className="mt-6 text-virtu-teal font-sans font-semibold text-lg underline underline-offset-4 decoration-virtu-gold/40">
-                  a partir de {emp.preco_a_partir}
-                </p>
-              )}
-            </div>
-
-            {/* Direita: Formulário */}
-            <div className="lg:mt-0 mt-8">
-              <ContactForm
-                title="Saiba mais!"
-                empreendimentoId={emp.id}
-                className="bg-white rounded-2xl shadow-2xl"
-              />
-            </div>
+      {/* 1. BANNER */}
+      <section className="pt-20 md:pt-24">
+        <div className="mx-3 sm:mx-6 md:mx-10 lg:mx-14 rounded-2xl md:rounded-[44px] overflow-hidden">
+          <div className="relative h-[35vh] sm:h-[40vh] md:h-[50vh] lg:h-[55vh] min-h-[200px] max-h-[520px]">
+            {(emp.imagem_hero || emp.imagem_principal) ? (
+              <Image src={(emp.imagem_hero || emp.imagem_principal)!.url} alt={emp.title} fill className="object-cover" priority />
+            ) : (
+              <div className="w-full h-full bg-gradient-to-br from-virtu-green-dark to-virtu-dark" />
+            )}
           </div>
         </div>
       </section>
 
-      {/* ================================================================
-          2. GALERIA
-          ================================================================ */}
+      {/* 2. Logo + Info | Form */}
+      <section className="py-6 md:py-8 lg:py-10">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col lg:grid lg:grid-cols-2 gap-6 lg:gap-12 items-start">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+              {emp.logo && (
+                <Image src={emp.logo.url} alt={emp.title} width={400} height={120} className="object-contain mb-5 md:mb-7 h-[70px] sm:h-[90px] md:h-[110px] lg:h-[130px] w-auto" />
+              )}
+              {!emp.logo && <h2 className="font-sans font-bold text-2xl md:text-3xl lg:text-4xl text-virtu-dark mb-5 md:mb-7">{emp.title}</h2>}
+              {emp.subtitulo && (
+                <h3 className="font-display font-bold italic text-lg sm:text-xl md:text-2xl text-virtu-green leading-snug mb-4 md:mb-6">{emp.subtitulo}</h3>
+              )}
+              {emp.descricao && (
+                <div className="font-sans font-light text-xs md:text-sm text-virtu-text leading-relaxed tracking-tight max-w-lg [&_p]:mb-3" dangerouslySetInnerHTML={{ __html: emp.descricao }} />
+              )}
+              {emp.preco_a_partir && (
+                <p className="mt-5 md:mt-7 text-virtu-green font-sans font-bold text-base md:text-lg underline underline-offset-4 decoration-virtu-green/30">
+                  a partir de R${emp.preco_a_partir}
+                </p>
+              )}
+            </motion.div>
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="w-full max-w-[440px] mx-auto lg:mx-0">
+              <ContactForm title="Saiba mais!" empreendimentoId={emp.id} className="bg-white rounded-2xl shadow-lg border border-gray-100" />
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* 3. GALERIA */}
       {emp.galeria_imagens && emp.galeria_imagens.length > 0 && (
         <GaleriaCarrossel imagens={emp.galeria_imagens} titulo="Galeria" />
       )}
 
-      {/* ================================================================
-          3. ÍCONES: Preço, Metragem, Dormitórios, Lazer
-          ================================================================ */}
-      <section className="py-8 border-y border-gray-100">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-wrap justify-center gap-8 md:gap-16">
+      {/* 4. INFO ICONS */}
+      <section className="py-4 md:py-5 border-y border-virtu-border">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6">
+          <div className="flex flex-wrap justify-center gap-4 sm:gap-6 md:gap-14">
             {emp.preco_a_partir && (
-              <div className="flex items-center gap-3 text-gray-600">
-                <DollarSign className="w-6 h-6 text-virtu-gold" />
-                <span className="font-sans text-sm">a partir de {emp.preco_a_partir}</span>
-              </div>
+              <div className="flex items-center gap-1.5 md:gap-2 text-virtu-text"><DollarSign className="w-4 h-4 md:w-5 md:h-5 text-virtu-green" /><span className="font-sans text-[11px] md:text-xs">a partir de R${emp.preco_a_partir}</span></div>
             )}
             {emp.metragem_a_partir && (
-              <div className="flex items-center gap-3 text-gray-600">
-                <Maximize className="w-6 h-6 text-virtu-gold" />
-                <span className="font-sans text-sm">a partir de {emp.metragem_a_partir}</span>
-              </div>
+              <div className="flex items-center gap-1.5 md:gap-2 text-virtu-text"><Maximize className="w-4 h-4 md:w-5 md:h-5 text-virtu-green" /><span className="font-sans text-[11px] md:text-xs">a partir de {emp.metragem_a_partir}m²</span></div>
             )}
             {emp.dormitorios && (
-              <div className="flex items-center gap-3 text-gray-600">
-                <BedDouble className="w-6 h-6 text-virtu-gold" />
-                <span className="font-sans text-sm">{emp.dormitorios}</span>
-              </div>
+              <div className="flex items-center gap-1.5 md:gap-2 text-virtu-text"><BedDouble className="w-4 h-4 md:w-5 md:h-5 text-virtu-green" /><span className="font-sans text-[11px] md:text-xs">{emp.dormitorios}</span></div>
             )}
-            <div className="flex items-center gap-3 text-gray-600">
-              <Waves className="w-6 h-6 text-virtu-gold" />
-              <span className="font-sans text-sm">lazer completo</span>
-            </div>
+            <div className="flex items-center gap-1.5 md:gap-2 text-virtu-text"><Waves className="w-4 h-4 md:w-5 md:h-5 text-virtu-green" /><span className="font-sans text-[11px] md:text-xs">lazer completo</span></div>
           </div>
         </div>
       </section>
 
-      {/* ================================================================
-          4. CONHEÇA NOSSA PLANTA
-          ================================================================ */}
+      {/* 5. PLANTA */}
       {emp.plantas && emp.plantas.length > 0 && (
-        <section className="py-16 md:py-24 bg-white">
+        <section className="py-6 md:py-8 lg:py-10 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 className="font-display text-3xl md:text-4xl italic text-virtu-dark text-center mb-10">
+            <h2 className="font-sans font-light text-lg md:text-2xl lg:text-[28px] text-virtu-dark text-center mb-4 md:mb-6 tracking-tight">
               Conheça nossa planta!
             </h2>
-
-            {/* Tabs */}
-            <div className="flex justify-center gap-3 mb-12">
-              {emp.plantas.map((planta, idx) => (
-                <button
-                  key={planta.id}
-                  onClick={() => setPlantaAtiva(idx)}
-                  className={`px-8 py-3 rounded-full text-sm font-sans font-medium transition-all ${
-                    plantaAtiva === idx
-                      ? 'bg-virtu-gold text-white shadow-md'
-                      : 'bg-white text-gray-600 border border-gray-200 hover:border-virtu-gold'
-                  }`}
-                >
-                  {planta.nome}
-                </button>
-              ))}
-            </div>
-
-            {/* Planta image */}
-            <div className="max-w-4xl mx-auto">
-              {emp.plantas[plantaAtiva]?.imagem ? (
-                <motion.div
-                  key={plantaAtiva}
-                  initial={{ opacity: 0, scale: 0.97 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.4 }}
-                  className="relative w-full aspect-[16/9]"
-                >
-                  <Image
-                    src={emp.plantas[plantaAtiva].imagem!.url}
-                    alt={emp.plantas[plantaAtiva].nome}
-                    fill
-                    className="object-contain"
-                  />
+            {emp.plantas.length > 1 && (
+              <div className="flex justify-center gap-2 md:gap-3 mb-4 md:mb-6">
+                {emp.plantas.map((planta, idx) => (
+                  <button key={planta.id} onClick={() => setPlantaAtiva(idx)}
+                    className={`px-5 md:px-8 py-2 md:py-3 rounded-lg text-xs md:text-sm font-sans font-bold uppercase tracking-wider transition-all min-w-[100px] md:min-w-[160px] ${
+                      plantaAtiva === idx ? 'bg-virtu-green-dark text-white' : 'bg-white text-virtu-text border border-virtu-border hover:border-virtu-green'
+                    }`}>
+                    {planta.nome}
+                  </button>
+                ))}
+              </div>
+            )}
+            <div className="max-w-5xl mx-auto">
+              {plantaAtual?.imagem ? (
+                <motion.div key={plantaAtiva} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }}
+                  className="relative w-full" style={{ aspectRatio: '2.2 / 1' }}>
+                  <Image src={plantaAtual.imagem.url} alt={plantaAtual.nome} fill className="object-contain" />
                 </motion.div>
-              ) : (
-                <div className="w-full aspect-[16/9] bg-gray-50 rounded-2xl flex items-center justify-center">
-                  <span className="text-gray-400 font-sans">Planta não disponível</span>
-                </div>
-              )}
-
-              {/* Características */}
-              {emp.plantas[plantaAtiva]?.caracteristicas && emp.plantas[plantaAtiva].caracteristicas.length > 0 && (
-                <div className="flex flex-wrap gap-4 justify-center mt-8">
-                  {emp.plantas[plantaAtiva].caracteristicas.map((carac, i) => (
-                    <span key={i} className="text-gray-600 font-sans text-sm flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-virtu-gold" />
-                      {carac}
-                    </span>
-                  ))}
+              ) : null}
+              {plantaAtual?.caracteristicas && plantaAtual.caracteristicas.length > 0 && (
+                <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-8 md:gap-14 mt-3 md:mt-5">
+                  {(() => {
+                    const mid = Math.ceil(plantaAtual.caracteristicas.length / 2);
+                    return (
+                      <>
+                        <div className="text-center sm:text-left">
+                          {plantaAtual.caracteristicas.slice(0, mid).map((c, i) => <p key={i} className="text-virtu-text font-sans text-xs md:text-sm leading-snug">{c}</p>)}
+                        </div>
+                        {plantaAtual.caracteristicas.slice(mid).length > 0 && (
+                          <div className="text-center sm:text-left">
+                            {plantaAtual.caracteristicas.slice(mid).map((c, i) => <p key={i} className="text-virtu-text font-sans text-xs md:text-sm leading-snug">{c}</p>)}
+                          </div>
+                        )}
+                      </>
+                    );
+                  })()}
                 </div>
               )}
             </div>
@@ -218,50 +149,42 @@ export default function EmpreendimentoDetalhePage() {
         </section>
       )}
 
-      {/* ================================================================
-          5. CTA: "Vamos conversar sobre o seu futuro!"
-          ================================================================ */}
-      <CTASection />
+      {/* 6. CTA BANNER */}
+      <LeadCaptureSection
+        titulo={`${emp.title}\n${emp.cidade?.nome || ''} - ${emp.cidade?.estado || ''}`}
+        imagemFundo={emp.imagem_hero?.url || emp.imagem_principal?.url}
+      />
 
-      {/* ================================================================
-          6. VÍDEO DO EMPREENDIMENTO
-          ================================================================ */}
+      {/* 7. VÍDEO — mesma largura max do cronograma */}
       {videoId && (
-        <section className="py-16 md:py-24 bg-white">
-          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-            <VideoPlayer
-              videoId={videoId}
-              title={`vídeo ${emp.title}`}
-              thumbnailUrl={emp.video_thumbnail?.url || emp.imagem_principal?.url || '/video-thumb.jpg'}
-            />
+        <section className="py-6 md:py-10 lg:py-14 bg-white">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <VideoPlayer videoId={videoId} title={`vídeo ${emp.title}`} thumbnailUrl={emp.video_thumbnail?.url || emp.imagem_principal?.url || '/video-thumb.jpg'} />
           </div>
         </section>
       )}
 
-      {/* ================================================================
-          7. CRONOGRAMA DE OBRA
-          ================================================================ */}
+      {/* 8. CRONOGRAMA — Figma: barras finas com label acima, % à direita */}
       {emp.andamentos_obra && emp.andamentos_obra.length > 0 && (
-        <section className="py-16 md:py-24 bg-white">
-          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 className="font-display text-3xl md:text-4xl text-virtu-dark text-center mb-12">
+        <section className="py-8 md:py-10 lg:py-14 bg-white">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 className="font-sans font-light text-xl md:text-2xl lg:text-3xl text-virtu-dark text-center mb-6 md:mb-10 tracking-tight">
               Cronograma de obra
             </h2>
-
-            <div className="space-y-6">
-              {emp.andamentos_obra.map((andamento) => (
-                <div key={andamento.id} className="flex flex-col gap-2">
-                  <div className="flex justify-between items-center">
-                    <span className="font-sans text-sm text-gray-600">{andamento.titulo}</span>
-                    <span className="font-sans text-sm font-semibold text-virtu-teal">{andamento.percentual}%</span>
+            <div className="space-y-4 md:space-y-5">
+              {emp.andamentos_obra.map((a) => (
+                <div key={a.id}>
+                  <div className="flex justify-between items-center mb-1.5">
+                    <span className="font-sans text-xs md:text-sm text-virtu-text">{a.titulo}</span>
+                    <span className="font-sans text-xs md:text-sm font-semibold text-virtu-green">{a.percentual}%</span>
                   </div>
-                  <div className="w-full h-2.5 bg-gray-100 rounded-full overflow-hidden">
+                  <div className="w-full relative h-2.5 md:h-3 bg-gray-100 rounded-full overflow-hidden">
                     <motion.div
                       initial={{ width: 0 }}
-                      whileInView={{ width: `${andamento.percentual}%` }}
+                      whileInView={{ width: `${a.percentual}%` }}
                       viewport={{ once: true }}
-                      transition={{ duration: 1, ease: 'easeOut' }}
-                      className="h-full bg-virtu-gold rounded-full"
+                      transition={{ duration: 1.2, ease: 'easeOut' }}
+                      className="h-full bg-virtu-green rounded-full"
                     />
                   </div>
                 </div>
@@ -271,35 +194,28 @@ export default function EmpreendimentoDetalhePage() {
         </section>
       )}
 
-      {/* ================================================================
-          8. ANDAMENTO DAS OBRAS (fotos)
-          ================================================================ */}
+      {/* 9. FOTOS DA OBRA */}
       {emp.fotos_obra && emp.fotos_obra.length > 0 && (
-        <section className="py-16 md:py-24 bg-white">
+        <section className="py-8 md:py-10 lg:py-14 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 className="font-display text-3xl md:text-4xl text-virtu-dark text-center mb-12">
-              Andamento das obras
-            </h2>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {emp.fotos_obra.slice(0, 6).map((foto) => (
-                <div key={foto.id} className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-md group">
-                  {foto.imagem && (
-                    <Image
-                      src={foto.imagem.url}
-                      alt={foto.descricao || 'Foto da obra'}
-                      fill
-                      className="object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                  )}
+            <h2 className="font-sans font-light text-lg md:text-2xl text-virtu-dark text-center mb-6 md:mb-10 tracking-tight">Andamento das obras</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 md:gap-5">
+              {emp.fotos_obra.slice(0, 6).map((foto, i) => (
+                <motion.div
+                  key={foto.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.08, duration: 0.45 }}
+                  className="relative aspect-[4/3] rounded-xl md:rounded-2xl overflow-hidden shadow-sm group"
+                >
+                  {foto.imagem && <Image src={foto.imagem.url} alt={foto.descricao || ''} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />}
                   {foto.data_captura && (
-                    <div className="absolute bottom-3 left-3 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full">
-                      <span className="text-xs font-sans text-gray-600">
-                        {new Date(foto.data_captura).toLocaleDateString('pt-BR')}
-                      </span>
+                    <div className="absolute bottom-2 left-2 bg-white/90 backdrop-blur-sm px-2 py-0.5 rounded-full">
+                      <span className="text-[10px] font-sans text-virtu-text">{new Date(foto.data_captura).toLocaleDateString('pt-BR')}</span>
                     </div>
                   )}
-                </div>
+                </motion.div>
               ))}
             </div>
           </div>

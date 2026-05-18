@@ -28,7 +28,9 @@ urlpatterns = [
     # APIs Públicas - Páginas
     path('home/', views.HomePageView.as_view(), name='api-home'),
     path('sobre-nos/', views.SobreNosView.as_view(), name='api-sobre-nos'),
+    path('empreendimentos-config/', views.EmpreendimentosIndexPageView.as_view(), name='api-empreendimentos-config'),
     path('configuracoes/', views.ConfiguracaoView.as_view(), name='api-config'),
+    path('tracking/', views.TrackingView.as_view(), name='api-tracking'),
 
     # APIs Públicas - Formulários
     path('leads/', views.LeadCreateView.as_view(), name='api-lead'),

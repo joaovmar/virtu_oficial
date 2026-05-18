@@ -12,14 +12,15 @@ from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
 
 from .models import (
     Cidade, StatusEmpreendimento, Diferencial, Depoimento, ConfiguracaoSite,
-    HomePage, EmpreendimentoPage, SobreNosPage,
+    HomePage, EmpreendimentoPage, EmpreendimentosIndexPage, SobreNosPage,
     Planta, GaleriaImagem, AndamentoObra, FotoObra,
     Lead, Newsletter
 )
 from .serializers import (
     CidadeSerializer, StatusSerializer, DiferencialSerializer,
-    DepoimentoSerializer, ConfiguracaoSerializer,
+    DepoimentoSerializer, ConfiguracaoSerializer, TrackingSerializer,
     EmpreendimentoCardSerializer, EmpreendimentoDetalheSerializer,
+    EmpreendimentosIndexPageSerializer,
     PlantaSerializer, GaleriaImagemSerializer, AndamentoObraSerializer,
     HomePageSerializer, SobreNosSerializer,
     LeadSerializer, LeadListSerializer, NewsletterSerializer
@@ -183,6 +184,20 @@ class EmpreendimentoViewSet(viewsets.ReadOnlyModelViewSet):
             return Response({'error': 'Não encontrado'}, status=status.HTTP_404_NOT_FOUND)
 
 
+class EmpreendimentosIndexPageView(APIView):
+    """API pública: Dados da página de empreendimentos (hero_imagem editável no backoffice)"""
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        try:
+            page = EmpreendimentosIndexPage.objects.live().first()
+            if not page:
+                return Response({}, status=status.HTTP_404_NOT_FOUND)
+            return Response(EmpreendimentosIndexPageSerializer(page).data)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 class HomePageView(APIView):
     """API pública: Dados da página inicial"""
     permission_classes = [AllowAny]
@@ -219,7 +234,7 @@ class SobreNosView(APIView):
 
 
 class ConfiguracaoView(APIView):
-    """API pública: Configurações do site"""
+    """API pública: Configurações do site (EXCLUI tokens privados)"""
     permission_classes = [AllowAny]
 
     def get(self, request):
@@ -229,29 +244,83 @@ class ConfiguracaoView(APIView):
         return Response({
             'email': 'contato@virtu.com.br',
             'telefone': '(11) 99999-9999',
-            'whatsapp': '',
-            'endereco': '',
-            'facebook': '',
-            'instagram': '',
-            'linkedin': '',
-            'youtube': '',
+            'whatsapp': '', 'endereco': '',
+            'facebook': '', 'instagram': '', 'linkedin': '', 'youtube': '',
             'copyright_texto': '© 2025 Todos os direitos reservados - virtú'
         })
+
+
+class TrackingView(APIView):
+    """
+    API pública: Retorna APENAS os IDs públicos de tracking.
+    SEGURANÇA: Nenhum token privado é retornado.
+    O rdstation_api_token NUNCA sai do backend.
+    """
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        config = ConfiguracaoSite.objects.first()
+        if not config:
+            return Response({
+                'gtm_ativo': False, 'gtm_container_id': '',
+                'rdstation_ativo': False, 'rdstation_public_token': '',
+                'meta_pixel_ativo': False, 'meta_pixel_id': '',
+                'ga4_ativo': False, 'ga4_measurement_id': '',
+            })
+        return Response(TrackingSerializer(config).data)
 
 
 class LeadCreateView(generics.CreateAPIView):
     """
     API pública: Envio de formulário (lead)
-    Conforme documentação
+    Após salvar no banco, envia ao RD Station via thread (server-side, sem expor token).
     """
     queryset = Lead.objects.all()
     serializer_class = LeadSerializer
     permission_classes = [AllowAny]
+    authentication_classes = []
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         lead = serializer.save()
+
+        # Envia ao RD Station em background APENAS para origens que não são o formulário de contato
+        # Regra: todo formulário exceto pagina_origem='/contato' ou origem='contato' envia ao RD
+        pagina = lead.pagina_origem or ''
+        origem = lead.origem or ''
+        is_contato = pagina.rstrip('/') == '/contato' or origem in ('contato', 'fale_conosco', 'fale-conosco')
+
+        if not is_contato:
+            # Define identificador de conversão por origem para segmentação no RD Station
+            _id_map = {
+                'banner_cta':          'virtu-banner-cta',
+                'empreendimento':      'virtu-empreendimento',
+                'sobre_nos':           'virtu-sobre-nos',
+                'encontre_imovel':     'virtu-encontre-imovel',
+            }
+            identificador = _id_map.get(origem)
+            if not identificador:
+                if lead.empreendimento:
+                    identificador = f'virtu-emp-{lead.empreendimento.slug}'
+                else:
+                    identificador = 'virtu-site'
+
+            from .integrations import enviar_lead_rdstation_async
+            rd_data = {
+                'nome': lead.nome,
+                'email': lead.email,
+                'telefone': lead.telefone,
+                'mensagem': lead.mensagem,
+                'empreendimento_nome': lead.empreendimento.title if lead.empreendimento else '',
+                'pagina_origem': lead.pagina_origem,
+                'origem': lead.origem,
+                'utm_source': lead.utm_source,
+                'utm_medium': lead.utm_medium,
+                'utm_campaign': lead.utm_campaign,
+            }
+            enviar_lead_rdstation_async(rd_data, identificador=identificador, lead_obj=lead)
+
         return Response(
             {'message': 'Lead criado com sucesso', 'id': lead.id},
             status=status.HTTP_201_CREATED
@@ -263,6 +332,7 @@ class NewsletterCreateView(generics.CreateAPIView):
     queryset = Newsletter.objects.all()
     serializer_class = NewsletterSerializer
     permission_classes = [AllowAny]
+    authentication_classes = []
 
     def create(self, request, *args, **kwargs):
         email = request.data.get('email')

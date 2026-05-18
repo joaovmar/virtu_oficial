@@ -1,108 +1,111 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import Image from 'next/image';
-import Link from 'next/link';
-import { motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { getEmpreendimentosDestaques, EmpreendimentoCard } from '@/lib/api';
 
 /**
- * Futuros Lançamentos - Figma:
- * Título: Sora Light 50px #282828 "Futuros" + Newsreader Medium Italic 75px #348981 "lançamentos"
- * Banner: 1920x785 com imagem bg, setas de navegação, dots/bolinhas
- * Texto sobre banner: Sora Regular/SemiBold, branco
+ * Futuros Lançamentos — Figma: slider fullwidth com setas circulares + dots
  */
-
 export default function FuturosLancamentosSection() {
   const [empreendimentos, setEmpreendimentos] = useState<EmpreendimentoCard[]>([]);
-  const [activeIndex, setActiveIndex] = useState(0);
+  const [idx, setIdx] = useState(0);
 
   useEffect(() => {
-    async function fetchData() {
-      try {
-        const data = await getEmpreendimentosDestaques();
-        setEmpreendimentos(data);
-      } catch {
-        // silently use fallback
-      }
-    }
+    async function fetchData() { try { const d = await getEmpreendimentosDestaques(); setEmpreendimentos(Array.isArray(d) ? d : []); } catch {} }
     fetchData();
   }, []);
 
-  const hasData = empreendimentos.length > 0;
-  const activeEmp = hasData ? empreendimentos[activeIndex] : null;
+  const go = useCallback((dir: number) => {
+    setIdx(prev => {
+      const len = empreendimentos.length || 1;
+      const next = prev + dir;
+      if (next < 0) return len - 1;
+      if (next >= len) return 0;
+      return next;
+    });
+  }, [empreendimentos.length]);
+
+  // Auto-slide every 6s
+  useEffect(() => {
+    if (empreendimentos.length <= 1) return;
+    const timer = setInterval(() => go(1), 6000);
+    return () => clearInterval(timer);
+  }, [empreendimentos.length, go]);
+
+  const activeEmp = empreendimentos.length > 0 ? empreendimentos[idx] : null;
 
   return (
-    <section className="py-16 md:py-24 bg-white">
-      {/* Título - Figma: centralizado */}
-      <div className="text-center mb-12 md:mb-16">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-        >
-          <p className="font-sans font-light text-[36px] md:text-[50px] text-virtu-dark leading-none">
-            Futuros
-          </p>
-          <p className="font-display font-medium italic text-[50px] md:text-[75px] text-virtu-green leading-[0.9]">
-            lançamentos
-          </p>
-        </motion.div>
-      </div>
+    <section className="py-10 md:py-14 lg:py-20 bg-white">
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.55 }}
+        className="text-center mb-8 md:mb-12 px-4"
+      >
+        <p className="font-sans font-light text-xl sm:text-2xl md:text-3xl text-virtu-dark leading-none">Futuros</p>
+        <p className="font-display font-medium italic text-3xl sm:text-4xl md:text-5xl text-virtu-green leading-[0.9]">lançamentos</p>
+      </motion.div>
 
-      {/* Banner - Figma: 1920x785, full-width */}
-      <div className="relative w-full h-[400px] md:h-[600px] lg:h-[785px] overflow-hidden group">
-        <Image
-          src={activeEmp?.imagem_principal?.url || '/ribeirao-preto-bg.jpg'}
-          alt={activeEmp?.title || 'Futuro lançamento'}
-          fill
-          className="object-cover transition-transform duration-700 group-hover:scale-[1.02]"
-        />
+      <div className="relative w-full h-[30vh] sm:h-[40vh] md:h-[50vh] lg:h-[65vh] min-h-[300px] max-h-[600px] overflow-hidden group">
+        {/* Imagem com transição */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={idx}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.6 }}
+            className="absolute inset-0"
+          >
+            <Image
+              src={activeEmp?.imagem_principal?.url || '/ribeirao-preto-bg.jpg'}
+              alt={activeEmp?.title || 'Futuro lançamento'}
+              fill
+              className="object-cover"
+            />
+          </motion.div>
+        </AnimatePresence>
+
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
 
-        {/* Conteúdo sobre o banner */}
-        <div className="absolute bottom-0 left-0 right-0 p-8 md:p-16">
-          <div className="max-w-7xl mx-auto">
-            {activeEmp?.cidade && (
-              <h3 className="text-white font-sans font-semibold text-[32px] md:text-[50px] tracking-[-0.5px] mb-3">
-                {activeEmp.cidade.nome} | {activeEmp.cidade.estado}
-              </h3>
-            )}
-            <p className="text-white/90 font-sans font-light text-[16px] md:text-[20px] tracking-[-0.2px] max-w-2xl leading-relaxed">
-              {activeEmp?.descricao_curta ||
-                'Ribeirão Preto, cidade que pulsa crescimento e qualidade de vida, em breve receberá novos lançamentos da virtú, pensados para acompanhar o ritmo e o potencial da região.'}
-            </p>
+        {/* Conteúdo */}
+        <div className="absolute bottom-0 left-0 right-0 p-5 sm:p-8 md:p-12 lg:p-16">
+          <div className="max-w-6xl mx-auto">
+            <motion.h3 key={`title-${idx}`} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+              className="text-white font-sans font-semibold text-xl sm:text-2xl md:text-3xl lg:text-4xl tracking-tight mb-1 md:mb-3">
+              {activeEmp?.cidade ? `${activeEmp.cidade.nome} | ${activeEmp.cidade.estado}` : 'Ribeirão Preto | SP'}
+            </motion.h3>
+            <motion.p key={`desc-${idx}`} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
+              className="text-white/90 font-sans font-light text-xs sm:text-sm md:text-base tracking-tight max-w-2xl leading-relaxed">
+              {activeEmp?.descricao_curta || 'Ribeirão Preto, cidade que pulsa crescimento e qualidade de vida, em breve receberá novos lançamentos da virtú.'}
+            </motion.p>
           </div>
         </div>
 
-        {/* Setas - Figma: weui:arrow-outlined */}
-        <button
-          onClick={() => setActiveIndex(prev => prev > 0 ? prev - 1 : (empreendimentos.length || 1) - 1)}
-          className="absolute left-[3%] top-1/2 -translate-y-1/2 w-[35px] h-[70px] flex items-center justify-center text-white/50 hover:text-white transition-colors"
-          aria-label="Anterior"
-        >
-          <ChevronLeft className="w-8 h-8" strokeWidth={1.5} />
+        {/* Setas — circulares com bg como no Figma */}
+        <button onClick={() => go(-1)}
+          className="absolute left-3 sm:left-5 md:left-8 top-1/2 -translate-y-1/2 w-10 h-10 md:w-12 md:h-12 rounded-full bg-white/10 hover:bg-white/25 backdrop-blur-sm flex items-center justify-center transition-colors"
+          aria-label="Anterior">
+          <ChevronLeft className="w-5 h-5 md:w-6 md:h-6 text-white" strokeWidth={2} />
         </button>
-        <button
-          onClick={() => setActiveIndex(prev => prev < (empreendimentos.length || 1) - 1 ? prev + 1 : 0)}
-          className="absolute right-[3%] top-1/2 -translate-y-1/2 w-[35px] h-[70px] flex items-center justify-center text-white/50 hover:text-white transition-colors"
-          aria-label="Próximo"
-        >
-          <ChevronRight className="w-8 h-8" strokeWidth={1.5} />
+        <button onClick={() => go(1)}
+          className="absolute right-3 sm:right-5 md:right-8 top-1/2 -translate-y-1/2 w-10 h-10 md:w-12 md:h-12 rounded-full bg-white/10 hover:bg-white/25 backdrop-blur-sm flex items-center justify-center transition-colors"
+          aria-label="Próximo">
+          <ChevronRight className="w-5 h-5 md:w-6 md:h-6 text-white" strokeWidth={2} />
         </button>
 
-        {/* Dots / Bolinhas - Figma: node bolinhas */}
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-3">
+        {/* Dots — maiores, ativo mais largo */}
+        <div className="absolute bottom-3 md:bottom-6 left-1/2 -translate-x-1/2 flex gap-2 md:gap-2.5">
           {(empreendimentos.length > 0 ? empreendimentos : [null]).map((_, i) => (
-            <button
-              key={i}
-              onClick={() => setActiveIndex(i)}
-              className={`w-2.5 h-2.5 rounded-full transition-colors ${
-                i === activeIndex ? 'bg-white' : 'bg-white/40 hover:bg-white/70'
+            <button key={i} onClick={() => setIdx(i)}
+              className={`h-2 md:h-2.5 rounded-full transition-all duration-300 ${
+                i === idx ? 'bg-white w-6 md:w-8' : 'bg-white/40 w-2 md:w-2.5 hover:bg-white/60'
               }`}
-              aria-label={`Ir para ${i + 1}`}
-            />
+              aria-label={`Slide ${i + 1}`} />
           ))}
         </div>
       </div>
