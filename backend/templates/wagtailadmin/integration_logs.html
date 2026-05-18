@@ -1,0 +1,424 @@
+{% extends "wagtailadmin/generic/base.html" %}
+{% load i18n %}
+
+{% block titletag %}Logs de Integrações — Virtú{% endblock %}
+
+{% block content %}
+<div class="nice-padding vlog-page">
+
+  <h1>Logs de Integrações</h1>
+  <p class="vlog-sub">
+    Monitoramento das integrações do site: RD Station, GTM, Meta Pixel e GA4.
+  </p>
+
+  {# ── Tabs de navegação ──────────────────────────────────────────────── #}
+  <div class="vtabs">
+    <a href="?tab=rdstation&dias={{ dias_f }}"
+       class="vtab {% if tab == 'rdstation' %}active{% endif %}">
+      RD Station
+    </a>
+    <a href="?tab=gtm&dias={{ dias_f }}"
+       class="vtab {% if tab == 'gtm' %}active{% endif %}">
+      Google Tag Manager
+    </a>
+    <a href="?tab=pixel&dias={{ dias_f }}"
+       class="vtab {% if tab == 'pixel' %}active{% endif %}">
+      Meta Pixel
+    </a>
+    <a href="?tab=ga4&dias={{ dias_f }}"
+       class="vtab {% if tab == 'ga4' %}active{% endif %}">
+      Google Analytics 4
+    </a>
+  </div>
+
+  {# ════════════════════════════════════════════════════════════════════ #}
+  {# TAB: RD STATION                                                      #}
+  {# ════════════════════════════════════════════════════════════════════ #}
+  {% if tab == 'rdstation' or not tab %}
+
+    <div class="vlog-info">
+      <strong>Como interpretar:</strong><br>
+      Cada linha representa uma tentativa de envio de lead ao RD Station.
+      Formulários em <code>/contato</code> não são enviados ao RD (ficam apenas no banco).<br>
+      <strong>Sucesso</strong> — lead registrado normalmente. &nbsp;
+      <strong>Falha</strong> — leia a Causa Provável e repasse à TI se necessário. &nbsp;
+      <strong>Inativo</strong> — RD Station desabilitado nas Configurações.
+    </div>
+
+    {# Resumo #}
+    <div class="vlog-summary">
+      <div class="vlog-card">
+        <div class="num vlog-num-total">{{ rd_totals.total }}</div>
+        <div class="lbl">Total (período)</div>
+      </div>
+      <div class="vlog-card">
+        <div class="num vlog-num-ok">{{ rd_totals.sucessos }}</div>
+        <div class="lbl">Enviados com sucesso</div>
+      </div>
+      <div class="vlog-card">
+        <div class="num vlog-num-err">{{ rd_totals.falhas }}</div>
+        <div class="lbl">Falhas de envio</div>
+      </div>
+      <div class="vlog-card">
+        <div class="num vlog-num-warn">{{ rd_totals.inativos }}</div>
+        <div class="lbl">Integração inativa</div>
+      </div>
+    </div>
+
+    {# Filtros #}
+    <form method="get" class="vlog-filters">
+      <input type="hidden" name="tab" value="rdstation">
+      <label>Status:</label>
+      <select name="status">
+        <option value=""       {% if not status_f         %}selected{% endif %}>Todos</option>
+        <option value="sucesso"{% if status_f == 'sucesso'%}selected{% endif %}>Sucesso</option>
+        <option value="falha"  {% if status_f == 'falha'  %}selected{% endif %}>Falha</option>
+        <option value="inativo"{% if status_f == 'inativo'%}selected{% endif %}>Inativo</option>
+      </select>
+      <label>Período:</label>
+      <select name="dias">
+        <option value="1"  {% if dias_f == 1   %}selected{% endif %}>Hoje</option>
+        <option value="7"  {% if dias_f == 7   %}selected{% endif %}>7 dias</option>
+        <option value="30" {% if dias_f == 30  %}selected{% endif %}>30 dias</option>
+        <option value="90" {% if dias_f == 90  %}selected{% endif %}>90 dias</option>
+        <option value="365"{% if dias_f == 365 %}selected{% endif %}>1 ano</option>
+      </select>
+      <label>E-mail:</label>
+      <input type="text" name="email" value="{{ email_f }}" placeholder="filtrar por e-mail...">
+      <button type="submit" class="btn-filter">Filtrar</button>
+      {% if status_f or email_f or dias_f != 7 %}
+        <a href="?tab=rdstation" class="vlog-clear">Limpar filtros</a>
+      {% endif %}
+    </form>
+
+    {# Tabela #}
+    {% if rd_logs %}
+    <div style="overflow-x:auto">
+    <table class="vlog-table">
+      <thead><tr>
+        <th>Data / Hora</th>
+        <th>Status</th>
+        <th>E-mail</th>
+        <th>Nome</th>
+        <th>Página / Identificador</th>
+        <th style="text-align:center">HTTP</th>
+        <th>Causa Provável</th>
+      </tr></thead>
+      <tbody>
+      {% for log in rd_logs %}
+      <tr>
+        <td style="white-space:nowrap;font-size:12px;color:var(--w-color-text-meta)">
+          {{ log.criado_em|date:"d/m/Y" }}<br>
+          {{ log.criado_em|date:"H:i:s" }}
+        </td>
+
+        <td>
+          <span class="vbadge
+            {% if log.status == 'sucesso' %}vbadge-ok
+            {% elif log.status == 'falha' %}vbadge-err
+            {% else %}vbadge-warn{% endif %}">
+            {% if log.status == 'sucesso' %}Sucesso
+            {% elif log.status == 'falha' %}Falha
+            {% else %}Inativo{% endif %}
+          </span>
+        </td>
+
+        <td style="font-size:12px;max-width:180px;word-break:break-all">
+          {{ log.email_lead|default:"—" }}
+          {% if log.lead %}
+            <br><a href="/admin/snippets/core/lead/{{ log.lead.id }}/"
+              target="_blank" style="font-size:11px;color:var(--w-color-interactive)">
+              Ver lead
+            </a>
+          {% endif %}
+        </td>
+
+        <td style="font-size:12px;max-width:130px">{{ log.nome_lead|default:"—" }}</td>
+
+        <td style="font-size:11px;max-width:180px">
+          {% if log.pagina_origem %}
+            <code style="background:var(--w-color-surface-field);
+              padding:1px 5px;border-radius:3px;font-size:11px">
+              {{ log.pagina_origem }}
+            </code><br>
+          {% endif %}
+          {% if log.identificador_conversao %}
+            <span style="color:#348981;font-weight:600">{{ log.identificador_conversao }}</span>
+          {% endif %}
+        </td>
+
+        <td style="text-align:center">
+          {% if log.http_status_code %}
+            <span class="vhttp {% if log.http_status_code < 300 %}vhttp-ok{% else %}vhttp-err{% endif %}">
+              {{ log.http_status_code }}
+            </span>
+          {% else %}
+            <span style="color:var(--w-color-text-meta);font-size:12px">—</span>
+          {% endif %}
+        </td>
+
+        <td style="max-width:360px">
+          {% if log.causa_provavel %}
+            <div class="vcausa {% if log.status == 'sucesso' %}vcausa-ok{% endif %}">
+              {{ log.causa_provavel }}
+            </div>
+          {% elif log.status == 'sucesso' %}
+            <span style="color:#1a7a4a;font-size:12px">Lead registrado com sucesso.</span>
+          {% else %}
+            <span style="color:var(--w-color-text-meta);font-size:12px">Sem detalhes.</span>
+          {% endif %}
+          {% if log.mensagem_erro %}
+            <details>
+              <summary>Erro técnico (repassar à TI)</summary>
+              <pre>{{ log.mensagem_erro }}</pre>
+            </details>
+          {% endif %}
+          {% if log.resposta_api and log.status != 'sucesso' %}
+            <details>
+              <summary>Resposta da API RD Station</summary>
+              <pre>{{ log.resposta_api }}</pre>
+            </details>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    </div>
+    {% if rd_logs|length == 200 %}
+      <p style="text-align:center;font-size:12px;color:var(--w-color-text-meta);margin-top:12px">
+        Exibindo os 200 registros mais recentes. Use os filtros para refinar.
+      </p>
+    {% endif %}
+    {% else %}
+      <div class="vlog-empty">Nenhum registro encontrado para os filtros selecionados.</div>
+    {% endif %}
+
+  {% endif %}{# /tab rdstation #}
+
+
+  {# ════════════════════════════════════════════════════════════════════ #}
+  {# TAB: GTM                                                             #}
+  {# ════════════════════════════════════════════════════════════════════ #}
+  {% if tab == 'gtm' %}
+
+    <div class="vlog-info">
+      O Google Tag Manager não gera logs de envio server-side — ele executa no navegador do visitante.
+      O painel abaixo mostra a <strong>configuração atual</strong> e o status de ativação.
+      Para verificar eventos GTM em tempo real, use o <strong>GTM Preview &amp; Debug</strong>
+      acessível em <a href="https://tagmanager.google.com" target="_blank" rel="noopener"
+        style="color:var(--w-color-interactive)">tagmanager.google.com</a>.
+    </div>
+
+    <div class="vlog-summary">
+      <div class="vlog-card">
+        <div class="num {% if config.gtm_ativo %}vlog-num-ok{% else %}vlog-num-err{% endif %}">
+          {% if config.gtm_ativo %}Ativo{% else %}Inativo{% endif %}
+        </div>
+        <div class="lbl">Status</div>
+      </div>
+      {% if config.gtm_container_id %}
+      <div class="vlog-card">
+        <div class="num" style="font-size:16px;color:var(--w-color-text-label)">
+          {{ config.gtm_container_id }}
+        </div>
+        <div class="lbl">Container ID</div>
+      </div>
+      {% endif %}
+    </div>
+
+    <table class="vlog-table">
+      <thead><tr><th>Parâmetro</th><th>Valor</th><th>Observação</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Status</td>
+          <td>
+            <span class="vbadge {% if config.gtm_ativo %}vbadge-ok{% else %}vbadge-err{% endif %}">
+              {% if config.gtm_ativo %}Habilitado{% else %}Desabilitado{% endif %}
+            </span>
+          </td>
+          <td style="font-size:12px;color:var(--w-color-text-meta)">
+            Alterável em Configurações do Site
+          </td>
+        </tr>
+        <tr>
+          <td>Container ID</td>
+          <td style="font-family:monospace">
+            {{ config.gtm_container_id|default:"Não configurado" }}
+          </td>
+          <td style="font-size:12px;color:var(--w-color-text-meta)">
+            Formato esperado: GTM-XXXXXXX
+          </td>
+        </tr>
+        <tr>
+          <td>Verificação em tempo real</td>
+          <td>
+            {% if config.gtm_ativo and config.gtm_container_id %}
+              <a href="https://tagmanager.google.com/#/container/{{ config.gtm_container_id }}/preview"
+                 target="_blank" rel="noopener"
+                 style="color:var(--w-color-interactive)">
+                Abrir GTM Preview
+              </a>
+            {% else %}
+              <span style="color:var(--w-color-text-meta)">Configure o Container ID primeiro</span>
+            {% endif %}
+          </td>
+          <td></td>
+        </tr>
+      </tbody>
+    </table>
+
+  {% endif %}{# /tab gtm #}
+
+
+  {# ════════════════════════════════════════════════════════════════════ #}
+  {# TAB: META PIXEL                                                      #}
+  {# ════════════════════════════════════════════════════════════════════ #}
+  {% if tab == 'pixel' %}
+
+    <div class="vlog-info">
+      O Meta Pixel executa no navegador do visitante e não gera logs server-side.
+      O painel abaixo mostra a <strong>configuração atual</strong>.
+      Para verificar eventos em tempo real, use o
+      <strong>Meta Pixel Helper</strong> (extensão do Chrome) ou o
+      <a href="https://business.facebook.com/events_manager" target="_blank" rel="noopener"
+        style="color:var(--w-color-interactive)">Events Manager</a> do Meta.
+    </div>
+
+    <div class="vlog-summary">
+      <div class="vlog-card">
+        <div class="num {% if config.meta_pixel_ativo %}vlog-num-ok{% else %}vlog-num-err{% endif %}">
+          {% if config.meta_pixel_ativo %}Ativo{% else %}Inativo{% endif %}
+        </div>
+        <div class="lbl">Status</div>
+      </div>
+      {% if config.meta_pixel_id %}
+      <div class="vlog-card">
+        <div class="num" style="font-size:16px;color:var(--w-color-text-label)">
+          {{ config.meta_pixel_id }}
+        </div>
+        <div class="lbl">Pixel ID</div>
+      </div>
+      {% endif %}
+    </div>
+
+    <table class="vlog-table">
+      <thead><tr><th>Parâmetro</th><th>Valor</th><th>Observação</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Status</td>
+          <td>
+            <span class="vbadge {% if config.meta_pixel_ativo %}vbadge-ok{% else %}vbadge-err{% endif %}">
+              {% if config.meta_pixel_ativo %}Habilitado{% else %}Desabilitado{% endif %}
+            </span>
+          </td>
+          <td style="font-size:12px;color:var(--w-color-text-meta)">
+            Alterável em Configurações do Site
+          </td>
+        </tr>
+        <tr>
+          <td>Pixel ID</td>
+          <td style="font-family:monospace">
+            {{ config.meta_pixel_id|default:"Não configurado" }}
+          </td>
+          <td style="font-size:12px;color:var(--w-color-text-meta)">
+            Formato esperado: 15 dígitos numéricos
+          </td>
+        </tr>
+        <tr>
+          <td>Events Manager</td>
+          <td>
+            {% if config.meta_pixel_ativo and config.meta_pixel_id %}
+              <a href="https://business.facebook.com/events_manager2/list/pixel/{{ config.meta_pixel_id }}/overview"
+                 target="_blank" rel="noopener"
+                 style="color:var(--w-color-interactive)">
+                Abrir Events Manager
+              </a>
+            {% else %}
+              <span style="color:var(--w-color-text-meta)">Configure o Pixel ID primeiro</span>
+            {% endif %}
+          </td>
+          <td></td>
+        </tr>
+      </tbody>
+    </table>
+
+  {% endif %}{# /tab pixel #}
+
+
+  {# ════════════════════════════════════════════════════════════════════ #}
+  {# TAB: GA4                                                             #}
+  {# ════════════════════════════════════════════════════════════════════ #}
+  {% if tab == 'ga4' %}
+
+    <div class="vlog-info">
+      O Google Analytics 4 executa no navegador e não gera logs server-side.
+      O painel abaixo mostra a <strong>configuração atual</strong>.
+      Para verificar eventos em tempo real, use o
+      <strong>DebugView</strong> no painel do GA4 ou o
+      <a href="https://analytics.google.com" target="_blank" rel="noopener"
+        style="color:var(--w-color-interactive)">Google Analytics</a>.
+    </div>
+
+    <div class="vlog-summary">
+      <div class="vlog-card">
+        <div class="num {% if config.ga4_ativo %}vlog-num-ok{% else %}vlog-num-err{% endif %}">
+          {% if config.ga4_ativo %}Ativo{% else %}Inativo{% endif %}
+        </div>
+        <div class="lbl">Status</div>
+      </div>
+      {% if config.ga4_measurement_id %}
+      <div class="vlog-card">
+        <div class="num" style="font-size:16px;color:var(--w-color-text-label)">
+          {{ config.ga4_measurement_id }}
+        </div>
+        <div class="lbl">Measurement ID</div>
+      </div>
+      {% endif %}
+    </div>
+
+    <table class="vlog-table">
+      <thead><tr><th>Parâmetro</th><th>Valor</th><th>Observação</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Status</td>
+          <td>
+            <span class="vbadge {% if config.ga4_ativo %}vbadge-ok{% else %}vbadge-err{% endif %}">
+              {% if config.ga4_ativo %}Habilitado{% else %}Desabilitado{% endif %}
+            </span>
+          </td>
+          <td style="font-size:12px;color:var(--w-color-text-meta)">
+            Alterável em Configurações do Site
+          </td>
+        </tr>
+        <tr>
+          <td>Measurement ID</td>
+          <td style="font-family:monospace">
+            {{ config.ga4_measurement_id|default:"Não configurado" }}
+          </td>
+          <td style="font-size:12px;color:var(--w-color-text-meta)">
+            Formato esperado: G-XXXXXXXXXX
+          </td>
+        </tr>
+        <tr>
+          <td>DebugView</td>
+          <td>
+            {% if config.ga4_ativo and config.ga4_measurement_id %}
+              <a href="https://analytics.google.com/analytics/web/#/p{{ config.ga4_measurement_id|slice:'2:' }}/reports/dashboard"
+                 target="_blank" rel="noopener"
+                 style="color:var(--w-color-interactive)">
+                Abrir GA4
+              </a>
+            {% else %}
+              <span style="color:var(--w-color-text-meta)">Configure o Measurement ID primeiro</span>
+            {% endif %}
+          </td>
+          <td></td>
+        </tr>
+      </tbody>
+    </table>
+
+  {% endif %}{# /tab ga4 #}
+
+</div>
+{% endblock %}

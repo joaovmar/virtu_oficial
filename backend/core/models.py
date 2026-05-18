@@ -1,11 +1,7 @@
-# -*- coding: utf-8 -*-
-"""
-Modelos Django/Wagtail para o site da Virtú
-Atualizado conforme documentação técnica do back-end
-"""
-
+import os
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.http import HttpResponseRedirect
 
 from wagtail.models import Page, Orderable
 from wagtail.fields import RichTextField, StreamField
@@ -15,6 +11,29 @@ from wagtail import blocks
 from wagtail.images.blocks import ImageChooserBlock
 
 from modelcluster.fields import ParentalKey, ParentalManyToManyField
+
+
+# =============================================================================
+# Mixin de Preview — redireciona para o frontend Next.js real
+# =============================================================================
+
+class FrontendPreviewMixin:
+    """
+    Substitui a pré-visualização padrão do Wagtail (que tentaria renderizar
+    um template Django) por um redirect para o frontend Next.js real.
+    A URL do front é configurada via env WAGTAIL_PREVIEW_FRONTEND_URL.
+    """
+    def serve_preview(self, request, mode_name):
+        frontend = os.environ.get(
+            'WAGTAIL_PREVIEW_FRONTEND_URL',
+            os.environ.get('WAGTAILADMIN_BASE_URL', 'https://brio-staging-web.com.br')
+        ).rstrip('/')
+        page_url = self.url or '/'
+        return HttpResponseRedirect(f"{frontend}{page_url}")
+
+    def get_preview_template(self, request, mode_name):
+        # Não usado (serve_preview redireciona antes), mas evita AttributeError
+        return 'wagtailadmin/preview_redirect.html'
 
 
 # =============================================================================
@@ -375,7 +394,7 @@ class HeroBannerImagem(Orderable):
         verbose_name_plural = "Banners do Hero"
 
 
-class HomePage(Page):
+class HomePage(FrontendPreviewMixin, Page):
     """Página Inicial do Site"""
     # Hero
     hero_titulo = models.CharField(
@@ -485,7 +504,7 @@ class HomePage(Page):
         verbose_name = "Página Inicial"
 
 
-class EmpreendimentosIndexPage(Page):
+class EmpreendimentosIndexPage(FrontendPreviewMixin, Page):
     """Página de Listagem de Empreendimentos"""
     hero_titulo = models.CharField(max_length=200, blank=True, verbose_name="Título")
     hero_subtitulo = models.CharField(max_length=300, blank=True, verbose_name="Subtítulo")
@@ -519,7 +538,7 @@ class EmpreendimentosIndexPage(Page):
         verbose_name = "Página de Empreendimentos"
 
 
-class EmpreendimentoPage(Page):
+class EmpreendimentoPage(FrontendPreviewMixin, Page):
     """
     Empreendimento - Entidade central conforme documentação
     """
@@ -794,7 +813,7 @@ class FotoObra(Orderable):
 # PÁGINAS INSTITUCIONAIS
 # =============================================================================
 
-class SobreNosPage(Page):
+class SobreNosPage(FrontendPreviewMixin, Page):
     """Página Sobre Nós / A Virtú"""
     hero_titulo = models.CharField(max_length=100, default="a virtú", verbose_name="Título")
     hero_imagem = models.ForeignKey(
@@ -916,7 +935,7 @@ class SeloQualidade(Orderable):
         return self.nome
 
 
-class ContatoPage(Page):
+class ContatoPage(FrontendPreviewMixin, Page):
     """Página de Contato"""
     hero_titulo = models.CharField(max_length=200, default="Fale Conosco", verbose_name="Título")
     hero_subtitulo = models.TextField(blank=True, verbose_name="Subtítulo")
@@ -943,7 +962,7 @@ class ContatoPage(Page):
         verbose_name = "Página de Contato"
 
 
-class BlogIndexPage(Page):
+class BlogIndexPage(FrontendPreviewMixin, Page):
     """Página de Listagem do Blog"""
     introducao = RichTextField(blank=True, verbose_name="Introdução")
 
@@ -954,7 +973,7 @@ class BlogIndexPage(Page):
         verbose_name = "Página do Blog"
 
 
-class BlogPage(Page):
+class BlogPage(FrontendPreviewMixin, Page):
     """Post do Blog"""
     data = models.DateField(verbose_name="Data de Publicação")
     imagem_destaque = models.ForeignKey(
