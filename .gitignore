@@ -213,6 +213,10 @@ out/
 build/
 dist/
 
+# Garante que o src/lib do frontend NAO seja ignorado pela regra 'lib/' acima
+!frontend/src/lib/
+!frontend/src/lib/**
+
 # Env files
 .env.local
 .env.*.local
