@@ -234,8 +234,27 @@ class ConfiguracaoSite(models.Model):
         null=True, blank=True,
         on_delete=models.SET_NULL,
         related_name='+',
-        verbose_name="Imagem de Fundo do Banner CTA",
-        help_text="Imagem aérea/paisagem usada como fundo no banner 'Breve lançamento'"
+        verbose_name="Imagem de Fundo do Card",
+        help_text="Imagem que aparece DENTRO do card arredondado 'Breve lançamento'"
+    )
+
+    # Imagem de fundo AO REDOR do card (espaço externo / wrapper)
+    banner_cta_wrapper_imagem = models.ForeignKey(
+        'wagtailimages.Image',
+        null=True, blank=True,
+        on_delete=models.SET_NULL,
+        related_name='+',
+        verbose_name="Imagem de Fundo ao Redor do Card",
+        help_text="Imagem que aparece no espaço ao REDOR do card 'Breve lançamento' (nas margens laterais e verticais)"
+    )
+
+    # Cor de fundo ao REDOR do card (visível nas margens externas)
+    banner_cta_bg_cor = models.CharField(
+        max_length=20,
+        blank=True,
+        default='#f5f6f4',
+        verbose_name="Cor de Fundo ao Redor do Card",
+        help_text="Cor de fundo que aparece nas margens ao redor do card 'Breve Lançamento'. Ex: #f5f6f4 (cinza claro), #ffffff (branco), #1e3d34 (verde escuro)"
     )
 
     # Grafismo decorativo (SVG/imagem que aparece atrás dos formulários)
@@ -328,6 +347,7 @@ class ConfiguracaoSite(models.Model):
         FieldPanel('copyright_texto'),
         MultiFieldPanel([
             FieldPanel('banner_cta_imagem'),
+            FieldPanel('banner_cta_wrapper_imagem'),
             FieldPanel('grafismo_imagem'),
         ], heading="Banner CTA (Breve Lançamento)"),
         MultiFieldPanel([

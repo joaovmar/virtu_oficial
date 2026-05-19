@@ -22,7 +22,7 @@ export default function LeadCaptureSection({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [bgImage, setBgImage] = useState(imagemFundo || '');
-  const [bgColor, setBgColor] = useState('');
+  const [wrapperImage, setWrapperImage] = useState('');
   const { register, handleSubmit, reset } = useForm<LeadData>();
 
   useEffect(() => {
@@ -32,10 +32,11 @@ export default function LeadCaptureSection({
     }
     getConfiguracoes()
       .then((config) => {
-        // Imagem editável no backoffice via ConfiguracaoSite.banner_cta_imagem
+        // Imagem DENTRO do card
         if (config.banner_cta_imagem?.url) setBgImage(config.banner_cta_imagem.url);
-        // Cor de fundo editável via ConfiguracaoSite.banner_cta_cor (fallback)
-        if ((config as any).banner_cta_cor) setBgColor((config as any).banner_cta_cor);
+        // Imagem AO REDOR do card (wrapper) — editável no Wagtail
+        if ((config as any).banner_cta_wrapper_imagem?.url)
+          setWrapperImage((config as any).banner_cta_wrapper_imagem.url);
       })
       .catch(() => {});
   }, [imagemFundo]);
@@ -55,25 +56,28 @@ export default function LeadCaptureSection({
 
   const inputCls = 'w-full px-4 md:px-5 py-2.5 md:py-3 bg-white border border-virtu-gold rounded-full font-sans font-semibold text-xs md:text-sm text-virtu-dark placeholder:text-virtu-placeholder tracking-tight focus:outline-none focus:ring-2 focus:ring-virtu-gold/40';
 
-  // Estilo de fundo: imagem do backoffice > cor do backoffice > verde escuro padrão
-  const sectionStyle: React.CSSProperties = !bgImage && bgColor
-    ? { backgroundColor: bgColor }
-    : {};
-
   return (
-    // wrapper externo: fornece o background/padding ao redor do card arredondado
-    // A cor/imagem de fundo é editável no Wagtail em Configurações > Banner CTA
     <motion.div
       initial={{ opacity: 0, y: 50 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-60px' }}
       transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
-      className="px-3 sm:px-6 lg:px-14 py-6 md:py-10"
+      className="relative px-3 sm:px-6 lg:px-14 py-6 md:py-10 bg-[#f5f6f4] overflow-hidden"
     >
-      <section
-        className="relative rounded-2xl md:rounded-[44px] overflow-hidden"
-        style={sectionStyle}
-      >
+      {/* Imagem AO REDOR do card — editável no Wagtail em Configurações > Banner CTA > Imagem de Fundo ao Redor do Card */}
+      {wrapperImage && (
+        <>
+          <Image
+            src={wrapperImage}
+            alt=""
+            fill
+            className="object-cover"
+            aria-hidden
+          />
+          <div className="absolute inset-0 bg-black/10" aria-hidden />
+        </>
+      )}
+      <section className="relative z-10 rounded-2xl md:rounded-[44px] overflow-hidden">
         {/* Imagem de fundo editável no backoffice */}
         {bgImage ? (
           <Image src={bgImage} alt="" fill className="object-cover" />

@@ -91,6 +91,7 @@ class ConfiguracaoSerializer(serializers.ModelSerializer):
     SEGURANÇA: Exclui rdstation_api_token que NUNCA deve ser exposto no frontend.
     """
     banner_cta_imagem = serializers.SerializerMethodField()
+    banner_cta_wrapper_imagem = serializers.SerializerMethodField()
 
     class Meta:
         model = ConfiguracaoSite
@@ -98,6 +99,9 @@ class ConfiguracaoSerializer(serializers.ModelSerializer):
 
     def get_banner_cta_imagem(self, obj):
         return get_image_url(obj.banner_cta_imagem)
+
+    def get_banner_cta_wrapper_imagem(self, obj):
+        return get_image_url(obj.banner_cta_wrapper_imagem)
 
 
 class TrackingSerializer(serializers.Serializer):
