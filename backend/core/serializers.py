@@ -251,6 +251,7 @@ class HomePageSerializer(serializers.ModelSerializer):
     banner_institucional_imagem = serializers.SerializerMethodField()
     etapas_jornada = serializers.SerializerMethodField()
     empreendimento_destaque = EmpreendimentoCardSerializer()
+    video_thumbnail = serializers.SerializerMethodField()
 
     class Meta:
         model = HomePage
@@ -262,6 +263,7 @@ class HomePageSerializer(serializers.ModelSerializer):
             'empreendimento_destaque', 'banner_destaque_texto',
             'secao_depoimentos_titulo',
             'cta_titulo', 'cta_botao_texto',
+            'video_url', 'video_thumbnail',
             'hero_banners',
         ]
 
@@ -296,6 +298,9 @@ class HomePageSerializer(serializers.ModelSerializer):
                 'subtitulo': b.subtitulo,
             })
         return banners
+
+    def get_video_thumbnail(self, obj):
+        return get_image_url(obj.video_thumbnail, 'fill-1280x720')
 
 
 class SobreNosSerializer(serializers.ModelSerializer):

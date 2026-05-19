@@ -488,6 +488,19 @@ class HomePage(FrontendPreviewMixin, Page):
         verbose_name="Texto do Botão"
     )
 
+    # Vídeo institucional
+    video_url = models.URLField(
+        blank=True,
+        verbose_name="URL do Vídeo Institucional",
+        help_text="Cole o link do YouTube. Ex: https://www.youtube.com/watch?v=XXXXXXXXXXX"
+    )
+    video_thumbnail = models.ForeignKey(
+        'wagtailimages.Image', null=True, blank=True,
+        on_delete=models.SET_NULL, related_name='+',
+        verbose_name="Thumbnail do Vídeo",
+        help_text="Imagem que aparece antes de reproduzir o vídeo (16:9, mín. 1280×720 px)"
+    )
+
     content_panels = Page.content_panels + [
         MultiFieldPanel([
             FieldPanel('hero_titulo'),
@@ -516,6 +529,10 @@ class HomePage(FrontendPreviewMixin, Page):
             FieldPanel('cta_titulo'),
             FieldPanel('cta_botao_texto'),
         ], heading="CTA Final"),
+        MultiFieldPanel([
+            FieldPanel('video_url'),
+            FieldPanel('video_thumbnail'),
+        ], heading="Vídeo Institucional"),
     ]
 
     subpage_types = ['EmpreendimentosIndexPage', 'SobreNosPage', 'ContatoPage', 'BlogIndexPage']

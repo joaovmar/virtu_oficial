@@ -7,6 +7,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { getHome, HomeData } from '@/lib/api';
 import FuturosLancamentosSection from '@/components/sections/FuturosLancamentosSection';
 import LeadCaptureSection from '@/components/sections/LeadCaptureSection';
+import VideoPlayer from '@/components/ui/VideoPlayer';
 
 export default function HomePage() {
   const [data, setData] = useState<HomeData | null>(null);
@@ -188,20 +189,28 @@ export default function HomePage() {
               transition={{ duration: 0.65, delay: 0.1 }}
               className="flex-1 w-full"
             >
-              <div className="rounded-2xl md:rounded-[44px] overflow-hidden aspect-video relative bg-black flex items-center justify-center cursor-pointer group">
-                <Image src="/video-thumb.jpg" alt="" fill className="object-cover opacity-50 group-hover:opacity-60 transition-opacity duration-500" />
-                <div className="absolute inset-0 bg-[rgba(0,0,0,0.6)] group-hover:bg-[rgba(0,0,0,0.5)] transition-colors" />
-                <div className="relative z-10 text-center flex flex-col items-center px-4">
-                  <h3 className="text-white font-sans font-semibold text-base sm:text-xl md:text-2xl lg:text-3xl tracking-tight text-center mb-3 md:mb-5 leading-tight">
-                    vídeo institucional virtú
-                  </h3>
-                  <div className="w-10 h-10 md:w-16 md:h-16 flex items-center justify-center">
-                    <svg viewBox="0 0 69 93" fill="none" className="w-5 h-7 md:w-8 md:h-11">
-                      <path d="M69 46.5L0 93L0 0L69 46.5Z" fill="white" fillOpacity="0.8"/>
-                    </svg>
+              {data?.video_url ? (
+                // Vídeo real cadastrado no Wagtail
+                <VideoPlayer
+                  videoId={
+                    data.video_url.includes('youtube.com')
+                      ? (data.video_url.split('v=')[1]?.split('&')[0] || '')
+                      : data.video_url.includes('youtu.be')
+                        ? data.video_url.split('youtu.be/')[1]?.split('?')[0] || ''
+                        : data.video_url
+                  }
+                  title="vídeo institucional virtú"
+                  thumbnailUrl={data.video_thumbnail?.url || '/video-thumb.jpg'}
+                />
+              ) : (
+                // Placeholder quando não há vídeo cadastrado
+                <div className="rounded-2xl md:rounded-[44px] overflow-hidden aspect-video relative bg-virtu-green-dark flex items-center justify-center">
+                  <div className="text-center px-6">
+                    <p className="text-white/50 font-sans text-sm">Vídeo institucional</p>
+                    <p className="text-white/30 font-sans text-xs mt-1">Cadastre a URL no Wagtail &rsaquo; Home &rsaquo; Vídeo Institucional</p>
                   </div>
                 </div>
-              </div>
+              )}
             </motion.div>
           </div>
         </div>
