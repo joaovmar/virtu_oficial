@@ -109,13 +109,19 @@ export default function SobreNosPage() {
 
       {/* 3. Vídeo */}
       <section className="py-10 md:py-12 lg:py-16 bg-white">
-        <div className="mx-3 sm:mx-6 md:mx-10 lg:mx-20 xl:mx-28">
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-60px' }}
+          transition={{ duration: 0.65 }}
+          className="mx-3 sm:mx-6 md:mx-10 lg:mx-20 xl:mx-28"
+        >
           <VideoPlayer
             videoId={data?.video_url?.includes('youtube') ? (data.video_url.split('v=')[1]?.split('&')[0] || '') : (data?.video_url || '')}
             title={data?.video_titulo || 'vídeo institucional virtú'}
             thumbnailUrl={data?.video_thumbnail?.url || '/video-thumb.jpg'}
           />
-        </div>
+        </motion.div>
       </section>
 
       {/* 4. Missão / Visão / Valores */}
@@ -168,16 +174,37 @@ export default function SobreNosPage() {
       {/* 5. Política de qualidade */}
       <section className="py-10 md:py-14 lg:py-20 bg-white">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-12">
-          <h2 className="font-sans font-semibold text-lg md:text-2xl text-virtu-green tracking-tight mb-3 md:mb-5">Política de qualidade</h2>
-          <div className="font-sans font-extralight text-sm md:text-base text-virtu-dark leading-relaxed tracking-tight max-w-4xl [&_p]:mb-3"
-            dangerouslySetInnerHTML={{ __html: data?.politica_texto || '<p>A virtú busca respeitar o atendimento aos requisitos aplicáveis, com melhoria contínua.</p>' }} />
-          <div className="mt-8 md:mt-12">
-            <h3 className="font-sans font-semibold text-base md:text-xl text-virtu-green tracking-tight mb-4 md:mb-6">Garantia e qualidade</h3>
-            <div className="flex gap-6 md:gap-10 items-center flex-wrap">
-              <Image src="/pbqp-h.png" alt="PBQP-H" width={200} height={90} className="object-contain h-[45px] md:h-[70px] w-auto" />
-              <Image src="/iso9001.png" alt="ISO 9001" width={150} height={60} className="object-contain h-[35px] md:h-[50px] w-auto" />
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-60px' }}
+            transition={{ duration: 0.55 }}
+          >
+            <h2 className="font-sans font-semibold text-lg md:text-2xl text-virtu-green tracking-tight mb-3 md:mb-5">Política de qualidade</h2>
+            <div className="font-sans font-extralight text-sm md:text-base text-virtu-dark leading-relaxed tracking-tight max-w-4xl [&_p]:mb-3"
+              dangerouslySetInnerHTML={{ __html: data?.politica_texto || '<p>A virtú busca respeitar o atendimento aos requisitos aplicáveis, com melhoria contínua.</p>' }} />
+            <div className="mt-8 md:mt-12">
+              <h3 className="font-sans font-semibold text-base md:text-xl text-virtu-green tracking-tight mb-4 md:mb-6">Garantia e qualidade</h3>
+              <div className="flex gap-6 md:gap-10 items-center flex-wrap">
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.4, delay: 0.1 }}
+                >
+                  <Image src="/pbqp-h.png" alt="PBQP-H" width={200} height={90} className="object-contain h-[45px] md:h-[70px] w-auto" />
+                </motion.div>
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.4, delay: 0.2 }}
+                >
+                  <Image src="/iso9001.png" alt="ISO 9001" width={150} height={60} className="object-contain h-[35px] md:h-[50px] w-auto" />
+                </motion.div>
+              </div>
             </div>
-          </div>
+          </motion.div>
         </div>
       </section>
 

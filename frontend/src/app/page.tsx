@@ -158,7 +158,7 @@ export default function HomePage() {
             <motion.div
               initial={{ opacity: 0, x: -40 }}
               whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
+              viewport={{ once: true, margin: '-80px' }}
               transition={{ duration: 0.6 }}
               className="lg:w-[280px] shrink-0 text-center lg:text-left"
             >
@@ -167,10 +167,10 @@ export default function HomePage() {
               </h2>
             </motion.div>
             <motion.div
-              initial={{ opacity: 0, x: 40 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
+              initial={{ opacity: 0, scale: 0.96 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true, margin: '-80px' }}
+              transition={{ duration: 0.65, delay: 0.1 }}
               className="flex-1 w-full"
             >
               <div className="rounded-2xl md:rounded-[44px] overflow-hidden aspect-video relative bg-black flex items-center justify-center cursor-pointer group">
@@ -195,7 +195,7 @@ export default function HomePage() {
       {/* 4. Futuros Lançamentos */}
       <FuturosLancamentosSection />
 
-      {/* 5. Lead Capture — com grafismo */}
+      {/* 5. Lead Capture — com grafismo e animação de scroll */}
       <LeadCaptureSection
         titulo={data?.empreendimento_destaque ? `${data.empreendimento_destaque.title}\n${data.empreendimento_destaque.cidade?.nome || ''} - ${data.empreendimento_destaque.cidade?.estado || ''}` : undefined}
         imagemFundo={data?.empreendimento_destaque?.imagem_principal?.url}
