@@ -110,7 +110,7 @@ export default function LeadCaptureSection({
 
         {/* Conteúdo */}
         <div className="relative z-[3] px-6 sm:px-10 lg:px-16 py-10 md:py-14 lg:py-20
-          flex flex-col lg:flex-row gap-10 lg:gap-20 justify-between items-center">
+          flex flex-col lg:flex-row gap-10 lg:gap-16 xl:gap-24 justify-center items-center">
 
           {/* Esquerda: texto + logos — largura flexível */}
           <motion.div
@@ -118,7 +118,7 @@ export default function LeadCaptureSection({
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="text-white lg:flex-1 text-center lg:text-left"
+            className="text-white lg:w-[380px] xl:w-[420px] shrink-0 text-center lg:text-left"
           >
             <span className="font-sans font-normal text-xs md:text-sm lg:text-base tracking-tight mb-1 md:mb-2 block">
               {subtitulo}
