@@ -62,7 +62,7 @@ export default function LeadCaptureSection({
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-60px' }}
       transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
-      className="relative px-3 sm:px-6 lg:px-14 py-6 md:py-10 bg-[#f5f6f4] overflow-hidden"
+      className="relative px-3 sm:px-6 lg:px-14 py-14 md:py-20 lg:py-24 bg-[#f5f6f4] overflow-hidden"
     >
       {/* Imagem AO REDOR do card — editável no Wagtail em Configurações > Banner CTA > Imagem de Fundo ao Redor do Card */}
       {wrapperImage && (

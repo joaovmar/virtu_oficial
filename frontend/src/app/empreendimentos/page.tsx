@@ -32,8 +32,8 @@ export default function EmpreendimentosPage() {
 
   return (
     <>
-      {/* 1. HERO — Banner arredondado Figma */}
-      <section className="relative min-h-[420px] sm:min-h-[480px] md:min-h-[540px] lg:min-h-[600px] flex items-center pt-20 md:pt-24 pb-6 md:pb-10">
+      {/* 1. HERO — Banner arredondado: começa abaixo do menu fixo */}
+      <section className="relative min-h-[calc(100svh-72px)] flex items-center pt-24 md:pt-28 pb-8 md:pb-12">
         <div className="absolute inset-0 z-0 mx-3 sm:mx-6 md:mx-10 lg:mx-14 mt-2 rounded-2xl md:rounded-[44px] overflow-hidden">
           <Image src={pageConfig?.hero_imagem?.url || '/vila-do-golfe-bg.jpg'} alt="Empreendimento" fill className="object-cover" priority />
           <div className="absolute inset-0 bg-[rgba(20,20,20,0.67)]" />
@@ -57,8 +57,8 @@ export default function EmpreendimentosPage() {
         </div>
       </section>
 
-      {/* 2. GRID */}
-      <section className="py-8 md:py-10 lg:py-16">
+      {/* 2. GRID — começa logo abaixo do hero sem espaço excessivo */}
+      <section className="py-10 md:py-14 lg:py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12">
           {cidades.length > 0 && (
             <div className="flex flex-wrap gap-2 mb-6 md:mb-8 justify-center">

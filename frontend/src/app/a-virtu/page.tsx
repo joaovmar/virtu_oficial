@@ -124,9 +124,9 @@ export default function SobreNosPage() {
         </motion.div>
       </section>
 
-      {/* 4. Missão / Visão / Valores */}
-      <section className={`py-10 md:py-14 lg:py-20 relative overflow-hidden ${
-        data?.mvv_background ? 'bg-virtu-green-dark' : 'bg-[#f5f6f4]'
+      {/* 4. Missão / Visão / Valores — altura maior, cabe numa tela */}
+      <section className={`min-h-[70vh] py-16 md:py-24 lg:py-32 relative overflow-hidden flex items-center ${
+        data?.mvv_background ? 'bg-virtu-green-dark' : 'bg-virtu-green-dark'
       }`}>
         {/* Background: apenas imagem cadastrada no backoffice, sem SVG decorativo padrão */}
         {data?.mvv_background && (
@@ -136,38 +136,44 @@ export default function SobreNosPage() {
           </div>
         )}
 
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-12 relative z-10">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-10 lg:gap-16">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-12 relative z-10 w-full">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: '-80px' }}
+            variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.15 } } }}
+            className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-14 lg:gap-20"
+          >
             {[
               { icon: Target, apiIcon: data?.missao_icone, title: data?.missao_titulo || 'missão', apiText: data?.missao_texto, fallback: 'Construir e expandir um legado com <strong>propósito</strong>, oferecendo produtos que acompanhem a evolução dos nossos clientes.' },
               { icon: Trophy, apiIcon: data?.visao_icone, title: data?.visao_titulo || 'visão', apiText: data?.visao_texto, fallback: 'Construir, junto aos nossos clientes, um futuro <strong>sólido e virtuoso</strong>, com excelência e <strong>propósito</strong> em cada conquista.' },
               { icon: Heart, apiIcon: data?.valores_icone, title: data?.valores_titulo || 'valores', apiText: data?.valores_texto, fallback: '<strong>Humildade</strong>, <strong>disciplina e ética</strong> como pilares; <strong>Excelência</strong>, como caminho para inovação.' },
-            ].map(({ icon: Icon, apiIcon, title, apiText, fallback }, i) => {
-              const hasBg = !!data?.mvv_background;
-              return (
-                <motion.div key={i} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }} className="flex flex-col items-center text-center">
-                  <div className={`w-16 h-16 md:w-20 md:h-20 rounded-full flex items-center justify-center mb-3 md:mb-5 overflow-hidden ${
-                    hasBg
-                      ? 'bg-white/10 border border-white/20'
-                      : 'bg-virtu-green/10 border border-virtu-green/20'
-                  }`}>
-                    {apiIcon ? (
-                      <Image src={apiIcon.url} alt={title} width={40} height={40} className="w-8 h-8 md:w-10 md:h-10 object-contain" />
-                    ) : (
-                      <Icon className={`w-8 h-8 md:w-10 md:h-10 ${hasBg ? 'text-white' : 'text-virtu-green-dark'}`} strokeWidth={1.2} />
-                    )}
-                  </div>
-                  <h3 className={`font-sans font-semibold text-sm md:text-base tracking-tight mb-2 md:mb-3 ${
-                    hasBg ? 'text-white' : 'text-virtu-green-dark'
-                  }`}>{title}</h3>
-                  <div className={`font-sans font-extralight text-[11px] md:text-[13px] text-center tracking-tight leading-relaxed max-w-[320px] [&_strong]:font-semibold ${
-                    hasBg ? 'text-white/90' : 'text-virtu-text'
-                  }`}
-                    dangerouslySetInnerHTML={{ __html: apiText || fallback }} />
-                </motion.div>
-              );
-            })}
-          </div>
+            ].map(({ icon: Icon, apiIcon, title, apiText, fallback }, i) => (
+              <motion.div
+                key={i}
+                variants={{ hidden: { opacity: 0, y: 40 }, visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] } } }}
+                className="flex flex-col items-center text-center"
+              >
+                {/* Ícone maior */}
+                <div className="w-20 h-20 md:w-24 md:h-24 lg:w-28 lg:h-28 rounded-full flex items-center justify-center mb-5 md:mb-7 overflow-hidden bg-white/10 border border-white/20">
+                  {apiIcon ? (
+                    <Image src={apiIcon.url} alt={title} width={56} height={56} className="w-10 h-10 md:w-12 md:h-12 lg:w-14 lg:h-14 object-contain" />
+                  ) : (
+                    <Icon className="w-10 h-10 md:w-12 md:h-12 lg:w-14 lg:h-14 text-white" strokeWidth={1} />
+                  )}
+                </div>
+                {/* Título */}
+                <h3 className="font-sans font-semibold text-base md:text-lg lg:text-xl text-white tracking-tight mb-3 md:mb-4">
+                  {title}
+                </h3>
+                {/* Texto */}
+                <div
+                  className="font-sans font-extralight text-xs md:text-sm lg:text-[15px] text-white/85 text-center tracking-tight leading-relaxed max-w-[300px] lg:max-w-[340px] [&_strong]:font-semibold [&_strong]:text-white"
+                  dangerouslySetInnerHTML={{ __html: apiText || fallback }}
+                />
+              </motion.div>
+            ))}
+          </motion.div>
         </div>
       </section>
 
