@@ -60,14 +60,21 @@ export default function EmpreendimentosPage() {
       {/* 2. GRID — começa logo abaixo do hero sem espaço excessivo */}
       <section className="py-10 md:py-14 lg:py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12">
-          {cidades.length > 0 && (
-            <div className="flex flex-wrap gap-2 mb-6 md:mb-8 justify-center">
-              <button onClick={() => handleFilter(null)} className={`px-4 md:px-5 py-1.5 md:py-2 rounded-full text-xs md:text-sm font-sans font-semibold ${cidadeAtiva === null ? 'bg-virtu-gold text-white' : 'bg-white text-virtu-text border border-virtu-border hover:border-virtu-gold'}`}>Todos</button>
-              {cidades.map((c) => (
-                <button key={c.id} onClick={() => handleFilter(c.id)} className={`px-4 md:px-5 py-1.5 md:py-2 rounded-full text-xs md:text-sm font-sans font-semibold ${cidadeAtiva === c.id ? 'bg-virtu-gold text-white' : 'bg-white text-virtu-text border border-virtu-border hover:border-virtu-gold'}`}>{c.nome}</button>
-              ))}
-            </div>
-          )}
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-60px' }}
+            transition={{ duration: 0.5 }}
+          >
+            {cidades.length > 0 && (
+              <div className="flex flex-wrap gap-2 mb-6 md:mb-8 justify-center">
+                <button onClick={() => handleFilter(null)} className={`px-4 md:px-5 py-1.5 md:py-2 rounded-full text-xs md:text-sm font-sans font-semibold ${cidadeAtiva === null ? 'bg-virtu-gold text-white' : 'bg-white text-virtu-text border border-virtu-border hover:border-virtu-gold'}`}>Todos</button>
+                {cidades.map((c) => (
+                  <button key={c.id} onClick={() => handleFilter(c.id)} className={`px-4 md:px-5 py-1.5 md:py-2 rounded-full text-xs md:text-sm font-sans font-semibold ${cidadeAtiva === c.id ? 'bg-virtu-gold text-white' : 'bg-white text-virtu-text border border-virtu-border hover:border-virtu-gold'}`}>{c.nome}</button>
+                ))}
+              </div>
+            )}
+          </motion.div>
           {loading ? (
             <div className="flex justify-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-4 border-virtu-gold border-t-transparent" /></div>
           ) : empreendimentos.length > 0 ? (
