@@ -128,10 +128,14 @@ export default function SobreNosPage() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-60px' }}
           transition={{ duration: 0.65 }}
-          className="mx-3 sm:mx-6 md:mx-10 lg:mx-20 xl:mx-28"
+          className="max-w-5xl mx-auto px-4 sm:px-8 md:px-12 lg:px-16"
         >
           <VideoPlayer
-            videoId={data?.video_url?.includes('youtube') ? (data.video_url.split('v=')[1]?.split('&')[0] || '') : (data?.video_url || '')}
+            videoId={data?.video_url?.includes('youtube.com')
+              ? (data.video_url.split('v=')[1]?.split('&')[0] || '')
+              : data?.video_url?.includes('youtu.be')
+                ? (data.video_url.split('youtu.be/')[1]?.split('?')[0] || '')
+                : (data?.video_url || '')}
             title={data?.video_titulo || 'vídeo institucional virtú'}
             thumbnailUrl={data?.video_thumbnail?.url || '/video-thumb.jpg'}
           />

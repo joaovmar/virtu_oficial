@@ -19,7 +19,7 @@ export default function VideoPlayer({ videoId, title, thumbnailUrl, className = 
   const [isPlaying, setIsPlaying] = useState(false);
 
   return (
-    <div className={`relative w-full overflow-hidden rounded-[20px] md:rounded-[44px] bg-black aspect-video ${className}`}>
+    <div className={`relative w-full overflow-hidden rounded-[20px] md:rounded-[44px] bg-virtu-green-dark aspect-video ${className}`}>
       {!isPlaying ? (
         <div
           className="absolute inset-0 w-full h-full flex items-center justify-center cursor-pointer group"
