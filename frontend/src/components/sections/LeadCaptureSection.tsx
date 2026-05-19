@@ -109,16 +109,16 @@ export default function LeadCaptureSection({
         )}
 
         {/* Conteúdo */}
-        <div className="relative z-[3] px-5 sm:px-8 lg:px-14 py-10 md:py-14 lg:py-20
-          flex flex-col lg:flex-row gap-8 lg:gap-14 justify-between items-center">
+        <div className="relative z-[3] px-6 sm:px-10 lg:px-16 py-10 md:py-14 lg:py-20
+          flex flex-col lg:flex-row gap-10 lg:gap-20 justify-between items-center">
 
-          {/* Esquerda: texto + logos */}
+          {/* Esquerda: texto + logos — largura flexível */}
           <motion.div
             initial={{ opacity: 0, x: -30 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="text-white lg:w-1/2 text-center lg:text-left"
+            className="text-white lg:flex-1 text-center lg:text-left"
           >
             <span className="font-sans font-normal text-xs md:text-sm lg:text-base tracking-tight mb-1 md:mb-2 block">
               {subtitulo}
@@ -134,13 +134,13 @@ export default function LeadCaptureSection({
             </div>
           </motion.div>
 
-          {/* Direita: formulário */}
+          {/* Direita: formulário — largura maior e centralizado */}
           <motion.div
             initial={{ opacity: 0, x: 30 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="relative lg:w-[400px] w-full max-w-[400px]"
+            className="relative w-full lg:w-[420px] xl:w-[460px] max-w-[460px] mx-auto lg:mx-0"
           >
             {submitSuccess ? (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
