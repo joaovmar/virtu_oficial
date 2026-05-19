@@ -124,15 +124,14 @@ export default function SobreNosPage() {
         </motion.div>
       </section>
 
-      {/* 4. Missão / Visão / Valores — altura maior, cabe numa tela */}
-      <section className={`min-h-[70vh] py-16 md:py-24 lg:py-32 relative overflow-hidden flex items-center ${
-        data?.mvv_background ? 'bg-virtu-green-dark' : 'bg-virtu-green-dark'
-      }`}>
-        {/* Background: apenas imagem cadastrada no backoffice, sem SVG decorativo padrão */}
+      {/* 4. Missão / Visão / Valores */}
+      <section className="min-h-[70vh] py-16 md:py-24 lg:py-32 relative overflow-hidden flex items-center bg-virtu-green-dark">
+        {/* Background: apenas imagem do backoffice — sem overlay extra */}
         {data?.mvv_background && (
           <div className="absolute inset-0 pointer-events-none">
             <Image src={data.mvv_background.url} alt="" fill className="object-cover" />
-            <div className="absolute inset-0 bg-virtu-green-dark/70" />
+            {/* overlay leve apenas para garantir legibilidade do texto */}
+            <div className="absolute inset-0 bg-virtu-green-dark/50" />
           </div>
         )}
 
@@ -154,19 +153,21 @@ export default function SobreNosPage() {
                 variants={{ hidden: { opacity: 0, y: 40 }, visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] } } }}
                 className="flex flex-col items-center text-center"
               >
-                {/* Ícone maior */}
-                <div className="w-20 h-20 md:w-24 md:h-24 lg:w-28 lg:h-28 rounded-full flex items-center justify-center mb-5 md:mb-7 overflow-hidden bg-white/10 border border-white/20">
+                {/* Círculo com gradiente do Figma: #348981 → #C1A784 */}
+                <div
+                  className="w-20 h-20 md:w-24 md:h-24 lg:w-[93px] lg:h-[93px] rounded-full flex items-center justify-center mb-5 md:mb-7 flex-shrink-0"
+                  style={{ background: 'linear-gradient(135deg, #348981 0%, #C1A784 100%)' }}
+                >
                   {apiIcon ? (
-                    <Image src={apiIcon.url} alt={title} width={56} height={56} className="w-10 h-10 md:w-12 md:h-12 lg:w-14 lg:h-14 object-contain" />
+                    <Image src={apiIcon.url} alt={title} width={48} height={48}
+                      className="w-10 h-10 md:w-11 md:h-11 object-contain" />
                   ) : (
-                    <Icon className="w-10 h-10 md:w-12 md:h-12 lg:w-14 lg:h-14 text-white" strokeWidth={1} />
+                    <Icon className="w-9 h-9 md:w-10 md:h-10 text-white" strokeWidth={1.2} />
                   )}
                 </div>
-                {/* Título */}
                 <h3 className="font-sans font-semibold text-base md:text-lg lg:text-xl text-white tracking-tight mb-3 md:mb-4">
                   {title}
                 </h3>
-                {/* Texto */}
                 <div
                   className="font-sans font-extralight text-xs md:text-sm lg:text-[15px] text-white/85 text-center tracking-tight leading-relaxed max-w-[300px] lg:max-w-[340px] [&_strong]:font-semibold [&_strong]:text-white"
                   dangerouslySetInnerHTML={{ __html: apiText || fallback }}
@@ -226,11 +227,11 @@ export default function SobreNosPage() {
         
         <div className="absolute inset-0 bg-black/60 z-0" />
 
-        {/* Selo Great Place To Work Movido para a esquerda */}
-        <div className="absolute top-6 right-6 md:top-10 md:right-16 lg:top-12 lg:right-24 z-20 transition-all">
+        {/* Certificado Great Place To Work 2025 */}
+        <div className="absolute top-6 right-6 md:top-10 md:right-16 lg:top-12 lg:right-24 z-20">
           <Image
-            src="/selo-gptw.png" 
-            alt="Certificada Great Place To Work"
+            src="/selo-gptw.svg"
+            alt="Certificada Great Place To Work 2025"
             width={90}
             height={135}
             className="w-16 md:w-20 lg:w-[90px] h-auto drop-shadow-lg"

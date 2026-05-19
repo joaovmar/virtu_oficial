@@ -47,7 +47,7 @@ export default function ContactForm({ title = 'Cadastre-se e saiba mais!', empre
         ) : (
           <motion.div initial={{ opacity: 1 }} exit={{ opacity: 0 }}>
             <h3 className="font-sans font-semibold text-base md:text-lg text-virtu-dark mb-4">{title}</h3>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-2.5 md:space-y-3">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 md:space-y-5">
               <div>
                 <label className="block font-sans font-semibold text-xs md:text-sm text-virtu-dark tracking-tight mb-1">Nome<span className="text-virtu-gold">*</span></label>
                 <input type="text" placeholder="Nome completo" className={`${inputBase} ${errors.nome ? 'border-red-400' : ''}`} {...register('nome', { required: 'Obrigatório' })} />

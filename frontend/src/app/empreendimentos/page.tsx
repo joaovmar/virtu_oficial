@@ -32,29 +32,64 @@ export default function EmpreendimentosPage() {
 
   return (
     <>
-      {/* 1. HERO — Banner arredondado: começa abaixo do menu fixo */}
-      <section className="relative min-h-[calc(100svh-72px)] flex items-center pt-24 md:pt-28 pb-8 md:pb-12">
-        <div className="absolute inset-0 z-0 mx-3 sm:mx-6 md:mx-10 lg:mx-14 mt-2 rounded-2xl md:rounded-[44px] overflow-hidden">
-          <Image src={pageConfig?.hero_imagem?.url || '/vila-do-golfe-bg.jpg'} alt="Empreendimento" fill className="object-cover" priority />
-          <div className="absolute inset-0 bg-[rgba(20,20,20,0.67)]" />
-        </div>
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 w-full">
-          <div className="flex flex-col lg:grid lg:grid-cols-2 gap-5 lg:gap-10 items-center">
-            <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="text-white text-center lg:text-left">
-              <span className="font-sans text-xs md:text-sm tracking-tight mb-1 md:mb-2 block">Breve lançamento</span>
-              <h1 className="font-sans font-light text-lg sm:text-xl md:text-2xl lg:text-3xl leading-tight mb-3 md:mb-5">
-                Casas sobrado na<br />região da Vila do Golfe<br />em Ribeirão Preto - SP
-              </h1>
-              <div className="flex items-center justify-center lg:justify-start gap-3 md:gap-5 mt-3 md:mt-6">
-                <Image src="/perplan-logo-white.svg" alt="Perplan" width={160} height={65} className="object-contain h-[28px] sm:h-[36px] md:h-[50px] w-auto" />
-                <Image src="/virtu-logo-white.svg" alt="virtú" width={85} height={34} className="object-contain h-[16px] sm:h-[20px] md:h-[26px] w-auto" />
-              </div>
-            </motion.div>
-            <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="w-full max-w-[380px] mx-auto lg:mx-0 lg:ml-auto">
-              <ContactForm title="Cadastre-se e saiba mais!" className="bg-transparent [&_label]:text-white [&_h3]:text-white" />
-            </motion.div>
+      {/* 1. HERO — Card arredondado com margens, igual ao Figma */}
+      <section className="relative pt-20 md:pt-24">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="relative mx-3 sm:mx-6 md:mx-10 lg:mx-14 rounded-2xl md:rounded-[44px] overflow-hidden"
+          style={{ minHeight: 'clamp(340px, 52vh, 580px)' }}
+        >
+          <Image
+            src={pageConfig?.hero_imagem?.url || '/vila-do-golfe-bg.jpg'}
+            alt="Empreendimento"
+            fill
+            className="object-cover"
+            priority
+          />
+          <div className="absolute inset-0 bg-[rgba(15,25,20,0.65)]" />
+
+          <div className="relative z-10 h-full flex items-center px-6 sm:px-10 md:px-14 py-10 md:py-14">
+            <div className="w-full flex flex-col lg:grid lg:grid-cols-2 gap-8 lg:gap-14 items-center">
+
+              {/* Texto esquerdo */}
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.15, duration: 0.5 }}
+                className="text-white text-center lg:text-left"
+              >
+                <span className="font-sans font-normal text-xs md:text-sm tracking-tight mb-2 block opacity-90">
+                  Breve lançamento
+                </span>
+                <h1 className="font-sans font-light text-xl sm:text-2xl md:text-3xl lg:text-4xl leading-tight mb-6 md:mb-8">
+                  Casas sobrado na<br />região da Vila do Golfe<br />em Ribeirão Preto - SP
+                </h1>
+                <div className="flex items-center justify-center lg:justify-start gap-4 md:gap-6">
+                  <Image src="/perplan-logo-white.svg" alt="Perplan" width={160} height={65}
+                    className="object-contain h-[32px] sm:h-[40px] md:h-[52px] w-auto" />
+                  <Image src="/virtu-logo-white.svg" alt="virtú" width={85} height={34}
+                    className="object-contain h-[18px] sm:h-[22px] md:h-[30px] w-auto" />
+                </div>
+              </motion.div>
+
+              {/* Formulário direito */}
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.25, duration: 0.5 }}
+                className="w-full max-w-[420px] mx-auto lg:mx-0 lg:ml-auto"
+              >
+                <ContactForm
+                  title="Cadastre-se e saiba mais!"
+                  className="bg-transparent [&_label]:text-white [&_h3]:text-white [&_h3]:text-xl"
+                />
+              </motion.div>
+
+            </div>
           </div>
-        </div>
+        </motion.div>
       </section>
 
       {/* 2. GRID — começa logo abaixo do hero sem espaço excessivo */}
