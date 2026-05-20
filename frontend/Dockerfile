@@ -13,6 +13,11 @@ COPY . .
 ARG NEXT_PUBLIC_API_URL=/api/v1
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 
+# URL pública do site — usada para prefixar URLs de mídia (/media/...)
+# O Next.js Image exige URLs absolutas no remotePatterns
+ARG NEXT_PUBLIC_SITE_URL=https://brio-staging-web.com.br
+ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL
+
 # Habilita standalone output
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
