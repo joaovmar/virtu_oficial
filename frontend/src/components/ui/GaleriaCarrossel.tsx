@@ -29,81 +29,73 @@ export default function GaleriaCarrossel({ imagens, titulo = "Galeria" }: Galeri
   const getSrc = (img: GaleriaImagem) => img.imagem?.url || img.thumb?.url || '';
   const getAlt = (img: GaleriaImagem) => img.imagem?.alt || img.descricao || 'Galeria';
 
-  const normDiff = (index: number) => {
-    let d = index - active;
-    if (d > imagens.length / 2) d -= imagens.length;
-    if (d < -imagens.length / 2) d += imagens.length;
-    return d;
-  };
+  // Índices dos 3 cards visíveis: anterior, ativo, próximo
+  const prev = (active - 1 + imagens.length) % imagens.length;
+  const next = (active + 1) % imagens.length;
+  const visible = [prev, active, next];
 
   return (
     <>
-      <section className="py-6 md:py-8 w-full overflow-hidden">
+      <section className="py-6 md:py-8">
+
+        {/* Título centralizado com margem */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="font-display italic text-xl md:text-2xl lg:text-3xl text-center text-virtu-dark mb-6 md:mb-10">
             {titulo}
           </h2>
         </div>
 
-        {/* Carrossel — ocupa 100% da largura da tela */}
-        <div className="relative w-screen left-1/2 -translate-x-1/2" style={{ height: 'clamp(260px, 42vh, 480px)' }}>
-          {imagens.map((img, index) => {
-            const diff = normDiff(index);
-            const absDiff = Math.abs(diff);
-            if (absDiff > 2) return null;
+        {/*
+          Container 100vw — de borda a borda.
+          3 imagens iguais, cada uma com 33.333% da largura total.
+          Card central com sombra e leve destaque.
+        */}
+        <div className="relative w-screen left-1/2 -translate-x-1/2 overflow-hidden"
+          style={{ height: 'clamp(220px, 40vh, 480px)' }}>
 
-            const isActive = diff === 0;
-
-            // Figma: card central 727×477, laterais ~60% visíveis nas bordas
-            // xPercent é relativo à largura do próprio card (clamp ~728px)
-            const configs: Record<number, { xPct: string; scale: number; z: number; opacity: number }> = {
-              0: { xPct: '-50%',                                    scale: 1,    z: 30, opacity: 1    },
-              1: { xPct: diff > 0 ? '8%'  : '-108%',               scale: 0.92, z: 20, opacity: 0.9  },
-              2: { xPct: diff > 0 ? '52%' : '-152%',               scale: 0.84, z: 10, opacity: 0.5  },
-            };
-            const cfg = configs[absDiff] ?? { xPct: '-50%', scale: 0.5, z: 0, opacity: 0 };
-
-            return (
-              <motion.div
-                key={img.id}
-                className="absolute top-0 h-full cursor-pointer"
-                style={{
-                  left: '50%',
-                  width: 'clamp(300px, 48vw, 728px)',
-                  zIndex: cfg.z,
-                }}
-                animate={{
-                  x: cfg.xPct,
-                  scale: cfg.scale,
-                  opacity: cfg.opacity,
-                }}
-                transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
-                onClick={() => isActive ? setLightboxOpen(true) : setActive(index)}
-              >
-                <div className={`relative w-full h-full ${isActive ? 'shadow-2xl' : 'shadow-md'}`}>
+          <div className="flex h-full w-full">
+            {visible.map((imgIndex, pos) => {
+              const img = imagens[imgIndex];
+              const isCenter = pos === 1;
+              return (
+                <motion.div
+                  key={`${imgIndex}-${pos}`}
+                  className="relative h-full cursor-pointer flex-shrink-0"
+                  style={{ width: '33.333%' }}
+                  animate={{ scale: isCenter ? 1.04 : 1, zIndex: isCenter ? 10 : 1 }}
+                  transition={{ duration: 0.4 }}
+                  onClick={() => {
+                    if (pos === 0) go(-1);
+                    else if (pos === 2) go(1);
+                    else setLightboxOpen(true);
+                  }}
+                >
                   {getSrc(img) && (
                     <Image
                       src={getSrc(img)}
                       alt={getAlt(img)}
                       fill
-                      className="object-cover"
-                      sizes="(max-width:768px) 90vw, 50vw"
-                      priority={isActive}
+                      className={`object-cover transition-opacity duration-300 ${isCenter ? 'opacity-100' : 'opacity-70'}`}
+                      sizes="33vw"
+                      priority={isCenter}
                     />
                   )}
-                </div>
-              </motion.div>
-            );
-          })}
+                  {isCenter && (
+                    <div className="absolute inset-0 shadow-[inset_0_0_0_2px_rgba(255,255,255,0.15)]" />
+                  )}
+                </motion.div>
+              );
+            })}
+          </div>
 
           {/* Setas */}
           <button onClick={() => go(-1)}
-            className="absolute left-2 sm:left-4 md:left-8 top-1/2 -translate-y-1/2 z-40 w-9 h-9 md:w-11 md:h-11 flex items-center justify-center rounded-full bg-white/80 hover:bg-white shadow transition-colors"
+            className="absolute left-3 sm:left-5 top-1/2 -translate-y-1/2 z-40 w-9 h-9 md:w-11 md:h-11 flex items-center justify-center rounded-full bg-white/80 hover:bg-white shadow transition-colors"
             aria-label="Anterior">
             <ChevronLeft className="w-4 h-4 md:w-5 md:h-5 text-virtu-dark" strokeWidth={2} />
           </button>
           <button onClick={() => go(1)}
-            className="absolute right-2 sm:right-4 md:right-8 top-1/2 -translate-y-1/2 z-40 w-9 h-9 md:w-11 md:h-11 flex items-center justify-center rounded-full bg-white/80 hover:bg-white shadow transition-colors"
+            className="absolute right-3 sm:right-5 top-1/2 -translate-y-1/2 z-40 w-9 h-9 md:w-11 md:h-11 flex items-center justify-center rounded-full bg-white/80 hover:bg-white shadow transition-colors"
             aria-label="Próximo">
             <ChevronRight className="w-4 h-4 md:w-5 md:h-5 text-virtu-dark" strokeWidth={2} />
           </button>
