@@ -33,6 +33,14 @@ export default function EmpreendimentoDetalhePage() {
   const videoId = emp.video_url?.includes('youtube') ? emp.video_url.split('v=')[1]?.split('&')[0] : emp.video_url?.includes('youtu.be') ? emp.video_url.split('/').pop() : '';
   const plantaAtual = emp.plantas?.[plantaAtiva];
 
+  // Formata valor em BRL: 450000 → R$ 450.000,00
+  const formatBRL = (valor: string | number | null | undefined) => {
+    if (!valor) return '';
+    const num = typeof valor === 'string' ? parseFloat(valor) : valor;
+    if (isNaN(num)) return String(valor);
+    return num.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 0, maximumFractionDigits: 0 });
+  };
+
   return (
     <>
       {/* 1. BANNER */}
@@ -65,7 +73,7 @@ export default function EmpreendimentoDetalhePage() {
               )}
               {emp.preco_a_partir && (
                 <p className="mt-5 md:mt-7 text-virtu-green font-sans font-bold text-base md:text-lg underline underline-offset-4 decoration-virtu-green/30">
-                  a partir de R${emp.preco_a_partir}
+                  a partir de {formatBRL(emp.preco_a_partir)}
                 </p>
               )}
             </motion.div>
@@ -86,7 +94,7 @@ export default function EmpreendimentoDetalhePage() {
         <div className="max-w-5xl mx-auto px-4 sm:px-6">
           <div className="flex flex-wrap justify-center gap-4 sm:gap-6 md:gap-14">
             {emp.preco_a_partir && (
-              <div className="flex items-center gap-1.5 md:gap-2 text-virtu-text"><DollarSign className="w-4 h-4 md:w-5 md:h-5 text-virtu-green" /><span className="font-sans text-[11px] md:text-xs">a partir de R${emp.preco_a_partir}</span></div>
+              <div className="flex items-center gap-1.5 md:gap-2 text-virtu-text"><DollarSign className="w-4 h-4 md:w-5 md:h-5 text-virtu-green" /><span className="font-sans text-[11px] md:text-xs">a partir de {formatBRL(emp.preco_a_partir)}</span></div>
             )}
             {emp.metragem_a_partir && (
               <div className="flex items-center gap-1.5 md:gap-2 text-virtu-text"><Maximize className="w-4 h-4 md:w-5 md:h-5 text-virtu-green" /><span className="font-sans text-[11px] md:text-xs">a partir de {emp.metragem_a_partir}m²</span></div>
