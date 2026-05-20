@@ -38,15 +38,15 @@ export default function GaleriaCarrossel({ imagens, titulo = "Galeria" }: Galeri
 
   return (
     <>
-      <section className="py-6 md:py-8 overflow-hidden w-full">
+      <section className="py-6 md:py-8 w-full overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="font-display italic text-xl md:text-2xl lg:text-3xl text-center text-virtu-dark mb-6 md:mb-10">
             {titulo}
           </h2>
         </div>
 
-        {/* Carrossel — card central ~728px, laterais visíveis nas bordas */}
-        <div className="relative w-full" style={{ height: 'clamp(260px, 42vh, 480px)' }}>
+        {/* Carrossel — ocupa 100% da largura da tela */}
+        <div className="relative w-screen left-1/2 -translate-x-1/2" style={{ height: 'clamp(260px, 42vh, 480px)' }}>
           {imagens.map((img, index) => {
             const diff = normDiff(index);
             const absDiff = Math.abs(diff);
