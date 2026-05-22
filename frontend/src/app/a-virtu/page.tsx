@@ -211,22 +211,38 @@ export default function SobreNosPage() {
             <div className="mt-8 md:mt-12">
               <h3 className="font-sans font-semibold text-base md:text-xl text-virtu-green tracking-tight mb-4 md:mb-6">Garantia e qualidade</h3>
               <div className="flex gap-6 md:gap-10 items-center flex-wrap">
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.4, delay: 0.1 }}
-                >
-                  <Image src="/pbqp-h.png" alt="PBQP-H" width={200} height={90} className="object-contain h-[45px] md:h-[70px] w-auto" />
-                </motion.div>
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.4, delay: 0.2 }}
-                >
-                  <Image src="/iso9001.png" alt="ISO 9001" width={150} height={60} className="object-contain h-[35px] md:h-[50px] w-auto" />
-                </motion.div>
+                {/* Selos dinâmicos do Wagtail — cadastrados em A Virtú > Selos de Qualidade */}
+                {data?.selos_qualidade && data.selos_qualidade.length > 0 ? (
+                  data.selos_qualidade.map((selo: any, i: number) => (
+                    <motion.div
+                      key={i}
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      whileInView={{ opacity: 1, scale: 1 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.4, delay: i * 0.1 }}
+                    >
+                      {selo.imagem?.url && (
+                        <Image
+                          src={selo.imagem.url}
+                          alt={selo.nome || 'Selo de qualidade'}
+                          width={200}
+                          height={90}
+                          className="object-contain h-[45px] md:h-[70px] w-auto"
+                        />
+                      )}
+                    </motion.div>
+                  ))
+                ) : (
+                  // Fallback com imagens estáticas quando não há selos cadastrados
+                  <>
+                    <motion.div initial={{ opacity: 0, scale: 0.9 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ duration: 0.4, delay: 0.1 }}>
+                      <Image src="/pbqp-h.png" alt="PBQP-H" width={200} height={90} className="object-contain h-[45px] md:h-[70px] w-auto" />
+                    </motion.div>
+                    <motion.div initial={{ opacity: 0, scale: 0.9 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ duration: 0.4, delay: 0.2 }}>
+                      <Image src="/iso9001.png" alt="ISO 9001" width={150} height={60} className="object-contain h-[35px] md:h-[50px] w-auto" />
+                    </motion.div>
+                  </>
+                )}
               </div>
             </div>
           </motion.div>
