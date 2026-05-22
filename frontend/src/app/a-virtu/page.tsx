@@ -101,7 +101,7 @@ export default function SobreNosPage() {
         </div>
       </section>
 
-      {/* 2. Nosso propósito — centralizado, visível ao scrollar */}
+      {/* 2. Nosso propósito */}
       <section className="py-14 md:py-20 lg:py-28 bg-white">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-12 text-center">
           <motion.div
@@ -110,8 +110,15 @@ export default function SobreNosPage() {
             viewport={{ once: true, margin: '-80px' }}
             transition={{ duration: 0.65 }}
           >
-            <p className="font-sans font-extralight text-xl md:text-2xl lg:text-3xl text-virtu-dark leading-none">Nosso</p>
-            <p className="font-display font-medium italic text-6xl md:text-7xl lg:text-8xl text-virtu-gold leading-[0.85] mb-8 md:mb-12">propósito</p>
+            {/* Título em linha: "Nosso" + "propósito" lado a lado */}
+            <div className="flex items-baseline justify-center gap-3 md:gap-5 mb-8 md:mb-12 flex-wrap">
+              <p className="font-sans font-extralight text-3xl md:text-4xl lg:text-5xl text-virtu-dark leading-none">
+                Nosso
+              </p>
+              <p className="font-display font-medium italic text-5xl md:text-6xl lg:text-7xl text-virtu-gold leading-none">
+                propósito
+              </p>
+            </div>
             <div
               className="font-sans font-light text-[14px] md:text-[15px] lg:text-[16px] text-virtu-dark leading-relaxed md:leading-[1.9] tracking-tight max-w-3xl mx-auto [&_p]:mb-5"
               dangerouslySetInnerHTML={{ __html: data?.historia_texto || '<p>A virtú nasce da união de profissionais com mais de duas décadas de atuação na construção civil, sustentada por parcerias sólidas e por uma trajetória marcada pela excelência.</p><p>Somos uma incorporadora e urbanizadora dedicada ao segmento de médio e alto padrão, com projetos que unem funcionalidade, elegância e exclusividade.</p>' }}

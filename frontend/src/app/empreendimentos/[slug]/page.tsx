@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { DollarSign, Maximize, BedDouble, Waves } from 'lucide-react';
+import { DollarSign, Maximize, BedDouble, Waves, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { getEmpreendimento, EmpreendimentoDetalhe } from '@/lib/api';
 import ContactForm from '@/components/ui/ContactForm';
 import GaleriaCarrossel from '@/components/ui/GaleriaCarrossel';
@@ -17,6 +17,7 @@ export default function EmpreendimentoDetalhePage() {
   const [emp, setEmp] = useState<EmpreendimentoDetalhe | null>(null);
   const [loading, setLoading] = useState(true);
   const [plantaAtiva, setPlantaAtiva] = useState(0);
+  const [fotoLightbox, setFotoLightbox] = useState<number | null>(null);
 
   useEffect(() => {
     async function fetchData() {
@@ -56,13 +57,19 @@ export default function EmpreendimentoDetalhePage() {
         </div>
       </section>
 
-      {/* 2. Logo + Info | Form */}
-      <section className="py-6 md:py-8 lg:py-10">
+      {/* 2. Logo + Info | Form — logo menor e à esquerda, gap maior */}
+      <section className="py-8 md:py-12 lg:py-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col lg:grid lg:grid-cols-2 gap-6 lg:gap-12 items-start">
+          <div className="flex flex-col lg:grid lg:grid-cols-2 gap-10 lg:gap-20 items-start">
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
               {emp.logo && (
-                <Image src={emp.logo.url} alt={emp.title} width={400} height={120} className="object-contain mb-5 md:mb-7 h-[70px] sm:h-[90px] md:h-[110px] lg:h-[130px] w-auto" />
+                <Image
+                  src={emp.logo.url}
+                  alt={emp.title}
+                  width={280}
+                  height={80}
+                  className="object-contain object-left mb-5 md:mb-7 h-[50px] sm:h-[60px] md:h-[70px] w-auto"
+                />
               )}
               {!emp.logo && <h2 className="font-sans font-bold text-2xl md:text-3xl lg:text-4xl text-virtu-dark mb-5 md:mb-7">{emp.title}</h2>}
               {emp.subtitulo && (
@@ -202,22 +209,34 @@ export default function EmpreendimentoDetalhePage() {
         </section>
       )}
 
-      {/* 9. FOTOS DA OBRA */}
+      {/* 9. FOTOS DA OBRA — com lightbox ao clicar */}
       {emp.fotos_obra && emp.fotos_obra.length > 0 && (
         <section className="py-8 md:py-10 lg:py-14 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <h2 className="font-sans font-light text-lg md:text-2xl text-virtu-dark text-center mb-6 md:mb-10 tracking-tight">Andamento das obras</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 md:gap-5">
-              {emp.fotos_obra.slice(0, 6).map((foto, i) => (
+              {emp.fotos_obra.map((foto, i) => (
                 <motion.div
                   key={foto.id}
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ delay: i * 0.08, duration: 0.45 }}
-                  className="relative aspect-[4/3] rounded-xl md:rounded-2xl overflow-hidden shadow-sm group"
+                  transition={{ delay: (i % 6) * 0.08, duration: 0.45 }}
+                  className="relative aspect-[4/3] rounded-xl md:rounded-2xl overflow-hidden shadow-sm group cursor-pointer"
+                  onClick={() => setFotoLightbox(i)}
                 >
-                  {foto.imagem && <Image src={foto.imagem.url} alt={foto.descricao || ''} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />}
+                  {foto.imagem && (
+                    <Image
+                      src={foto.imagem.url}
+                      alt={foto.descricao || ''}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                  )}
+                  {/* Overlay sutil ao hover */}
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
+                    <Maximize className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  </div>
                   {foto.data_captura && (
                     <div className="absolute bottom-2 left-2 bg-white/90 backdrop-blur-sm px-2 py-0.5 rounded-full">
                       <span className="text-[10px] font-sans text-virtu-text">{new Date(foto.data_captura).toLocaleDateString('pt-BR')}</span>
@@ -227,6 +246,59 @@ export default function EmpreendimentoDetalhePage() {
               ))}
             </div>
           </div>
+
+          {/* Lightbox fotos da obra */}
+          {fotoLightbox !== null && emp.fotos_obra[fotoLightbox] && (
+            <motion.div
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+              className="fixed inset-0 z-50 bg-black/92 flex items-center justify-center"
+              onClick={() => setFotoLightbox(null)}
+            >
+              <button
+                onClick={() => setFotoLightbox(null)}
+                className="absolute top-4 right-4 w-10 h-10 bg-white/10 rounded-full flex items-center justify-center hover:bg-white/20 z-10"
+              >
+                <X className="w-5 h-5 text-white" />
+              </button>
+              <button
+                onClick={(e) => { e.stopPropagation(); setFotoLightbox(p => p! > 0 ? p! - 1 : emp.fotos_obra.length - 1); }}
+                className="absolute left-3 md:left-6 w-10 h-10 bg-white/10 rounded-full flex items-center justify-center hover:bg-white/20"
+              >
+                <ChevronLeft className="w-5 h-5 text-white" />
+              </button>
+              <motion.div
+                key={fotoLightbox}
+                initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
+                className="relative max-w-5xl max-h-[85vh] w-full mx-14"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {emp.fotos_obra[fotoLightbox].imagem && (
+                  <Image
+                    src={emp.fotos_obra[fotoLightbox].imagem!.url}
+                    alt={emp.fotos_obra[fotoLightbox].descricao || ''}
+                    width={emp.fotos_obra[fotoLightbox].imagem!.width || 1200}
+                    height={emp.fotos_obra[fotoLightbox].imagem!.height || 800}
+                    className="object-contain w-full h-full max-h-[85vh]"
+                  />
+                )}
+                {emp.fotos_obra[fotoLightbox].data_captura && (
+                  <p className="text-center text-white/60 text-xs font-sans mt-3">
+                    {new Date(emp.fotos_obra[fotoLightbox].data_captura!).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}
+                    {emp.fotos_obra[fotoLightbox].descricao && ` — ${emp.fotos_obra[fotoLightbox].descricao}`}
+                  </p>
+                )}
+              </motion.div>
+              <button
+                onClick={(e) => { e.stopPropagation(); setFotoLightbox(p => p! < emp.fotos_obra.length - 1 ? p! + 1 : 0); }}
+                className="absolute right-3 md:right-6 w-10 h-10 bg-white/10 rounded-full flex items-center justify-center hover:bg-white/20"
+              >
+                <ChevronRight className="w-5 h-5 text-white" />
+              </button>
+              <div className="absolute bottom-5 left-1/2 -translate-x-1/2 text-white/50 text-xs font-sans">
+                {fotoLightbox + 1} / {emp.fotos_obra.length}
+              </div>
+            </motion.div>
+          )}
         </section>
       )}
     </>
