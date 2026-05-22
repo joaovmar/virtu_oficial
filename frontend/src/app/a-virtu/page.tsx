@@ -103,24 +103,26 @@ export default function SobreNosPage() {
 
       {/* 2. Nosso propósito */}
       <section className="py-14 md:py-20 lg:py-28 bg-white">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-12 text-center">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-12">
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-80px' }}
             transition={{ duration: 0.65 }}
+            className="flex flex-col lg:flex-row gap-8 lg:gap-16 items-start"
           >
-            {/* Título em linha: "Nosso" + "propósito" lado a lado */}
-            <div className="flex items-baseline justify-center gap-3 md:gap-5 mb-8 md:mb-12 flex-wrap">
-              <p className="font-sans font-extralight text-3xl md:text-4xl lg:text-5xl text-virtu-dark leading-none">
+            {/* Esquerda: Nosso (cima) + propósito (baixo) */}
+            <div className="shrink-0 lg:w-[220px] text-left">
+              <p className="font-sans font-extralight text-2xl md:text-3xl text-virtu-dark leading-none">
                 Nosso
               </p>
-              <p className="font-display font-medium italic text-5xl md:text-6xl lg:text-7xl text-virtu-gold leading-none">
+              <p className="font-display font-medium italic text-4xl md:text-5xl lg:text-6xl text-virtu-gold leading-tight">
                 propósito
               </p>
             </div>
+            {/* Direita: texto */}
             <div
-              className="font-sans font-light text-[14px] md:text-[15px] lg:text-[16px] text-virtu-dark leading-relaxed md:leading-[1.9] tracking-tight max-w-3xl mx-auto [&_p]:mb-5"
+              className="flex-1 font-sans font-light text-[14px] md:text-[15px] lg:text-[16px] text-virtu-dark leading-relaxed md:leading-[1.9] tracking-tight [&_p]:mb-5 pt-1"
               dangerouslySetInnerHTML={{ __html: data?.historia_texto || '<p>A virtú nasce da união de profissionais com mais de duas décadas de atuação na construção civil, sustentada por parcerias sólidas e por uma trajetória marcada pela excelência.</p><p>Somos uma incorporadora e urbanizadora dedicada ao segmento de médio e alto padrão, com projetos que unem funcionalidade, elegância e exclusividade.</p>' }}
             />
           </motion.div>
