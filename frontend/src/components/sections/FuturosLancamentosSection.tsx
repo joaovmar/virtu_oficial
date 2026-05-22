@@ -74,13 +74,13 @@ export default function FuturosLancamentosSection() {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.55 }}
-        className="text-center mb-8 md:mb-12 px-4"
+        className="text-center mb-6 md:mb-10 px-4"
       >
         <p className="font-sans font-light text-xl sm:text-2xl md:text-3xl text-virtu-dark leading-none">Futuros</p>
         <p className="font-display font-medium italic text-3xl sm:text-4xl md:text-5xl text-virtu-green leading-[0.9]">lançamentos</p>
       </motion.div>
 
-      <div className="relative w-full h-[30vh] sm:h-[40vh] md:h-[50vh] lg:h-[65vh] min-h-[300px] max-h-[600px] overflow-hidden">
+      <div className="relative w-full overflow-hidden" style={{ height: 'clamp(500px, 75vh, 800px)' }}>
 
         {/* Fundo: imagem do empreendimento ou gradiente quando não há imagem */}
         <AnimatePresence mode="wait">

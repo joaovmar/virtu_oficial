@@ -3,23 +3,21 @@
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { getEmpreendimentos, getEmpreendimentosDestaques, getCidades, getEmpreendimentosConfig, EmpreendimentoCard as EmpCard, Cidade, EmpreendimentosIndexConfig } from '@/lib/api';
+import { getEmpreendimentos, getCidades, getEmpreendimentosConfig, EmpreendimentoCard as EmpCard, Cidade, EmpreendimentosIndexConfig } from '@/lib/api';
 import EmpreendimentoCard from '@/components/ui/EmpreendimentoCard';
 import ContactForm from '@/components/ui/ContactForm';
+import FuturosLancamentosSection from '@/components/sections/FuturosLancamentosSection';
 
 export default function EmpreendimentosPage() {
   const [empreendimentos, setEmpreendimentos] = useState<EmpCard[]>([]);
-  const [destaques, setDestaques] = useState<EmpCard[]>([]);
   const [cidades, setCidades] = useState<Cidade[]>([]);
   const [pageConfig, setPageConfig] = useState<EmpreendimentosIndexConfig | null>(null);
   const [cidadeAtiva, setCidadeAtiva] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
-  const [lancIdx, setLancIdx] = useState(0);
 
   useEffect(() => { async function f() { try {
-    const [e, c, d, cfg] = await Promise.all([getEmpreendimentos().catch(() => []), getCidades().catch(() => []), getEmpreendimentosDestaques().catch(() => []), getEmpreendimentosConfig().catch(() => null)]);
-    setEmpreendimentos(Array.isArray(e) ? e : []); setCidades(Array.isArray(c) ? c : []); setDestaques(Array.isArray(d) ? d : []); setPageConfig(cfg);
+    const [e, c, cfg] = await Promise.all([getEmpreendimentos().catch(() => []), getCidades().catch(() => []), getEmpreendimentosConfig().catch(() => null)]);
+    setEmpreendimentos(Array.isArray(e) ? e : []); setCidades(Array.isArray(c) ? c : []); setPageConfig(cfg);
   } catch {} finally { setLoading(false); } } f(); }, []);
 
   const handleFilter = async (id: number | null) => {
@@ -133,41 +131,8 @@ export default function EmpreendimentosPage() {
         </div>
       </section>
 
-      {/* 3. Futuros lançamentos */}
-      <section className="py-8 md:py-12 lg:py-16 bg-white">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-60px' }}
-          transition={{ duration: 0.5 }}
-          className="text-center mb-5 md:mb-8 px-4"
-        >
-          <p className="font-sans font-light text-xl sm:text-2xl md:text-3xl text-virtu-dark leading-none">Futuros</p>
-          <p className="font-display font-medium italic text-3xl sm:text-4xl md:text-5xl text-virtu-green leading-[0.9]">lançamentos</p>
-        </motion.div>
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-40px' }}
-          transition={{ duration: 0.65, delay: 0.1 }}
-          className="relative mx-3 sm:mx-6 md:mx-10 lg:mx-14 h-[40vh] sm:h-[45vh] md:h-[52vh] lg:h-[58vh] min-h-[260px] max-h-[520px] overflow-hidden rounded-2xl md:rounded-[44px]"
-        >
-          <Image src={activeLanc?.imagem_principal?.url || '/ribeirao-preto-bg.jpg'} alt={activeLanc?.title || 'Lançamento'} fill className="object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-          <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6 md:p-10">
-            <div className="max-w-6xl mx-auto">
-              <h3 className="text-white font-sans font-semibold text-lg sm:text-2xl md:text-3xl tracking-tight mb-1 md:mb-2">
-                {activeLanc?.cidade ? `${activeLanc.cidade.nome} | ${activeLanc.cidade.estado}` : 'Ribeirão Preto | SP'}
-              </h3>
-              <p className="text-white/90 font-sans font-light text-xs sm:text-sm md:text-base tracking-tight max-w-xl leading-relaxed">
-                {activeLanc?.descricao_curta || 'Em breve receberá novos lançamentos da virtú.'}
-              </p>
-            </div>
-          </div>
-          <button onClick={() => setLancIdx(p => p > 0 ? p - 1 : Math.max(0, destaques.length - 1))} className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 text-white/50 hover:text-white"><ChevronLeft className="w-5 h-5 md:w-7 md:h-7" strokeWidth={1.5} /></button>
-          <button onClick={() => setLancIdx(p => p < Math.max(0, destaques.length - 1) ? p + 1 : 0)} className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 text-white/50 hover:text-white"><ChevronRight className="w-5 h-5 md:w-7 md:h-7" strokeWidth={1.5} /></button>
-        </motion.div>
-      </section>
+      {/* 3. Futuros lançamentos — componente unificado */}
+      <FuturosLancamentosSection />
     </>
   );
 }

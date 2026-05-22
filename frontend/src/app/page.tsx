@@ -51,10 +51,8 @@ export default function HomePage() {
 
   return (
     <>
-      {/* ================================================================
-          1. HERO — altura reduzida para ~75vh (não full-screen)
-          ================================================================ */}
-      <section className="relative w-full" style={{ height: 'clamp(480px, 75vh, 820px)' }}>
+      {/* 1. HERO — 100% da viewport no primeiro scroll */}
+      <section className="relative w-full h-[100svh] min-h-[600px]">
         <AnimatePresence mode="wait">
           <motion.div key={heroIdx} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.7 }} className="absolute inset-0">
             {activeHero?.imagem?.url ? (
