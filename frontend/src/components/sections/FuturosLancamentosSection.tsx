@@ -108,25 +108,32 @@ export default function FuturosLancamentosSection() {
 
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
 
-        {/* Texto */}
-        <div className="absolute bottom-0 left-0 right-0 p-5 sm:p-8 md:p-12 lg:p-16">
-          <div className="max-w-6xl mx-auto">
+        {/* Texto — posicionado no canto inferior esquerdo com padding generoso */}
+        <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-10 md:p-14 lg:p-20">
+          <div className="max-w-2xl">
             <motion.h3
               key={`title-${idx}`}
-              initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-              className="text-white font-sans font-semibold text-xl sm:text-2xl md:text-3xl lg:text-4xl tracking-tight mb-1 md:mb-3"
+              initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.45 }}
+              className="text-white font-sans font-semibold text-lg sm:text-xl md:text-2xl lg:text-3xl tracking-tight mb-2 md:mb-3"
             >
               {activeEmp?.cidade
                 ? `${activeEmp.cidade.nome} | ${activeEmp.cidade.estado}`
-                : 'Ribeirão Preto | SP'}
+                : activeEmp?.title || 'Ribeirão Preto | SP'}
             </motion.h3>
             <motion.p
               key={`desc-${idx}`}
-              initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-              className="text-white/90 font-sans font-light text-xs sm:text-sm md:text-base tracking-tight max-w-2xl leading-relaxed"
-            >
-              {activeEmp?.descricao_curta || 'Ribeirão Preto, cidade que pulsa crescimento e qualidade de vida, em breve receberá novos lançamentos da virtú.'}
-            </motion.p>
+              initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.45, delay: 0.1 }}
+              className="text-white/85 font-sans font-light text-[11px] sm:text-xs md:text-sm leading-relaxed max-w-md tracking-tight"
+              dangerouslySetInnerHTML={{
+                __html: activeEmp?.descricao_curta
+                  ? activeEmp.descricao_curta
+                      .replace(/virtú/gi, '<strong>virtú</strong>')
+                      .replace(/virtu/gi, '<strong>virtú</strong>')
+                  : 'Ribeirão Preto, cidade que pulsa crescimento e qualidade de vida, em breve receberá novos lançamentos da <strong>virtú</strong>, pensados para acompanhar o ritmo e o potencial da região.'
+              }}
+            />
           </div>
         </div>
 
