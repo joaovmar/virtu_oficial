@@ -52,9 +52,9 @@ export default function HomePage() {
   return (
     <>
       {/* ================================================================
-          1. HERO — Carrossel full-width com setas + dots
+          1. HERO — altura reduzida para ~75vh (não full-screen)
           ================================================================ */}
-      <section className="relative w-full h-[100svh] min-h-[500px] max-h-[960px]">
+      <section className="relative w-full" style={{ height: 'clamp(480px, 75vh, 820px)' }}>
         <AnimatePresence mode="wait">
           <motion.div key={heroIdx} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.7 }} className="absolute inset-0">
             {activeHero?.imagem?.url ? (
@@ -85,7 +85,7 @@ export default function HomePage() {
               transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
               className="opacity-80"
             >
-              <svg width="44" height="44" viewBox="0 0 27 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <svg width="32" height="32" viewBox="0 0 27 28" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <g clipPath="url(#vclip)">
                   <path d="M13.5465 18.9383C13.5235 18.9383 13.4944 18.932 13.4714 18.932C11.6212 18.9081 10.2098 17.3722 9.03433 16.1953C7.67426 14.8325 6.29735 13.3085 4.9143 11.6296C4.90818 11.624 4.90282 11.6177 4.90282 11.6113L8.44084 11.6113C9.21889 12.4722 10.072 13.3561 10.677 13.8882C11.8004 14.8865 12.5157 15.5313 13.5005 15.5258C14.9127 15.5139 15.9725 14.2472 17.6382 12.257C17.8227 12.0362 17.9958 11.821 18.1566 11.6113L21.8447 11.6113C21.2681 12.3221 20.6746 13.0218 20.0987 13.727C19.4301 14.5458 18.7616 15.3582 18.093 16.1714C16.756 17.8027 15.1883 18.9383 13.5465 18.9383Z" fill="#C1A784"/>
                   <path d="M1.29541e-06 13.9996C1.63283e-06 6.28029 6.05676 2.64749e-07 13.5004 5.90121e-07C20.944 9.15492e-07 27 6.28029 27 13.9996C27 21.7189 20.944 27.9992 13.5004 27.9992C6.05676 27.9992 0.000767712 21.7189 0.00076805 13.9996L1.29541e-06 13.9996ZM25.0281 13.9996C25.0281 7.40801 19.8566 2.04498 13.5004 2.04498C7.1442 2.04498 1.97195 7.408 1.97195 14.0004C1.97195 20.5928 7.14343 25.9558 13.5004 25.9558C19.8573 25.9558 25.0281 20.592 25.0281 13.9996Z" fill="#C1A784"/>

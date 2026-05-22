@@ -71,9 +71,9 @@ export default function SobreNosPage() {
 
   return (
     <>
-      {/* 1. HERO — Banner arredondado com margens */}
+      {/* 1. HERO — Banner maior */}
       <section className="relative pt-20 md:pt-24 min-h-[350px]">
-        <div className="relative mx-3 sm:mx-6 md:mx-10 lg:mx-14 h-[50vh] sm:h-[55vh] md:h-[65vh] min-h-[350px] rounded-2xl md:rounded-[44px] overflow-hidden flex flex-col items-center justify-end pb-10 md:pb-14">
+        <div className="relative mx-3 sm:mx-6 md:mx-10 lg:mx-14 h-[60vh] sm:h-[65vh] md:h-[75vh] min-h-[400px] rounded-2xl md:rounded-[44px] overflow-hidden flex flex-col items-center justify-end pb-10 md:pb-14">
           <Image src={data?.hero_imagem?.url || '/hero-bg.jpg'} alt="A virtú" fill className="object-cover" priority />
           <div className="absolute inset-0 bg-black/30" />
         <div className="relative z-10 text-center">
@@ -81,13 +81,10 @@ export default function SobreNosPage() {
             <span className="font-extralight text-2xl sm:text-3xl md:text-4xl">A </span>
             <span className="font-bold italic text-3xl sm:text-4xl md:text-5xl">virtú</span>
           </motion.h1>
+        {/* V menor no hero */}
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1 }} className="mt-5">
-            <motion.div
-              animate={{ y: [0, 8, 0] }}
-              transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-              className="opacity-80 mx-auto w-fit"
-            >
-              <svg width="44" height="44" viewBox="0 0 27 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <motion.div animate={{ y: [0, 8, 0] }} transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }} className="opacity-80 mx-auto w-fit">
+              <svg width="28" height="28" viewBox="0 0 27 28" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <g clipPath="url(#vclip2)">
                   <path d="M13.5465 18.9383C13.5235 18.9383 13.4944 18.932 13.4714 18.932C11.6212 18.9081 10.2098 17.3722 9.03433 16.1953C7.67426 14.8325 6.29735 13.3085 4.9143 11.6296C4.90818 11.624 4.90282 11.6177 4.90282 11.6113L8.44084 11.6113C9.21889 12.4722 10.072 13.3561 10.677 13.8882C11.8004 14.8865 12.5157 15.5313 13.5005 15.5258C14.9127 15.5139 15.9725 14.2472 17.6382 12.257C17.8227 12.0362 17.9958 11.821 18.1566 11.6113L21.8447 11.6113C21.2681 12.3221 20.6746 13.0218 20.0987 13.727C19.4301 14.5458 18.7616 15.3582 18.093 16.1714C16.756 17.8027 15.1883 18.9383 13.5465 18.9383Z" fill="#C1A784"/>
                   <path d="M1.29541e-06 13.9996C1.63283e-06 6.28029 6.05676 2.64749e-07 13.5004 5.90121e-07C20.944 9.15492e-07 27 6.28029 27 13.9996C27 21.7189 20.944 27.9992 13.5004 27.9992C6.05676 27.9992 0.000767712 21.7189 0.00076805 13.9996L1.29541e-06 13.9996ZM25.0281 13.9996C25.0281 7.40801 19.8566 2.04498 13.5004 2.04498C7.1442 2.04498 1.97195 7.408 1.97195 14.0004C1.97195 20.5928 7.14343 25.9558 13.5004 25.9558C19.8573 25.9558 25.0281 20.592 25.0281 13.9996Z" fill="#C1A784"/>
@@ -104,17 +101,16 @@ export default function SobreNosPage() {
         </div>
       </section>
 
-      {/* 2. Nosso propósito (Ajuste Pixel Perfect do OVERLAP) */}
+      {/* 2. Nosso propósito — fonte 20px */}
       <section className="py-10 md:py-14 lg:py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12">
-          {/* Aumentado o gap e o tamanho da coluna da esquerda para evitar que a fonte 8xl vaze pro lado */}
           <div className="flex flex-col lg:flex-row gap-8 lg:gap-20 items-start">
             <motion.div initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} className="lg:w-[420px] shrink-0 text-center lg:text-left">
               <p className="font-sans font-extralight text-xl md:text-2xl lg:text-3xl text-virtu-dark leading-none">Nosso</p>
               <p className="font-display font-medium italic text-6xl md:text-7xl lg:text-8xl text-virtu-gold leading-[0.85] -mt-1 pr-4">propósito</p>
             </motion.div>
             <motion.div initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} className="flex-1 mt-2 lg:mt-0">
-              <div className="font-sans font-light text-sm md:text-[15px] lg:text-base text-virtu-dark leading-relaxed md:leading-[1.8] tracking-tight [&_p]:mb-5"
+              <div className="font-sans font-light text-[14px] md:text-[15px] lg:text-[20px] text-virtu-dark leading-relaxed md:leading-[1.8] tracking-tight [&_p]:mb-5"
                 dangerouslySetInnerHTML={{ __html: data?.historia_texto || '<p>A virtú nasce da união de profissionais com mais de duas décadas de atuação na construção civil, sustentada por parcerias sólidas e por uma trajetória marcada pela excelência.</p><p>Somos uma incorporadora e urbanizadora dedicada ao segmento de médio e alto padrão, com projetos que unem funcionalidade, elegância e exclusividade.</p>' }} />
             </motion.div>
           </div>
@@ -142,8 +138,8 @@ export default function SobreNosPage() {
         </motion.div>
       </section>
 
-      {/* 4. Missão / Visão / Valores */}
-      <section className="min-h-[70vh] py-16 md:py-24 lg:py-32 relative overflow-hidden flex items-center bg-virtu-green-dark">
+      {/* 4. Missão / Visão / Valores — altura ampliada */}
+      <section className="min-h-[80vh] py-20 md:py-28 lg:py-36 relative overflow-hidden flex items-center bg-virtu-green-dark">
         {/* Background: apenas imagem do backoffice — sem overlay extra */}
         {data?.mvv_background && (
           <div className="absolute inset-0 pointer-events-none">
@@ -187,7 +183,7 @@ export default function SobreNosPage() {
                   {title}
                 </h3>
                 <div
-                  className="font-sans font-extralight text-xs md:text-sm lg:text-[15px] text-white/85 text-center tracking-tight leading-relaxed max-w-[300px] lg:max-w-[340px] [&_strong]:font-semibold [&_strong]:text-white"
+                  className="font-sans font-extralight text-[13px] md:text-[14px] text-white/85 text-center tracking-tight leading-relaxed max-w-[300px] lg:max-w-[340px] [&_strong]:font-semibold [&_strong]:text-white"
                   dangerouslySetInnerHTML={{ __html: apiText || fallback }}
                 />
               </motion.div>
@@ -249,8 +245,8 @@ export default function SobreNosPage() {
         </div>
       </section>
 
-      {/* 6. CTA com form refatorado (Ajuste de Largura e GPTW) */}
-      <section className="relative w-full min-h-[75vh] flex items-center justify-center py-16 md:py-20 px-4 sm:px-6 lg:px-8">
+      {/* 6. CTA Trabalhe Conosco — mais compacto */}
+      <section className="relative w-full min-h-[55vh] flex items-center justify-center py-12 md:py-16 px-4 sm:px-6 lg:px-8">
         <Image 
           src={data?.cta_imagem?.url || '/hero-bg.jpg'} 
           fill 
@@ -261,36 +257,34 @@ export default function SobreNosPage() {
         
         <div className="absolute inset-0 bg-black/60 z-0" />
 
-        {/* Certificado Great Place To Work 2025 */}
-        <div className="absolute top-6 right-6 md:top-10 md:right-16 lg:top-12 lg:right-24 z-20">
+        {/* Great Place To Work — selo maior e mais destacado */}
+        <div className="absolute top-6 right-6 md:top-8 md:right-12 lg:top-10 lg:right-20 z-20">
           <Image
             src="/selo-gptw.svg"
             alt="Certificada Great Place To Work 2025"
-            width={90}
-            height={135}
-            className="w-16 md:w-20 lg:w-[90px] h-auto drop-shadow-lg"
+            width={120}
+            height={180}
+            className="w-20 md:w-28 lg:w-[120px] h-auto drop-shadow-xl"
           />
         </div>
 
         {/* Largura aumentada para max-w-4xl (Área vermelha) */}
         <div className="relative z-10 w-full max-w-4xl mx-auto flex flex-col items-center">
           
-          <div className="text-center mb-10 w-full">
-            <motion.h2 
-              initial={{ opacity: 0, y: 20 }} 
-              whileInView={{ opacity: 1, y: 0 }} 
+          <div className="text-center mb-8 w-full">
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 tracking-tight"
+              className="text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-3 tracking-tight"
             >
               {data?.cta_titulo || 'Pronto para fazer parte de nossa história?'}
             </motion.h2>
-            <p className="text-sm md:text-base text-white/90 font-light max-w-2xl mx-auto leading-relaxed">
-              {data?.cta_subtitulo || 'Converse com nossa equipe e descubra como podemos ajudar você a realizar seus sonhos. Aqui nós trabalhamos para ajudar você a alcançar um propósito para seu futuro que você nunca viu antes!'}
-              <br className="hidden md:block" />
-              <span className="italic mt-3 block opacity-80 text-sm md:text-[15px]">
-                Aqui nós trabalhamos para ajudar você a alcançar um propósito para seu futuro!
-              </span>
-            </p>
+            {data?.cta_subtitulo && (
+              <p className="text-[14px] md:text-[15px] text-white/90 font-light max-w-2xl mx-auto leading-relaxed">
+                {data.cta_subtitulo}
+              </p>
+            )}
           </div>
 
           {submitSuccess ? (

@@ -63,7 +63,7 @@ export default function EmpreendimentosPage() {
                 <span className="font-sans font-normal text-xs md:text-sm tracking-tight mb-2 block opacity-90">
                   Breve lançamento
                 </span>
-                <h1 className="font-sans font-light text-xl sm:text-2xl md:text-3xl lg:text-4xl leading-tight mb-6 md:mb-8">
+                <h1 className="font-sans font-light text-[24px] sm:text-[28px] md:text-[30px] lg:text-[32px] leading-tight mb-6 md:mb-8">
                   Casas sobrado na<br />região da Vila do Golfe<br />em Ribeirão Preto - SP
                 </h1>
                 <div className="flex items-center justify-center lg:justify-start gap-4 md:gap-6">
@@ -83,7 +83,7 @@ export default function EmpreendimentosPage() {
               >
                 <ContactForm
                   title="Cadastre-se e saiba mais!"
-                  className="bg-transparent [&_label]:text-white [&_h3]:text-white [&_h3]:text-xl"
+                  className="bg-transparent [&_label]:text-white [&_h3]:text-white [&_h3]:text-xl [&_h3]:text-center [&_h3]:mb-5"
                 />
               </motion.div>
 

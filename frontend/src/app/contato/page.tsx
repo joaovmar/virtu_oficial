@@ -43,13 +43,13 @@ export default function ContatoPage() {
       <section className="relative py-20 sm:py-24 md:py-28 lg:py-32">
         <Image src="/hero-bg.jpg" fill className="object-cover" alt="Contato" priority />
         <div className="absolute inset-0 bg-gradient-to-r from-virtu-green-dark/80 to-virtu-green-dark/70" />
-        <div className="relative z-10 max-w-3xl mx-auto px-4 sm:px-6 text-center">
+        <div className="relative z-10 max-w-2xl mx-auto px-4 sm:px-6 text-center">
           <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-            className="font-sans font-bold text-[24px] sm:text-[30px] lg:text-[36px] text-white mb-2 md:mb-3 leading-snug">
-            Pronto para fazer parte de nossa história?
+            className="font-sans font-bold text-[22px] sm:text-[26px] md:text-[30px] text-white mb-2 md:mb-3 leading-snug">
+            Pronto para fazer parte<br className="hidden sm:block" /> de nossa história?
           </motion.h1>
           <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-            className="text-white/80 font-sans font-light text-[13px] md:text-[16px]">
+            className="text-white/80 font-sans font-light text-[13px] md:text-[15px]">
             Converse com nossa equipe e descubra como podemos ajudar você.
           </motion.p>
         </div>
