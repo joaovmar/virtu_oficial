@@ -26,8 +26,6 @@ export default function EmpreendimentosPage() {
     catch {} finally { setLoading(false); }
   };
 
-  const activeLanc = destaques.length > 0 ? destaques[lancIdx] : null;
-
   return (
     <>
       {/* 1. HERO — Card arredondado com margens, igual ao Figma */}
