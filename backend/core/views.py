@@ -12,7 +12,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
 
 from .models import (
     Cidade, StatusEmpreendimento, Diferencial, Depoimento, ConfiguracaoSite,
-    HomePage, EmpreendimentoPage, EmpreendimentosIndexPage, SobreNosPage,
+    HomePage, EmpreendimentoPage, EmpreendimentosIndexPage, SobreNosPage, ContatoPage,
     Planta, GaleriaImagem, AndamentoObra, FotoObra,
     Lead, Newsletter
 )
@@ -215,6 +215,34 @@ class HomePageView(APIView):
             ).data
 
             return Response(data)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class ContatoPageView(APIView):
+    """API pública: Dados da página de contato"""
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        try:
+            page = ContatoPage.objects.live().first()
+            if not page:
+                return Response({}, status=status.HTTP_404_NOT_FOUND)
+            hero_imagem = None
+            if page.hero_imagem:
+                try:
+                    hero_imagem = {'url': page.hero_imagem.file.url, 'alt': page.hero_imagem.title}
+                except Exception:
+                    pass
+            return Response({
+                'hero_titulo': page.hero_titulo,
+                'hero_subtitulo': page.hero_subtitulo,
+                'hero_imagem': hero_imagem,
+                'form_titulo': page.form_titulo,
+                'secao_titulo': page.secao_titulo,
+                'horario_semana': page.horario_semana,
+                'horario_fim_semana': page.horario_fim_semana,
+            })
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 

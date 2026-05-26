@@ -27,6 +27,7 @@ router.register(r'admin/depoimentos', views.DepoimentoAdminViewSet, basename='ad
 urlpatterns = [
     # APIs Públicas - Páginas
     path('home/', views.HomePageView.as_view(), name='api-home'),
+    path('contato/', views.ContatoPageView.as_view(), name='api-contato'),
     path('sobre-nos/', views.SobreNosView.as_view(), name='api-sobre-nos'),
     path('empreendimentos-config/', views.EmpreendimentosIndexPageView.as_view(), name='api-empreendimentos-config'),
     path('configuracoes/', views.ConfiguracaoView.as_view(), name='api-config'),

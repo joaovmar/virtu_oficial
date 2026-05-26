@@ -983,6 +983,23 @@ class ContatoPage(FrontendPreviewMixin, Page):
     )
     form_titulo = models.CharField(max_length=100, default="Envie sua mensagem", verbose_name="Título do Formulário")
 
+    # Campos da seção de informações editáveis
+    secao_titulo = models.CharField(
+        max_length=200, blank=True,
+        default="Vamos conversar sobre o seu futuro!",
+        verbose_name="Título da Seção de Contato"
+    )
+    horario_semana = models.CharField(
+        max_length=100, blank=True,
+        default="Segunda a Sexta: 9h às 18h",
+        verbose_name="Horário Semana"
+    )
+    horario_fim_semana = models.CharField(
+        max_length=100, blank=True,
+        default="Sábado: 9h às 13h",
+        verbose_name="Horário Fim de Semana"
+    )
+
     content_panels = Page.content_panels + [
         MultiFieldPanel([
             FieldPanel('hero_titulo'),
@@ -990,6 +1007,11 @@ class ContatoPage(FrontendPreviewMixin, Page):
             FieldPanel('hero_imagem'),
         ], heading="Hero"),
         FieldPanel('form_titulo'),
+        MultiFieldPanel([
+            FieldPanel('secao_titulo'),
+            FieldPanel('horario_semana'),
+            FieldPanel('horario_fim_semana'),
+        ], heading="Seção de Informações"),
     ]
 
     parent_page_types = ['HomePage']
