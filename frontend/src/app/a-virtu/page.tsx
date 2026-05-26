@@ -109,7 +109,7 @@ export default function SobreNosPage() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-80px' }}
             transition={{ duration: 0.65 }}
-            className="flex flex-col lg:flex-row gap-8 lg:gap-16 items-start"
+            className="flex flex-col lg:flex-row gap-8 lg:gap-16 items-center"
           >
             {/* Esquerda: Nosso (cima) + propósito (baixo) */}
             <div className="shrink-0 lg:w-[220px] text-left">
@@ -122,7 +122,7 @@ export default function SobreNosPage() {
             </div>
             {/* Direita: texto */}
             <div
-              className="flex-1 font-sans font-light text-[14px] md:text-[15px] lg:text-[16px] text-virtu-dark leading-relaxed md:leading-[1.9] tracking-tight [&_p]:mb-5 pt-1"
+              className="flex-1 font-sans font-light text-[14px] md:text-[15px] lg:text-[16px] text-virtu-dark leading-relaxed md:leading-[1.9] tracking-tight [&_p]:mb-5"
               dangerouslySetInnerHTML={{ __html: data?.historia_texto || '<p>A virtú nasce da união de profissionais com mais de duas décadas de atuação na construção civil, sustentada por parcerias sólidas e por uma trajetória marcada pela excelência.</p><p>Somos uma incorporadora e urbanizadora dedicada ao segmento de médio e alto padrão, com projetos que unem funcionalidade, elegância e exclusividade.</p>' }}
             />
           </motion.div>
