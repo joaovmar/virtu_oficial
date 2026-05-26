@@ -67,7 +67,7 @@ export default function SobreNosPage() {
     );
   }
 
-  const inputFlatCls = 'w-full px-4 md:px-5 py-3 md:py-3.5 rounded-lg bg-white text-virtu-dark placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-virtu-green transition-all shadow-sm';
+  const inputFlatCls = 'w-full px-4 py-2.5 rounded-lg bg-white text-virtu-dark placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-virtu-green transition-all shadow-sm text-sm';
 
   return (
     <>
@@ -257,8 +257,8 @@ export default function SobreNosPage() {
         </div>
       </section>
 
-      {/* 6. CTA Trabalhe Conosco — mais compacto */}
-      <section className="relative w-full min-h-[55vh] flex items-center justify-center py-12 md:py-16 px-4 sm:px-6 lg:px-8">
+      {/* 6. CTA Trabalhe Conosco — compacto para caber tudo numa tela */}
+      <section className="relative w-full min-h-[100vh] flex items-center justify-center py-10 md:py-12 px-4 sm:px-6 lg:px-8">
         <Image 
           src={data?.cta_imagem?.url || '/hero-bg.jpg'} 
           fill 
@@ -269,14 +269,14 @@ export default function SobreNosPage() {
         
         <div className="absolute inset-0 bg-black/60 z-0" />
 
-        {/* Great Place To Work — selo maior e mais destacado */}
-        <div className="absolute top-6 right-6 md:top-8 md:right-12 lg:top-10 lg:right-20 z-20">
+        {/* Great Place To Work — fixado no canto superior direito, alinhado com o topo do banner */}
+        <div className="absolute top-0 right-6 md:right-10 lg:right-16 z-20 translate-y-0">
           <Image
             src="/selo-gptw.svg"
             alt="Certificada Great Place To Work 2025"
-            width={120}
-            height={180}
-            className="w-20 md:w-28 lg:w-[120px] h-auto drop-shadow-xl"
+            width={110}
+            height={165}
+            className="w-20 md:w-24 lg:w-[110px] h-auto drop-shadow-xl"
           />
         </div>
 
@@ -306,64 +306,34 @@ export default function SobreNosPage() {
             </motion.div>
           ) : (
             // Formulário esticado para max-w-3xl para preencher as margens corretas
-            <form onSubmit={handleSubmit(onSubmit)} className="w-full flex flex-col gap-6 max-w-3xl">
+            <form onSubmit={handleSubmit(onSubmit)} className="w-full flex flex-col gap-3 max-w-3xl">
               
-              <div className="flex flex-col gap-1.5 text-left">
-                <label htmlFor="nome" className="text-white text-[15px] font-semibold tracking-wide">Nome*</label>
-                <input 
-                  id="nome"
-                  type="text" 
-                  placeholder="Nome completo" 
-                  className={inputFlatCls} 
-                  {...register('nome', { required: true })} 
-                />
+              <div className="flex flex-col gap-1 text-left">
+                <label htmlFor="nome" className="text-white text-[13px] font-semibold tracking-wide">Nome*</label>
+                <input id="nome" type="text" placeholder="Nome completo" className={inputFlatCls} {...register('nome', { required: true })} />
               </div>
 
-              <div className="flex flex-col gap-1.5 text-left">
-                <label htmlFor="email" className="text-white text-[15px] font-semibold tracking-wide">E-mail*</label>
-                <input 
-                  id="email"
-                  type="email" 
-                  placeholder="E-mail" 
-                  className={inputFlatCls} 
-                  {...register('email', { required: true })} 
-                />
+              <div className="flex flex-col gap-1 text-left">
+                <label htmlFor="email" className="text-white text-[13px] font-semibold tracking-wide">E-mail*</label>
+                <input id="email" type="email" placeholder="E-mail" className={inputFlatCls} {...register('email', { required: true })} />
               </div>
 
-              <div className="flex flex-col gap-1.5 text-left">
-                <label htmlFor="telefone" className="text-white text-[15px] font-semibold tracking-wide">Telefone*</label>
-                <input 
-                  id="telefone"
-                  type="tel" 
-                  placeholder="(11) 99999-9999" 
-                  className={inputFlatCls} 
-                  {...register('telefone', { required: true })} 
-                />
+              <div className="flex flex-col gap-1 text-left">
+                <label htmlFor="telefone" className="text-white text-[13px] font-semibold tracking-wide">Telefone*</label>
+                <input id="telefone" type="tel" placeholder="(11) 99999-9999" className={inputFlatCls} {...register('telefone', { required: true })} />
               </div>
 
-              <div className="flex flex-col gap-1.5 text-left">
-                <label htmlFor="mensagem" className="text-white text-[15px] font-semibold tracking-wide">Mensagem*</label>
-                <textarea 
-                  id="mensagem"
-                  placeholder="Mensagem" 
-                  rows={4} 
-                  className={`${inputFlatCls} resize-none`} 
-                  {...register('mensagem', { required: true })} 
-                />
+              <div className="flex flex-col gap-1 text-left">
+                <label htmlFor="mensagem" className="text-white text-[13px] font-semibold tracking-wide">Mensagem*</label>
+                <textarea id="mensagem" placeholder="Mensagem" rows={3} className={`${inputFlatCls} resize-none`} {...register('mensagem', { required: true })} />
               </div>
 
-              <button 
-                type="submit" 
-                disabled={isSubmitting}
-                className={`mt-6 mx-auto w-full md:w-auto md:min-w-[240px] px-10 py-3.5 rounded-full text-white font-semibold text-[15px] transition-all shadow-md ${
-                  isSubmitting 
-                    ? 'bg-gray-400 cursor-not-allowed opacity-70' 
-                    : 'bg-gradient-to-r from-virtu-green to-virtu-gold hover:opacity-90 hover:shadow-lg hover:-translate-y-0.5'
-                }`}
-              >
+              <button type="submit" disabled={isSubmitting}
+                className={`mt-3 mx-auto w-full md:w-auto md:min-w-[220px] px-8 py-3 rounded-full text-white font-semibold text-[14px] transition-all shadow-md ${
+                  isSubmitting ? 'bg-gray-400 cursor-not-allowed opacity-70' : 'bg-gradient-to-r from-virtu-green to-virtu-gold hover:opacity-90 hover:shadow-lg hover:-translate-y-0.5'
+                }`}>
                 {isSubmitting ? 'Enviando...' : 'Entrar em contato'}
               </button>
-
             </form>
           )}
         </div>

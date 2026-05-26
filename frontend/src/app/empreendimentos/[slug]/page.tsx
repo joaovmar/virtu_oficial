@@ -73,7 +73,7 @@ export default function EmpreendimentoDetalhePage() {
               )}
               {!emp.logo && <h2 className="font-sans font-bold text-2xl md:text-3xl lg:text-4xl text-virtu-dark mb-5 md:mb-7">{emp.title}</h2>}
               {emp.subtitulo && (
-                <h3 className="font-display font-bold italic text-lg sm:text-xl md:text-2xl text-virtu-green leading-snug mb-4 md:mb-6">{emp.subtitulo}</h3>
+                <h3 className="font-sans font-bold italic text-lg sm:text-xl md:text-2xl text-virtu-green leading-snug mb-4 md:mb-6">{emp.subtitulo}</h3>
               )}
               {emp.descricao && (
                 <div className="font-sans font-light text-xs md:text-sm text-virtu-text leading-relaxed tracking-tight max-w-lg [&_p]:mb-3" dangerouslySetInnerHTML={{ __html: emp.descricao }} />
