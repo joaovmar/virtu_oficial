@@ -137,7 +137,7 @@ export default function ContatoPage() {
               ) : (
                 <div className="bg-white rounded-[16px] p-5 md:p-7 shadow-lg">
                   <h3 className="font-sans font-semibold text-[16px] md:text-[20px] text-virtu-dark mb-4">{formTitulo}</h3>
-                  <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
+                  <form id="form-contato" onSubmit={handleSubmit(onSubmit)} className="space-y-3">
                     {[
                       { name: 'nome' as const, label: 'Nome', type: 'text', placeholder: 'Nome completo' },
                       { name: 'email' as const, label: 'E-mail', type: 'email', placeholder: 'E-mail' },
