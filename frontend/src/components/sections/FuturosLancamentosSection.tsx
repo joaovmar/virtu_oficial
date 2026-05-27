@@ -9,11 +9,10 @@ import { getEmpreendimentos, EmpreendimentoCard } from '@/lib/api';
 /**
  * Futuros Lançamentos
  *
- * Alimentado por empreendimentos cujo Status (slug) contenha:
- * breve | lancamento | lançamento | pre | futuro | em-breve
+ * Alimentado por empreendimentos com a flag "Exibir em Futuros Lançamentos" marcada.
  *
  * Para aparecer aqui, no Wagtail:
- *   1. Páginas → Empreendimentos → [empreendimento] → Status de Vendas = "Breve Lançamento"
+ *   1. Páginas → Empreendimentos → [empreendimento] → Controle → ☑ Exibir em Futuros Lançamentos
  *   2. Cadastrar Imagem Principal (Card) — essa é a foto de fundo do slider
  *   3. Publicar
  */
@@ -27,21 +26,21 @@ export default function FuturosLancamentosSection() {
         const todos = await getEmpreendimentos();
         if (!Array.isArray(todos)) return;
 
-        const futuros = todos.filter(e => {
-          const slug = (e.status?.slug || '').toLowerCase()
-            .normalize('NFD').replace(/[\u0300-\u036f]/g, ''); // remove acentos
-          return (
-            slug.includes('breve') ||
-            slug.includes('lancamento') ||
-            slug.includes('lançamento') ||
-            slug.includes('pre') ||
-            slug.includes('futuro') ||
-            slug.includes('em-breve')
-          );
-        });
+        // Filtra apenas os marcados com a flag futuro_lancamento
+        const futuros = todos.filter(e => (e as any).futuro_lancamento === true);
 
-        // Se não há futuros com esse status, exibe todos como fallback
-        setEmpreendimentos(futuros.length > 0 ? futuros : todos);
+        // Fallback: se nenhum estiver marcado, exibe os que têm status de lançamento
+        if (futuros.length > 0) {
+          setEmpreendimentos(futuros);
+        } else {
+          const porStatus = todos.filter(e => {
+            const slug = (e.status?.slug || '').toLowerCase()
+              .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+            return slug.includes('breve') || slug.includes('lancamento') ||
+                   slug.includes('pre') || slug.includes('futuro');
+          });
+          setEmpreendimentos(porStatus.length > 0 ? porStatus : todos);
+        }
       } catch {}
     }
     fetchData();

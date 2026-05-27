@@ -184,7 +184,7 @@ class EmpreendimentoCardSerializer(serializers.ModelSerializer):
             'id', 'title', 'slug', 'url', 'status', 'cidade',
             'descricao_curta', 'preco_a_partir', 'metragem_a_partir',
             'dormitorios', 'caracteristicas_resumo', 'imagem_principal',
-            'data_entrega', 'destaque'
+            'data_entrega', 'destaque', 'futuro_lancamento', 'ordem',
         ]
 
     def get_imagem_principal(self, obj):

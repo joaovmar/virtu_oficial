@@ -665,6 +665,11 @@ class EmpreendimentoPage(FrontendPreviewMixin, Page):
 
     # Controle
     destaque = models.BooleanField(default=False, verbose_name="Em Destaque")
+    futuro_lancamento = models.BooleanField(
+        default=False,
+        verbose_name="Exibir em Futuros Lançamentos",
+        help_text="Marque para exibir este empreendimento na seção 'Futuros Lançamentos' da Home e da página de Empreendimentos"
+    )
     ordem = models.PositiveIntegerField(default=0, verbose_name="Ordem")
 
     content_panels = Page.content_panels + [
@@ -704,6 +709,7 @@ class EmpreendimentoPage(FrontendPreviewMixin, Page):
         InlinePanel('fotos_obra', label="Fotos da Obra"),
         MultiFieldPanel([
             FieldPanel('destaque'),
+            FieldPanel('futuro_lancamento'),
             FieldPanel('ordem'),
         ], heading="Controle"),
     ]
