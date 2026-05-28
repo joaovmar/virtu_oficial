@@ -153,7 +153,7 @@ export default function LeadCaptureSection({
                 <h3 className="font-sans font-semibold text-base md:text-lg text-white text-center tracking-tight mb-4">
                   Cadastre-se e saiba mais!
                 </h3>
-                <form id="form-lead-breve-lancamento" onSubmit={handleSubmit(onSubmit)} className="space-y-2.5 md:space-y-3">
+                <form id="form-lead-breve-lancamento" onSubmit={handleSubmit(onSubmit)} className="space-y-4 md:space-y-5">
                   <div>
                     <label className="block font-sans font-semibold text-xs md:text-sm text-white tracking-tight mb-1">Nome*</label>
                     <input type="text" placeholder="Nome completo" className={inputCls}
