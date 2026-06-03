@@ -116,15 +116,17 @@ export default function HomePage() {
         )}
       </section>
 
-      {/* 2. "Pensamos no futuro" — blocagem: min-h-screen */}
+      {/* 2. "Pensamos no futuro" + Banner institucional — mesma blocagem */}
       <section className="py-10 md:py-14 lg:py-20 bg-white min-h-screen flex items-center">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 w-full">
+
+          {/* Textos */}
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="flex flex-col lg:flex-row gap-6 lg:gap-16 items-start"
+            className="flex flex-col lg:flex-row gap-6 lg:gap-16 items-start mb-10 md:mb-14 lg:mb-16"
           >
             <div className="lg:w-[300px] shrink-0">
               <p className="font-sans font-extralight text-xl md:text-2xl lg:text-3xl text-virtu-dark leading-none">
@@ -141,18 +143,14 @@ export default function HomePage() {
               )}
             </div>
           </motion.div>
-        </div>
-      </section>
 
-      {/* Banner institucional — seção separada */}
-      {data?.banner_institucional_imagem && (
-        <section className="bg-white pb-10 md:pb-14 lg:pb-20">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12">
+          {/* Banner institucional */}
+          {data?.banner_institucional_imagem && (
             <motion.div
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.7 }}
+              transition={{ duration: 0.7, delay: 0.1 }}
               className="relative w-full h-[220px] sm:h-[280px] md:h-[360px] lg:h-[420px] rounded-2xl md:rounded-[44px] overflow-hidden"
             >
               <Image src={data.banner_institucional_imagem.url} alt="" fill className="object-cover" />
@@ -165,9 +163,10 @@ export default function HomePage() {
                 </div>
               )}
             </motion.div>
-          </div>
-        </section>
-      )}
+          )}
+
+        </div>
+      </section>
 
       {/* 3. Vídeo + "Todos os caminhos" */}
       <section className="py-8 md:py-10 lg:py-14 bg-white overflow-hidden">
