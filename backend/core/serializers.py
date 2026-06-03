@@ -176,6 +176,7 @@ class EmpreendimentoCardSerializer(serializers.ModelSerializer):
     status = StatusSerializer()
     cidade = CidadeSerializer()
     imagem_principal = serializers.SerializerMethodField()
+    imagem_futuros_lancamentos = serializers.SerializerMethodField()
     url = serializers.SerializerMethodField()
 
     class Meta:
@@ -184,11 +185,18 @@ class EmpreendimentoCardSerializer(serializers.ModelSerializer):
             'id', 'title', 'slug', 'url', 'status', 'cidade',
             'descricao_curta', 'preco_a_partir', 'metragem_a_partir',
             'dormitorios', 'caracteristicas_resumo', 'imagem_principal',
+            'imagem_futuros_lancamentos',
             'data_entrega', 'destaque', 'futuro_lancamento', 'ordem',
         ]
 
     def get_imagem_principal(self, obj):
         return get_image_url(obj.imagem_principal, 'fill-600x400')
+
+    def get_imagem_futuros_lancamentos(self, obj):
+        # Usa imagem específica se cadastrada, senão fallback para imagem principal
+        if obj.imagem_futuros_lancamentos:
+            return get_image_url(obj.imagem_futuros_lancamentos)
+        return get_image_url(obj.imagem_principal)
 
     def get_url(self, obj):
         return obj.url

@@ -670,6 +670,12 @@ class EmpreendimentoPage(FrontendPreviewMixin, Page):
         verbose_name="Exibir em Futuros Lançamentos",
         help_text="Marque para exibir este empreendimento na seção 'Futuros Lançamentos' da Home e da página de Empreendimentos"
     )
+    imagem_futuros_lancamentos = models.ForeignKey(
+        'wagtailimages.Image', null=True, blank=True,
+        on_delete=models.SET_NULL, related_name='+',
+        verbose_name="Imagem do Banner Futuros Lançamentos",
+        help_text="Imagem usada como fundo no slider 'Futuros Lançamentos'. Se não informada, usa a Imagem Principal."
+    )
     ordem = models.PositiveIntegerField(default=0, verbose_name="Ordem")
 
     content_panels = Page.content_panels + [
@@ -710,6 +716,7 @@ class EmpreendimentoPage(FrontendPreviewMixin, Page):
         MultiFieldPanel([
             FieldPanel('destaque'),
             FieldPanel('futuro_lancamento'),
+            FieldPanel('imagem_futuros_lancamentos'),
             FieldPanel('ordem'),
         ], heading="Controle"),
     ]

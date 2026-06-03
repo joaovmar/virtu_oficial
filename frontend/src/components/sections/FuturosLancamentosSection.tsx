@@ -64,7 +64,9 @@ export default function FuturosLancamentosSection() {
   }, [empreendimentos.length, go]);
 
   const activeEmp = empreendimentos.length > 0 ? empreendimentos[idx] : null;
-  const bgUrl = activeEmp?.imagem_principal?.url || (activeEmp as any)?.imagem_hero?.url || null;
+  const bgUrl = activeEmp
+    ? ((activeEmp as any).imagem_futuros_lancamentos?.url || activeEmp.imagem_principal?.url || null)
+    : null;
 
   return (
     <section className="py-10 md:py-14 lg:py-20 bg-white">
