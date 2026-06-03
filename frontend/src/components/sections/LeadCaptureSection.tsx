@@ -127,8 +127,8 @@ export default function LeadCaptureSection({
               {titulo}
             </h2>
             <div className="flex items-center justify-center lg:justify-start gap-3 md:gap-5 mt-5 md:mt-8">
-              <Image src="/perplan-logo-white.svg" alt="Perplan" width={160} height={65}
-                className="object-contain h-[36px] sm:h-[44px] md:h-[58px] w-auto" />
+              <Image src="/perplan-logo-white.svg" alt="Perplan" width={200} height={80}
+                className="object-contain h-[44px] sm:h-[52px] md:h-[64px] w-auto" />
               <Image src="/virtu-logo-white.svg" alt="virtú" width={85} height={34}
                 className="object-contain h-[22px] sm:h-[26px] md:h-[34px] w-auto" />
             </div>
