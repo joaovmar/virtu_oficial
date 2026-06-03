@@ -1079,6 +1079,7 @@ class BlogPage(FrontendPreviewMixin, Page):
 # LEAD - Conforme documentação
 # =============================================================================
 
+@register_snippet
 class Lead(models.Model):
     """Lead - Contato interessado"""
     nome = models.CharField(max_length=200, verbose_name="Nome")
@@ -1109,6 +1110,27 @@ class Lead(models.Model):
         verbose_name="Status"
     )
     observacoes = models.TextField(blank=True, verbose_name="Observações")
+
+    panels = [
+        FieldRowPanel([
+            FieldPanel('nome'),
+            FieldPanel('email'),
+        ]),
+        FieldRowPanel([
+            FieldPanel('telefone'),
+            FieldPanel('status'),
+        ]),
+        FieldPanel('mensagem'),
+        FieldRowPanel([
+            FieldPanel('empreendimento'),
+            FieldPanel('pagina_origem'),
+        ]),
+        FieldRowPanel([
+            FieldPanel('origem'),
+            FieldPanel('lido'),
+        ]),
+        FieldPanel('observacoes'),
+    ]
 
     class Meta:
         verbose_name = "Lead"

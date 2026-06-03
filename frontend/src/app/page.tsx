@@ -116,9 +116,9 @@ export default function HomePage() {
         )}
       </section>
 
-      {/* 2. "Pensamos no futuro" */}
-      <section className="py-10 md:py-14 lg:py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12">
+      {/* 2. "Pensamos no futuro" — blocagem: min-h-screen */}
+      <section className="py-10 md:py-14 lg:py-20 bg-white min-h-screen flex items-center">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 w-full">
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -141,15 +141,19 @@ export default function HomePage() {
               )}
             </div>
           </motion.div>
+        </div>
+      </section>
 
-          {/* Banner institucional */}
-          {data?.banner_institucional_imagem && (
+      {/* Banner institucional — seção separada */}
+      {data?.banner_institucional_imagem && (
+        <section className="bg-white pb-10 md:pb-14 lg:pb-20">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12">
             <motion.div
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.7, delay: 0.1 }}
-              className="mt-10 md:mt-14 lg:mt-16 relative w-full h-[220px] sm:h-[280px] md:h-[360px] lg:h-[420px] rounded-2xl md:rounded-[44px] overflow-hidden"
+              transition={{ duration: 0.7 }}
+              className="relative w-full h-[220px] sm:h-[280px] md:h-[360px] lg:h-[420px] rounded-2xl md:rounded-[44px] overflow-hidden"
             >
               <Image src={data.banner_institucional_imagem.url} alt="" fill className="object-cover" />
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-black/50" />
@@ -161,9 +165,9 @@ export default function HomePage() {
                 </div>
               )}
             </motion.div>
-          )}
-        </div>
-      </section>
+          </div>
+        </section>
+      )}
 
       {/* 3. Vídeo + "Todos os caminhos" */}
       <section className="py-8 md:py-10 lg:py-14 bg-white overflow-hidden">
