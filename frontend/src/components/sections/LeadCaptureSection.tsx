@@ -23,20 +23,21 @@ export default function LeadCaptureSection({
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [bgImage, setBgImage] = useState(imagemFundo || '');
   const [wrapperImage, setWrapperImage] = useState('');
+  const [logoParceiroUrl, setLogoParceiroUrl] = useState('');
+  const [logoVirtuUrl, setLogoVirtuUrl] = useState('');
   const { register, handleSubmit, reset } = useForm<LeadData>();
 
   useEffect(() => {
-    if (imagemFundo) {
-      setBgImage(imagemFundo);
-      return;
-    }
+    if (imagemFundo) setBgImage(imagemFundo);
     getConfiguracoes()
       .then((config) => {
-        // Imagem DENTRO do card
-        if (config.banner_cta_imagem?.url) setBgImage(config.banner_cta_imagem.url);
-        // Imagem AO REDOR do card (wrapper) — editável no Wagtail
+        if (!imagemFundo && config.banner_cta_imagem?.url) setBgImage(config.banner_cta_imagem.url);
         if ((config as any).banner_cta_wrapper_imagem?.url)
           setWrapperImage((config as any).banner_cta_wrapper_imagem.url);
+        if ((config as any).banner_logo_parceiro?.url)
+          setLogoParceiroUrl((config as any).banner_logo_parceiro.url);
+        if ((config as any).banner_logo_virtu?.url)
+          setLogoVirtuUrl((config as any).banner_logo_virtu.url);
       })
       .catch(() => {});
   }, [imagemFundo]);
@@ -127,9 +128,9 @@ export default function LeadCaptureSection({
               {titulo}
             </h2>
             <div className="flex items-center justify-center lg:justify-start gap-3 md:gap-5 mt-5 md:mt-8">
-              <Image src="/perplan-logo-white.svg" alt="Perplan" width={200} height={80}
+              <Image src={logoParceiroUrl || '/perplan-logo-white.svg'} alt="Perplan" width={200} height={80}
                 className="object-contain h-[44px] sm:h-[52px] md:h-[64px] w-auto" />
-              <Image src="/virtu-logo-white.svg" alt="virtú" width={85} height={34}
+              <Image src={logoVirtuUrl || '/virtu-logo-white.svg'} alt="virtú" width={85} height={34}
                 className="object-contain h-[22px] sm:h-[26px] md:h-[34px] w-auto" />
             </div>
           </motion.div>

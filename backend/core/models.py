@@ -257,6 +257,20 @@ class ConfiguracaoSite(models.Model):
         help_text="Cor de fundo que aparece nas margens ao redor do card 'Breve Lançamento'. Ex: #f5f6f4 (cinza claro), #ffffff (branco), #1e3d34 (verde escuro)"
     )
 
+    # Logos do banner CTA (Breve Lançamento)
+    banner_logo_parceiro = models.ForeignKey(
+        'wagtailimages.Image', null=True, blank=True,
+        on_delete=models.SET_NULL, related_name='+',
+        verbose_name="Logo do Parceiro (ex: Perplan)",
+        help_text="Logo que aparece à esquerda no banner 'Breve Lançamento'"
+    )
+    banner_logo_virtu = models.ForeignKey(
+        'wagtailimages.Image', null=True, blank=True,
+        on_delete=models.SET_NULL, related_name='+',
+        verbose_name="Logo da virtú no Banner",
+        help_text="Logo da virtú que aparece no banner 'Breve Lançamento' (padrão: virtu-logo-white.svg)"
+    )
+
     # Grafismo decorativo (SVG/imagem que aparece atrás dos formulários)
     grafismo_imagem = models.ForeignKey(
         'wagtailimages.Image',
@@ -348,6 +362,8 @@ class ConfiguracaoSite(models.Model):
         MultiFieldPanel([
             FieldPanel('banner_cta_imagem'),
             FieldPanel('banner_cta_wrapper_imagem'),
+            FieldPanel('banner_logo_parceiro'),
+            FieldPanel('banner_logo_virtu'),
             FieldPanel('grafismo_imagem'),
         ], heading="Banner CTA (Breve Lançamento)"),
         MultiFieldPanel([

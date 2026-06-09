@@ -103,6 +103,12 @@ class ConfiguracaoSerializer(serializers.ModelSerializer):
     def get_banner_cta_wrapper_imagem(self, obj):
         return get_image_url(obj.banner_cta_wrapper_imagem)
 
+    def get_banner_logo_parceiro(self, obj):
+        return get_image_url(obj.banner_logo_parceiro)
+
+    def get_banner_logo_virtu(self, obj):
+        return get_image_url(obj.banner_logo_virtu)
+
 
 class TrackingSerializer(serializers.Serializer):
     """

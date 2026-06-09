@@ -109,7 +109,10 @@ export default function EmpreendimentoDetalhePage() {
             {emp.dormitorios && (
               <div className="flex items-center gap-1.5 md:gap-2 text-virtu-text"><BedDouble className="w-4 h-4 md:w-5 md:h-5 text-virtu-green" /><span className="font-sans text-[11px] md:text-xs">{emp.dormitorios}</span></div>
             )}
-            <div className="flex items-center gap-1.5 md:gap-2 text-virtu-text"><Waves className="w-4 h-4 md:w-5 md:h-5 text-virtu-green" /><span className="font-sans text-[11px] md:text-xs">lazer completo</span></div>
+            {/* lazer_completo vem do campo Características Resumo no Wagtail */}
+            {emp.caracteristicas_resumo && (
+              <div className="flex items-center gap-1.5 md:gap-2 text-virtu-text"><Waves className="w-4 h-4 md:w-5 md:h-5 text-virtu-green" /><span className="font-sans text-[11px] md:text-xs">{emp.caracteristicas_resumo}</span></div>
+            )}
           </div>
         </div>
       </section>
