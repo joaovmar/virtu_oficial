@@ -33,9 +33,6 @@ export default function VideoPlayer({ videoId, title, thumbnailUrl, className = 
           )}
           <div className="absolute inset-0 bg-[rgba(0,0,0,0.55)] group-hover:bg-[rgba(0,0,0,0.45)] transition-colors duration-300" />
           <div className="relative z-10 flex flex-col items-center px-4">
-            <h3 className="text-white font-sans font-semibold text-base sm:text-xl md:text-2xl lg:text-3xl tracking-tight text-center mb-3 md:mb-5 leading-tight">
-              {title}
-            </h3>
             <motion.div
               whileHover={{ scale: 1.12 }}
               whileTap={{ scale: 0.95 }}

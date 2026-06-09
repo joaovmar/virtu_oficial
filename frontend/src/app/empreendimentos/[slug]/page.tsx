@@ -46,7 +46,7 @@ export default function EmpreendimentoDetalhePage() {
     <>
       {/* 1. BANNER */}
       <section className="pt-20 md:pt-24">
-        <div className="mx-3 sm:mx-6 md:mx-10 lg:mx-14 rounded-2xl md:rounded-[44px] overflow-hidden">
+        <div className="mx-6 sm:mx-10 md:mx-16 lg:mx-24 rounded-2xl md:rounded-[44px] overflow-hidden">
           <div className="relative h-[35vh] sm:h-[40vh] md:h-[50vh] lg:h-[55vh] min-h-[200px] max-h-[520px]">
             {(emp.imagem_hero || emp.imagem_principal) ? (
               <Image src={(emp.imagem_hero || emp.imagem_principal)!.url} alt={emp.title} fill className="object-cover" priority />
