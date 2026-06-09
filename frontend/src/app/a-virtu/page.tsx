@@ -102,7 +102,7 @@ export default function SobreNosPage() {
       </section>
 
       {/* 2. Nosso propósito */}
-      <section className="py-14 md:py-20 lg:py-28 bg-white min-h-screen flex items-center">
+      <section className="py-10 md:py-14 lg:py-20 bg-white min-h-[80%] flex items-center">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-12">
           <motion.div
             initial={{ opacity: 0, y: 40 }}
