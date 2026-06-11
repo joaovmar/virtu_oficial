@@ -266,6 +266,9 @@ export interface ConfiguracaoSite {
   youtube: string;
   copyright_texto: string;
   banner_cta_imagem: Imagem | null;
+  banner_cta_wrapper_imagem: Imagem | null;
+  banner_logo_parceiro: Imagem | null;
+  banner_logo_virtu: Imagem | null;
 }
 
 export interface TrackingConfig {

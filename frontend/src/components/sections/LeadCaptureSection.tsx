@@ -14,8 +14,8 @@ interface LeadCaptureSectionProps {
 }
 
 export default function LeadCaptureSection({
-  titulo = 'Casas sobrado na\nregião da Vila do Golfe\nem Ribeirão Preto - SP',
-  subtitulo = 'Breve lançamento',
+  titulo,
+  subtitulo,
   imagemFundo,
   showGrafismo = false,
 }: LeadCaptureSectionProps) {
@@ -32,12 +32,9 @@ export default function LeadCaptureSection({
     getConfiguracoes()
       .then((config) => {
         if (!imagemFundo && config.banner_cta_imagem?.url) setBgImage(config.banner_cta_imagem.url);
-        if ((config as any).banner_cta_wrapper_imagem?.url)
-          setWrapperImage((config as any).banner_cta_wrapper_imagem.url);
-        if ((config as any).banner_logo_parceiro?.url)
-          setLogoParceiroUrl((config as any).banner_logo_parceiro.url);
-        if ((config as any).banner_logo_virtu?.url)
-          setLogoVirtuUrl((config as any).banner_logo_virtu.url);
+        if (config.banner_cta_wrapper_imagem?.url) setWrapperImage(config.banner_cta_wrapper_imagem.url);
+        if (config.banner_logo_parceiro?.url) setLogoParceiroUrl(config.banner_logo_parceiro.url);
+        if (config.banner_logo_virtu?.url) setLogoVirtuUrl(config.banner_logo_virtu.url);
       })
       .catch(() => {});
   }, [imagemFundo]);
@@ -121,18 +118,28 @@ export default function LeadCaptureSection({
             transition={{ duration: 0.5, delay: 0.1 }}
             className="text-white lg:w-[380px] xl:w-[420px] shrink-0 text-center lg:text-left"
           >
-            <span className="font-sans font-normal text-xs md:text-sm lg:text-base tracking-tight mb-1 md:mb-2 block">
-              {subtitulo}
-            </span>
-            <h2 className="font-sans font-light text-lg sm:text-xl md:text-2xl lg:text-3xl leading-tight whitespace-pre-line">
-              {titulo}
-            </h2>
-            <div className="flex items-center justify-center lg:justify-start gap-3 md:gap-5 mt-5 md:mt-8">
-              <Image src={logoParceiroUrl || '/perplan-logo-white.svg'} alt="Perplan" width={200} height={80}
-                className="object-contain h-[44px] sm:h-[52px] md:h-[64px] w-auto" />
-              <Image src={logoVirtuUrl || '/virtu-logo-white.svg'} alt="virtú" width={85} height={34}
-                className="object-contain h-[22px] sm:h-[26px] md:h-[34px] w-auto" />
-            </div>
+            {subtitulo && (
+              <span className="font-sans font-normal text-xs md:text-sm lg:text-base tracking-tight mb-1 md:mb-2 block">
+                {subtitulo}
+              </span>
+            )}
+            {titulo && (
+              <h2 className="font-sans font-light text-lg sm:text-xl md:text-2xl lg:text-3xl leading-tight whitespace-pre-line">
+                {titulo}
+              </h2>
+            )}
+            {(logoParceiroUrl || logoVirtuUrl) && (
+              <div className="flex items-center justify-center lg:justify-start gap-3 md:gap-5 mt-5 md:mt-8">
+                {logoParceiroUrl && (
+                  <Image src={logoParceiroUrl} alt="Parceiro" width={200} height={80}
+                    className="object-contain h-[44px] sm:h-[52px] md:h-[64px] w-auto" />
+                )}
+                {logoVirtuUrl && (
+                  <Image src={logoVirtuUrl} alt="virtú" width={85} height={34}
+                    className="object-contain h-[22px] sm:h-[26px] md:h-[34px] w-auto" />
+                )}
+              </div>
+            )}
           </motion.div>
 
           {/* Direita: formulário — largura maior e centralizado */}

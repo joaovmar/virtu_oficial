@@ -92,6 +92,8 @@ class ConfiguracaoSerializer(serializers.ModelSerializer):
     """
     banner_cta_imagem = serializers.SerializerMethodField()
     banner_cta_wrapper_imagem = serializers.SerializerMethodField()
+    banner_logo_parceiro = serializers.SerializerMethodField()
+    banner_logo_virtu = serializers.SerializerMethodField()
 
     class Meta:
         model = ConfiguracaoSite
