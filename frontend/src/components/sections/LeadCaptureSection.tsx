@@ -87,25 +87,6 @@ export default function LeadCaptureSection({
         {/* Overlay escuro para legibilidade */}
         <div className="absolute inset-0 bg-[rgba(15,30,25,0.72)]" />
 
-        {/* Grafismo decorativo — arcos concêntricos editáveis via showGrafismo */}
-        {showGrafismo && (
-          <div className="absolute inset-0 pointer-events-none z-[2] opacity-[0.10]" aria-hidden>
-            <svg viewBox="0 0 900 600" fill="none"
-              className="absolute right-0 top-0 h-full w-1/2"
-              preserveAspectRatio="xMaxYMid meet">
-              <circle cx="500" cy="300" r="420" stroke="white" strokeWidth="0.6" />
-              <circle cx="500" cy="300" r="330" stroke="white" strokeWidth="0.6" />
-              <circle cx="500" cy="300" r="240" stroke="white" strokeWidth="0.6" />
-              <circle cx="500" cy="300" r="150" stroke="white" strokeWidth="0.6" />
-              <circle cx="500" cy="300" r="70"  stroke="white" strokeWidth="0.6" />
-              <path d="M500 -120 A420 420 0 0 1 920 300" stroke="white" strokeWidth="1.2" fill="none" />
-              <path d="M500 -30  A330 330 0 0 1 830 300" stroke="white" strokeWidth="1"   fill="none" />
-              <line x1="80"  y1="300" x2="920" y2="300" stroke="white" strokeWidth="0.4" />
-              <line x1="500" y1="-120" x2="500" y2="720" stroke="white" strokeWidth="0.4" />
-            </svg>
-          </div>
-        )}
-
         {/* Conteúdo */}
         <div className="relative z-[3] px-6 sm:px-10 lg:px-16 py-10 md:py-14 lg:py-20
           flex flex-col lg:flex-row gap-10 lg:gap-16 xl:gap-24 justify-center items-center">

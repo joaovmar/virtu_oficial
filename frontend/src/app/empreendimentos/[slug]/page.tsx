@@ -212,7 +212,53 @@ export default function EmpreendimentoDetalhePage() {
         </section>
       )}
 
-      {/* 9. FOTOS DA OBRA — com lightbox ao clicar */}
+      {/* 10. LOCALIZAÇÃO — Google Maps embed */}
+      {(emp.latitude && emp.longitude) || emp.endereco ? (
+        <section className="py-8 md:py-10 lg:py-14 bg-[#f5f6f4]">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 className="font-sans font-light text-lg md:text-2xl text-virtu-dark text-center mb-6 md:mb-10 tracking-tight">
+              Localização
+            </h2>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+              className="relative rounded-2xl md:rounded-[32px] overflow-hidden shadow-lg"
+              style={{ height: 'clamp(300px, 45vh, 500px)' }}
+            >
+              <iframe
+                title={`Localização ${emp.title}`}
+                width="100%"
+                height="100%"
+                style={{ border: 0 }}
+                loading="lazy"
+                allowFullScreen
+                referrerPolicy="no-referrer-when-downgrade"
+                src={
+                  emp.latitude && emp.longitude
+                    ? `https://www.google.com/maps?q=${emp.latitude},${emp.longitude}&z=15&output=embed`
+                    : `https://www.google.com/maps?q=${encodeURIComponent(emp.endereco || emp.localizacao || emp.title)}&output=embed`
+                }
+              />
+              {/* Card de endereço sobreposto */}
+              {(emp.endereco || emp.localizacao) && (
+                <div className="absolute bottom-4 left-4 bg-white/95 backdrop-blur-sm rounded-xl px-4 py-3 shadow-md max-w-[280px]">
+                  <p className="font-sans font-semibold text-[12px] text-virtu-green mb-0.5">Endereço</p>
+                  <p className="font-sans text-[12px] text-virtu-dark leading-snug">
+                    {emp.endereco || emp.localizacao}
+                  </p>
+                  {emp.bairro && (
+                    <p className="font-sans text-[11px] text-virtu-muted mt-0.5">{emp.bairro}</p>
+                  )}
+                </div>
+              )}
+            </motion.div>
+          </div>
+        </section>
+      ) : null}
+
+      {/* 11. FOTOS DA OBRA — com lightbox ao clicar */}
       {emp.fotos_obra && emp.fotos_obra.length > 0 && (
         <section className="py-8 md:py-10 lg:py-14 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
