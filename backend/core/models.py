@@ -11,6 +11,7 @@ from wagtail import blocks
 from wagtail.images.blocks import ImageChooserBlock
 
 from modelcluster.fields import ParentalKey, ParentalManyToManyField
+from modelcluster.models import ClusterableModel
 
 
 # =============================================================================
@@ -1096,7 +1097,7 @@ class BlogPage(FrontendPreviewMixin, Page):
 # =============================================================================
 
 @register_snippet
-class CategoriaContato(models.Model):
+class CategoriaContato(ClusterableModel):
     """Categoria do formulário de Fale Conosco"""
     nome = models.CharField(max_length=100, verbose_name="Nome da Categoria")
     slug = models.SlugField(unique=True, verbose_name="Slug")
