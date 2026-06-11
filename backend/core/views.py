@@ -13,6 +13,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
 from .models import (
     Cidade, StatusEmpreendimento, Diferencial, Depoimento, ConfiguracaoSite,
     HomePage, EmpreendimentoPage, EmpreendimentosIndexPage, SobreNosPage, ContatoPage,
+    PoliticaPrivacidadePage, CategoriaContato, ContatoFormulario,
     Planta, GaleriaImagem, AndamentoObra, FotoObra,
     Lead, Newsletter
 )
@@ -431,3 +432,114 @@ class DepoimentoAdminViewSet(viewsets.ModelViewSet):
     queryset = Depoimento.objects.all()
     serializer_class = DepoimentoSerializer
     permission_classes = [IsAdminUser]
+
+
+# =============================================================================
+# FALE CONOSCO — Categorias dinâmicas
+# =============================================================================
+
+class CategoriasContatoView(APIView):
+    """API pública: Lista categorias ativas com seus campos"""
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        categorias = CategoriaContato.objects.filter(ativo=True)
+        data = []
+        for cat in categorias:
+            campos = []
+            for campo in cat.campos.all().order_by('sort_order'):
+                campos.append({
+                    'label': campo.label,
+                    'tipo': campo.tipo,
+                    'placeholder': campo.placeholder,
+                    'obrigatorio': campo.obrigatorio,
+                    'opcoes': [o.strip() for o in campo.opcoes.split('\n') if o.strip()] if campo.opcoes else [],
+                })
+            data.append({
+                'id': cat.id,
+                'nome': cat.nome,
+                'slug': cat.slug,
+                'campos': campos,
+            })
+        return Response(data)
+
+
+class ContatoFormularioCreateView(APIView):
+    """API pública: Recebe formulário do Fale Conosco e envia e-mail para a categoria"""
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        import threading
+        from django.core.mail import send_mail
+        from django.conf import settings
+
+        categoria_id = request.data.get('categoria_id')
+        nome = request.data.get('nome', '')
+        email = request.data.get('email', '')
+        telefone = request.data.get('telefone', '')
+        dados = request.data.get('dados', {})
+
+        if not nome or not email:
+            return Response({'error': 'Nome e e-mail são obrigatórios.'}, status=400)
+
+        categoria = None
+        email_destino = None
+        if categoria_id:
+            try:
+                categoria = CategoriaContato.objects.get(id=categoria_id, ativo=True)
+                email_destino = categoria.email_destino
+            except CategoriaContato.DoesNotExist:
+                pass
+
+        # Salva no banco
+        formulario = ContatoFormulario.objects.create(
+            categoria=categoria,
+            nome=nome,
+            email=email,
+            telefone=telefone,
+            dados=dados,
+            email_enviado_para=email_destino or '',
+        )
+
+        # Envia e-mail em background
+        if email_destino:
+            def enviar():
+                try:
+                    linhas = [f"Nome: {nome}", f"E-mail: {email}"]
+                    if telefone:
+                        linhas.append(f"Telefone: {telefone}")
+                    if categoria:
+                        linhas.append(f"Categoria: {categoria.nome}")
+                    for campo, valor in (dados or {}).items():
+                        linhas.append(f"{campo}: {valor}")
+                    corpo = "\n".join(linhas)
+                    send_mail(
+                        subject=f"[Fale Conosco] {categoria.nome if categoria else 'Contato'} — {nome}",
+                        message=corpo,
+                        from_email=getattr(settings, 'DEFAULT_FROM_EMAIL', 'noreply@virtu.com.br'),
+                        recipient_list=[email_destino],
+                        fail_silently=True,
+                    )
+                except Exception:
+                    pass
+            threading.Thread(target=enviar, daemon=True).start()
+
+        return Response({'message': 'Formulário enviado com sucesso.', 'id': formulario.id}, status=201)
+
+
+class PoliticaPrivacidadeView(APIView):
+    """API pública: Conteúdo da página de Política de Privacidade"""
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        try:
+            page = PoliticaPrivacidadePage.objects.live().first()
+            if not page:
+                return Response({'error': 'Página não encontrada'}, status=404)
+            return Response({
+                'titulo': page.hero_titulo,
+                'ultima_atualizacao': page.ultima_atualizacao,
+                'conteudo': page.conteudo,
+            })
+        except Exception as e:
+            return Response({'error': str(e)}, status=500)

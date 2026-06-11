@@ -551,7 +551,7 @@ class HomePage(FrontendPreviewMixin, Page):
         ], heading="Vídeo Institucional"),
     ]
 
-    subpage_types = ['EmpreendimentosIndexPage', 'SobreNosPage', 'ContatoPage', 'BlogIndexPage']
+    subpage_types = ['EmpreendimentosIndexPage', 'SobreNosPage', 'ContatoPage', 'BlogIndexPage', 'PoliticaPrivacidadePage']
 
     class Meta:
         verbose_name = "Página Inicial"
@@ -1089,6 +1089,151 @@ class BlogPage(FrontendPreviewMixin, Page):
     class Meta:
         verbose_name = "Post do Blog"
         ordering = ['-data']
+
+
+# =============================================================================
+# FALE CONOSCO - Categorias de Formulário com campos dinâmicos
+# =============================================================================
+
+@register_snippet
+class CategoriaContato(models.Model):
+    """Categoria do formulário de Fale Conosco"""
+    nome = models.CharField(max_length=100, verbose_name="Nome da Categoria")
+    slug = models.SlugField(unique=True, verbose_name="Slug")
+    email_destino = models.EmailField(
+        verbose_name="E-mail de Destino",
+        help_text="Para qual e-mail os formulários desta categoria serão enviados"
+    )
+    ativo = models.BooleanField(default=True, verbose_name="Ativo")
+    ordem = models.PositiveIntegerField(default=0, verbose_name="Ordem")
+
+    class Meta:
+        verbose_name = "Categoria de Contato"
+        verbose_name_plural = "Categorias de Contato"
+        ordering = ['ordem', 'nome']
+
+    def __str__(self):
+        return self.nome
+
+    panels = [
+        FieldPanel('nome'),
+        FieldPanel('slug'),
+        FieldPanel('email_destino'),
+        FieldPanel('ativo'),
+        FieldPanel('ordem'),
+        InlinePanel('campos', label="Campos do Formulário"),
+    ]
+
+
+class CampoCategoriaContato(Orderable):
+    """Campo dinâmico de uma categoria de contato"""
+    TIPO_CHOICES = [
+        ('texto', 'Texto curto'),
+        ('textarea', 'Texto longo'),
+        ('email', 'E-mail'),
+        ('telefone', 'Telefone'),
+        ('select', 'Seleção (dropdown)'),
+        ('checkbox', 'Checkbox (sim/não)'),
+    ]
+
+    categoria = ParentalKey(
+        CategoriaContato,
+        on_delete=models.CASCADE,
+        related_name='campos'
+    )
+    label = models.CharField(max_length=100, verbose_name="Label do Campo")
+    tipo = models.CharField(max_length=20, choices=TIPO_CHOICES, default='texto', verbose_name="Tipo")
+    placeholder = models.CharField(max_length=200, blank=True, verbose_name="Placeholder")
+    obrigatorio = models.BooleanField(default=True, verbose_name="Obrigatório")
+    opcoes = models.TextField(
+        blank=True,
+        verbose_name="Opções (para Seleção)",
+        help_text="Uma opção por linha. Apenas para tipo 'Seleção'"
+    )
+
+    panels = [
+        FieldRowPanel([
+            FieldPanel('label'),
+            FieldPanel('tipo'),
+        ]),
+        FieldPanel('placeholder'),
+        FieldRowPanel([
+            FieldPanel('obrigatorio'),
+        ]),
+        FieldPanel('opcoes'),
+    ]
+
+    class Meta:
+        verbose_name = "Campo do Formulário"
+        verbose_name_plural = "Campos do Formulário"
+
+    def __str__(self):
+        return f"{self.label} ({self.tipo})"
+
+
+@register_snippet
+class ContatoFormulario(models.Model):
+    """Formulário preenchido pelo usuário no Fale Conosco"""
+    categoria = models.ForeignKey(
+        CategoriaContato, null=True, blank=True,
+        on_delete=models.SET_NULL,
+        verbose_name="Categoria"
+    )
+    nome = models.CharField(max_length=200, verbose_name="Nome")
+    email = models.EmailField(verbose_name="E-mail")
+    telefone = models.CharField(max_length=20, blank=True, verbose_name="Telefone")
+    dados = models.JSONField(default=dict, verbose_name="Dados do Formulário")
+    email_enviado_para = models.EmailField(blank=True, verbose_name="E-mail Enviado Para")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Data")
+    lido = models.BooleanField(default=False, verbose_name="Lido")
+
+    panels = [
+        FieldRowPanel([FieldPanel('nome'), FieldPanel('email')]),
+        FieldRowPanel([FieldPanel('telefone'), FieldPanel('categoria')]),
+        FieldPanel('dados', read_only=True),
+        FieldRowPanel([FieldPanel('email_enviado_para'), FieldPanel('lido')]),
+    ]
+
+    class Meta:
+        verbose_name = "Formulário Recebido"
+        verbose_name_plural = "Formulários Recebidos"
+        ordering = ['-created_at']
+
+    def __str__(self):
+        cat = self.categoria.nome if self.categoria else 'Sem categoria'
+        return f"{self.nome} — {cat} ({self.created_at.strftime('%d/%m/%Y')})"
+
+
+# =============================================================================
+# PÁGINA DE POLÍTICA DE PRIVACIDADE
+# =============================================================================
+
+class PoliticaPrivacidadePage(FrontendPreviewMixin, Page):
+    """Página de Política de Privacidade — totalmente editável no Wagtail"""
+    hero_titulo = models.CharField(
+        max_length=200, default="Política de Privacidade",
+        verbose_name="Título"
+    )
+    ultima_atualizacao = models.DateField(
+        null=True, blank=True,
+        verbose_name="Data da Última Atualização"
+    )
+    conteudo = RichTextField(
+        verbose_name="Conteúdo",
+        help_text="Texto completo da política de privacidade. Use a formatação do editor para títulos, listas etc."
+    )
+
+    content_panels = Page.content_panels + [
+        FieldPanel('hero_titulo'),
+        FieldPanel('ultima_atualizacao'),
+        FieldPanel('conteudo'),
+    ]
+
+    parent_page_types = ['HomePage']
+    subpage_types = []
+
+    class Meta:
+        verbose_name = "Política de Privacidade"
 
 
 # =============================================================================
