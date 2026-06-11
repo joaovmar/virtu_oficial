@@ -131,12 +131,12 @@ export default function LeadCaptureSection({
             {(logoParceiroUrl || logoVirtuUrl) && (
               <div className="flex items-center justify-center lg:justify-start gap-3 md:gap-5 mt-5 md:mt-8">
                 {logoParceiroUrl && (
-                  <Image src={logoParceiroUrl} alt="Parceiro" width={200} height={80}
-                    className="object-contain h-[44px] sm:h-[52px] md:h-[64px] w-auto" />
+                  <Image src={logoParceiroUrl} alt="Parceiro" width={160} height={50}
+                    className="object-contain h-[38px] sm:h-[44px] md:h-[50px] w-auto" />
                 )}
                 {logoVirtuUrl && (
-                  <Image src={logoVirtuUrl} alt="virtú" width={85} height={34}
-                    className="object-contain h-[22px] sm:h-[26px] md:h-[34px] w-auto" />
+                  <Image src={logoVirtuUrl} alt="virtú" width={160} height={50}
+                    className="object-contain h-[38px] sm:h-[44px] md:h-[50px] w-auto" />
                 )}
               </div>
             )}
