@@ -31,8 +31,12 @@ export default function PoliticaPrivacidadePage() {
 
   if (!data) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-virtu-muted font-sans text-[14px]">Página não disponível no momento.</p>
+      <div className="min-h-screen flex flex-col items-center justify-center pt-20 px-4">
+        <h1 className="font-sans font-bold text-2xl text-virtu-dark mb-3">Política de Privacidade</h1>
+        <p className="text-virtu-muted font-sans text-[14px] text-center max-w-md">
+          Esta página ainda não foi configurada.<br />
+          <span className="text-[12px] mt-1 block">Acesse o Wagtail → Páginas → Adicionar Página Filha → Política de Privacidade.</span>
+        </p>
       </div>
     );
   }

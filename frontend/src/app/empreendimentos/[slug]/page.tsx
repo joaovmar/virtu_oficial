@@ -237,8 +237,8 @@ export default function EmpreendimentoDetalhePage() {
                 referrerPolicy="no-referrer-when-downgrade"
                 src={
                   emp.latitude && emp.longitude
-                    ? `https://www.google.com/maps?q=${emp.latitude},${emp.longitude}&z=15&output=embed`
-                    : `https://www.google.com/maps?q=${encodeURIComponent(emp.endereco || emp.localizacao || emp.title)}&output=embed`
+                    ? `https://maps.google.com/maps?q=${emp.latitude},${emp.longitude}&z=15&output=embed&hl=pt-BR`
+                    : `https://maps.google.com/maps?q=${encodeURIComponent((emp.endereco || emp.localizacao || '') + (emp.cidade ? ', ' + emp.cidade.nome + ' - ' + emp.cidade.estado : ''))}&z=15&output=embed&hl=pt-BR`
                 }
               />
               {/* Card de endereço sobreposto */}
