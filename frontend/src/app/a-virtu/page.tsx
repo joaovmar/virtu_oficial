@@ -71,9 +71,11 @@ export default function SobreNosPage() {
 
   return (
     <>
-      {/* 1. HERO — Banner maior */}
-      <section className="relative pt-20 md:pt-24 min-h-[350px]">
-        <div className="relative mx-3 sm:mx-6 md:mx-10 lg:mx-14 h-[60vh] sm:h-[65vh] md:h-[75vh] min-h-[400px] rounded-2xl md:rounded-[44px] overflow-hidden flex flex-col items-center justify-end pb-10 md:pb-14">
+      {/* 1. HERO — Mobile: tela inteira sem margens. Desktop: banner com margens */}
+      <section className="relative pt-0 sm:pt-20 md:pt-24">
+        {/* Espaçador do navbar só no mobile */}
+        <div className="block sm:hidden h-16" />
+        <div className="relative mx-0 sm:mx-6 md:mx-10 lg:mx-14 h-[calc(100svh-4rem)] sm:h-[60vh] md:h-[75vh] min-h-[500px] sm:min-h-[400px] rounded-none sm:rounded-2xl md:rounded-[44px] overflow-hidden flex flex-col items-center justify-end pb-10 md:pb-14">
           <Image src={data?.hero_imagem?.url || '/hero-bg.jpg'} alt="A virtú" fill className="object-cover" priority />
           <div className="absolute inset-0 bg-black/30" />
         <div className="relative z-10 text-center">
@@ -109,20 +111,20 @@ export default function SobreNosPage() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-80px' }}
             transition={{ duration: 0.65 }}
-            className="flex flex-col lg:flex-row gap-8 lg:gap-16 items-center"
+            className="flex flex-col lg:flex-row gap-4 sm:gap-6 lg:gap-16 items-center"
           >
             {/* Esquerda: Nosso (cima) + propósito (baixo) */}
             <div className="shrink-0 lg:w-[220px] text-left">
-              <p className="font-sans font-extralight text-2xl md:text-3xl text-virtu-dark leading-none">
+              <p className="font-sans font-extralight text-xl sm:text-2xl md:text-3xl text-virtu-dark leading-none">
                 Nosso
               </p>
-              <p className="font-display font-medium italic text-4xl md:text-5xl lg:text-6xl text-virtu-gold leading-tight">
+              <p className="font-display font-medium italic text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-virtu-gold leading-tight">
                 propósito
               </p>
             </div>
             {/* Direita: texto */}
             <div
-              className="flex-1 font-sans font-light text-[14px] md:text-[15px] lg:text-[16px] text-virtu-dark leading-relaxed md:leading-[1.9] tracking-tight [&_p]:mb-5"
+              className="flex-1 font-sans font-light text-[13px] sm:text-[14px] md:text-[15px] lg:text-[16px] text-virtu-dark leading-relaxed md:leading-[1.9] tracking-tight [&_p]:mb-3 sm:[&_p]:mb-5"
               dangerouslySetInnerHTML={{ __html: data?.historia_texto || '<p>A virtú nasce da união de profissionais com mais de duas décadas de atuação na construção civil, sustentada por parcerias sólidas e por uma trajetória marcada pela excelência.</p><p>Somos uma incorporadora e urbanizadora dedicada ao segmento de médio e alto padrão, com projetos que unem funcionalidade, elegância e exclusividade.</p>' }}
             />
           </motion.div>

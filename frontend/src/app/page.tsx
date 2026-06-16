@@ -126,19 +126,19 @@ export default function HomePage() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="flex flex-col lg:flex-row gap-6 lg:gap-16 items-start mb-10 md:mb-14 lg:mb-16"
+            className="flex flex-col lg:flex-row gap-4 sm:gap-6 lg:gap-16 items-start mb-8 sm:mb-10 md:mb-14 lg:mb-16"
           >
             <div className="lg:w-[300px] shrink-0">
-              <p className="font-sans font-extralight text-xl md:text-2xl lg:text-3xl text-virtu-dark leading-none">
+              <p className="font-sans font-extralight text-lg sm:text-xl md:text-2xl lg:text-3xl text-virtu-dark leading-none">
                 {data?.secao_futuro_titulo || ''}
               </p>
-              <p className="font-display font-medium italic text-5xl md:text-6xl lg:text-8xl text-virtu-gold leading-[0.85] -mt-1">
+              <p className="font-display font-medium italic text-4xl sm:text-5xl md:text-6xl lg:text-8xl text-virtu-gold leading-[0.85] -mt-1">
                 futuro
               </p>
             </div>
-            <div className="flex-1">
+            <div className="flex-1 mt-2 sm:mt-3 lg:mt-0">
               {data?.secao_futuro_texto && (
-                <div className="font-sans font-light text-sm md:text-base text-virtu-dark leading-relaxed tracking-tight [&_p]:mb-4"
+                <div className="font-sans font-light text-sm md:text-base text-virtu-dark leading-relaxed tracking-tight [&_p]:mb-3 sm:[&_p]:mb-4"
                   dangerouslySetInnerHTML={{ __html: data.secao_futuro_texto }} />
               )}
             </div>
@@ -151,13 +151,13 @@ export default function HomePage() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.7, delay: 0.1 }}
-              className="relative w-full h-[220px] sm:h-[280px] md:h-[360px] lg:h-[420px] rounded-2xl md:rounded-[44px] overflow-hidden"
+              className="relative w-full h-[180px] sm:h-[220px] md:h-[360px] lg:h-[420px] rounded-2xl md:rounded-[44px] overflow-hidden"
             >
               <Image src={data.banner_institucional_imagem.url} alt="" fill className="object-cover" />
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-black/50" />
               {data.banner_institucional_texto && (
                 <div className="absolute inset-y-0 right-0 flex items-center pr-4 sm:pr-8 md:pr-14 max-w-[55%] md:max-w-[45%]">
-                  <h3 className="text-white font-sans font-light text-base sm:text-lg md:text-2xl lg:text-3xl text-right leading-tight tracking-tight">
+                  <h3 className="text-white font-sans font-light text-sm sm:text-base md:text-2xl lg:text-3xl text-right leading-tight tracking-tight">
                     {data.banner_institucional_texto}
                   </h3>
                 </div>
@@ -168,10 +168,10 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 3. Vídeo + "Todos os caminhos" */}
-      <section className="py-8 md:py-10 lg:py-14 bg-white overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12">
-          <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-14">
+      {/* 3. Vídeo + "Todos os caminhos" — mobile: vídeo embaixo do texto */}
+      <section className="py-8 md:py-10 lg:py-14 bg-white overflow-hidden min-h-screen flex items-center">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 w-full">
+          <div className="flex flex-col-reverse lg:flex-row items-center gap-6 sm:gap-8 lg:gap-14">
             <motion.div
               initial={{ opacity: 0, x: -40 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -179,7 +179,7 @@ export default function HomePage() {
               transition={{ duration: 0.6 }}
               className="lg:w-[280px] shrink-0 text-center lg:text-left"
             >
-              <h2 className="font-sans font-extralight text-2xl md:text-3xl lg:text-4xl text-virtu-green leading-[1.15]">
+              <h2 className="font-sans font-extralight text-xl sm:text-2xl md:text-3xl lg:text-4xl text-virtu-green leading-[1.15]">
                 Todos os<br />caminhos<br />se conectam<br />a <span className="font-bold text-virtu-green-dark">virtú.</span>
               </h2>
             </motion.div>
