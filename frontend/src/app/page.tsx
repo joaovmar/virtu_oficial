@@ -116,8 +116,8 @@ export default function HomePage() {
         )}
       </section>
 
-      {/* 2. "Pensamos no futuro" + Banner institucional — mesma blocagem */}
-      <section className="py-10 md:py-14 lg:py-20 bg-white min-h-screen flex items-center">
+      {/* 2. "Pensamos no futuro" + Banner institucional */}
+      <section className="py-10 md:py-14 lg:py-20 bg-white md:min-h-screen md:flex md:items-center">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 w-full">
 
           {/* Textos */}
@@ -168,8 +168,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 3. Vídeo + "Todos os caminhos" — mobile: vídeo embaixo do texto */}
-      <section className="py-8 md:py-10 lg:py-14 bg-white overflow-hidden min-h-screen flex items-center">
+      {/* 3. Vídeo + "Todos os caminhos" */}
+      <section className="py-8 md:py-10 lg:py-14 bg-white overflow-hidden md:min-h-screen md:flex md:items-center">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 w-full">
           <div className="flex flex-col-reverse lg:flex-row items-center gap-6 sm:gap-8 lg:gap-14">
             <motion.div
