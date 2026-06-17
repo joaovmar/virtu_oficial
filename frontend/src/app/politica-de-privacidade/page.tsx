@@ -16,7 +16,14 @@ export default function PoliticaPrivacidadePage() {
 
   useEffect(() => {
     api.get('/politica-privacidade/')
-      .then(r => setData(r.data))
+      .then(r => {
+        const d = r.data;
+        // Remove atributos data-block-key gerados pelo Wagtail RichTextField
+        if (d?.conteudo) {
+          d.conteudo = d.conteudo.replace(/ data-block-key="[^"]*"/g, '');
+        }
+        setData(d);
+      })
       .catch(() => setData(null))
       .finally(() => setLoading(false));
   }, []);
