@@ -528,18 +528,18 @@ class ContatoFormularioCreateView(APIView):
 
 
 class PoliticaPrivacidadeView(APIView):
-    """API pública: Conteúdo da página de Política de Privacidade"""
     permission_classes = [AllowAny]
 
     def get(self, request):
         try:
+            from wagtail.rich_text import expand_db_html
             page = PoliticaPrivacidadePage.objects.live().first()
             if not page:
                 return Response({'error': 'Página não encontrada'}, status=404)
             return Response({
                 'titulo': page.hero_titulo,
                 'ultima_atualizacao': page.ultima_atualizacao,
-                'conteudo': page.conteudo,
+                'conteudo': expand_db_html(page.conteudo),
             })
         except Exception as e:
             return Response({'error': str(e)}, status=500)
