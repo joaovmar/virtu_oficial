@@ -305,6 +305,10 @@ export interface EmpreendimentosIndexConfig {
   hero_imagem: Imagem | null;
   form_titulo: string;
   secao_projetos_titulo: string;
+  banner_label: string;
+  banner_texto: string;
+  banner_logo_parceiro: Imagem | null;
+  banner_logo_virtu: Imagem | null;
 }
 
 export async function getEmpreendimentosConfig(): Promise<EmpreendimentosIndexConfig> {

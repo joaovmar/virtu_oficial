@@ -575,6 +575,27 @@ class EmpreendimentosIndexPage(FrontendPreviewMixin, Page):
         max_length=100, default="Conheça nossos projetos",
         verbose_name="Título da Seção de Projetos"
     )
+    # Banner hero — conteúdo editável
+    banner_label = models.CharField(
+        max_length=100, blank=True,
+        default="Breve lançamento",
+        verbose_name="Label do Banner (ex: Breve lançamento)"
+    )
+    banner_texto = models.TextField(
+        blank=True,
+        verbose_name="Texto/Título do Banner",
+        help_text="Título principal que aparece no hero. Ex: Casas sobrado na região da Vila do Golfe"
+    )
+    banner_logo_parceiro = models.ForeignKey(
+        'wagtailimages.Image', null=True, blank=True,
+        on_delete=models.SET_NULL, related_name='+',
+        verbose_name="Logo do Parceiro (ex: Perplan)"
+    )
+    banner_logo_virtu = models.ForeignKey(
+        'wagtailimages.Image', null=True, blank=True,
+        on_delete=models.SET_NULL, related_name='+',
+        verbose_name="Logo da virtú no Banner"
+    )
 
     content_panels = Page.content_panels + [
         MultiFieldPanel([
@@ -582,6 +603,12 @@ class EmpreendimentosIndexPage(FrontendPreviewMixin, Page):
             FieldPanel('hero_subtitulo'),
             FieldPanel('hero_imagem'),
         ], heading="Hero"),
+        MultiFieldPanel([
+            FieldPanel('banner_label'),
+            FieldPanel('banner_texto'),
+            FieldPanel('banner_logo_parceiro'),
+            FieldPanel('banner_logo_virtu'),
+        ], heading="Conteúdo do Banner"),
         FieldPanel('form_titulo'),
         FieldPanel('secao_projetos_titulo'),
     ]

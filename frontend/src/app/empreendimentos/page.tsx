@@ -56,18 +56,28 @@ export default function EmpreendimentosPage() {
                 transition={{ delay: 0.15, duration: 0.5 }}
                 className="text-white text-center lg:text-left"
               >
-                <span className="font-sans font-normal text-xs md:text-sm tracking-tight mb-2 block opacity-90">
-                  Breve lançamento
-                </span>
-                <h1 className="font-sans font-light text-[24px] sm:text-[28px] md:text-[30px] lg:text-[32px] leading-tight mb-6 md:mb-8">
-                  Casas sobrado na<br />região da Vila do Golfe<br />em Ribeirão Preto - SP
-                </h1>
-                <div className="flex items-center justify-center lg:justify-start gap-4 md:gap-6">
-                  <Image src="/perplan-logo-white.svg" alt="Perplan" width={160} height={65}
-                    className="object-contain h-[32px] sm:h-[40px] md:h-[52px] w-auto" />
-                  <Image src="/virtu-logo-white.svg" alt="virtú" width={85} height={34}
-                    className="object-contain h-[18px] sm:h-[22px] md:h-[30px] w-auto" />
-                </div>
+                {pageConfig?.banner_label && (
+                  <span className="font-sans font-normal text-xs md:text-sm tracking-tight mb-2 block opacity-90">
+                    {pageConfig.banner_label}
+                  </span>
+                )}
+                {pageConfig?.banner_texto && (
+                  <h1 className="font-sans font-light text-[24px] sm:text-[28px] md:text-[30px] lg:text-[32px] leading-tight mb-6 md:mb-8 whitespace-pre-line">
+                    {pageConfig.banner_texto}
+                  </h1>
+                )}
+                {(pageConfig?.banner_logo_parceiro || pageConfig?.banner_logo_virtu) && (
+                  <div className="flex items-center justify-center lg:justify-start gap-4 md:gap-6">
+                    {pageConfig.banner_logo_parceiro && (
+                      <Image src={pageConfig.banner_logo_parceiro.url} alt="Parceiro" width={160} height={65}
+                        className="object-contain h-[32px] sm:h-[40px] md:h-[52px] w-auto" />
+                    )}
+                    {pageConfig.banner_logo_virtu && (
+                      <Image src={pageConfig.banner_logo_virtu.url} alt="virtú" width={85} height={34}
+                        className="object-contain h-[18px] sm:h-[22px] md:h-[30px] w-auto" />
+                    )}
+                  </div>
+                )}
               </motion.div>
 
               {/* Formulário direito */}

@@ -381,14 +381,26 @@ class SobreNosSerializer(serializers.ModelSerializer):
 
 class EmpreendimentosIndexPageSerializer(serializers.ModelSerializer):
     hero_imagem = serializers.SerializerMethodField()
+    banner_logo_parceiro = serializers.SerializerMethodField()
+    banner_logo_virtu = serializers.SerializerMethodField()
 
     class Meta:
         from .models import EmpreendimentosIndexPage
         model = EmpreendimentosIndexPage
-        fields = ['hero_titulo', 'hero_subtitulo', 'hero_imagem', 'form_titulo', 'secao_projetos_titulo']
+        fields = [
+            'hero_titulo', 'hero_subtitulo', 'hero_imagem', 'form_titulo',
+            'secao_projetos_titulo', 'banner_label', 'banner_texto',
+            'banner_logo_parceiro', 'banner_logo_virtu',
+        ]
 
     def get_hero_imagem(self, obj):
         return get_image_url(obj.hero_imagem)
+
+    def get_banner_logo_parceiro(self, obj):
+        return get_image_url(obj.banner_logo_parceiro)
+
+    def get_banner_logo_virtu(self, obj):
+        return get_image_url(obj.banner_logo_virtu)
 
 
 class LeadSerializer(serializers.ModelSerializer):
