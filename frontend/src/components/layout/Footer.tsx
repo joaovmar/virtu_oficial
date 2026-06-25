@@ -82,7 +82,7 @@ export default function Footer() {
             <a href={`mailto:${email}`} className="font-sans font-semibold text-[11px] tracking-tight text-virtu-muted hover:text-virtu-green transition-colors duration-300">{email}</a>
             <a href={`tel:${telefone.replace(/\D/g, '')}`} className="font-sans font-semibold text-[11px] tracking-tight text-virtu-muted hover:text-virtu-green transition-colors duration-300">{telefone}</a>
             <Link href="/contato" className="font-sans font-semibold text-[11px] tracking-tight text-virtu-muted hover:text-virtu-green transition-colors duration-300">Fale conosco</Link>
-            <Link href="/politica-privacidade" className="font-sans font-semibold text-[11px] tracking-tight text-virtu-muted hover:text-virtu-green transition-colors duration-300">Política de privacidade</Link>
+            <Link href="/politica-de-privacidade" className="font-sans font-semibold text-[11px] tracking-tight text-virtu-muted hover:text-virtu-green transition-colors duration-300">Política de privacidade</Link>
           </div>
           
           <p className="font-sans text-[11px] tracking-tight text-virtu-light mb-2">Acompanhe a virtú!</p>
@@ -130,7 +130,7 @@ export default function Footer() {
               <a href={`mailto:${email}`} className="font-sans font-semibold text-sm tracking-tight text-virtu-muted hover:text-virtu-green transition-colors duration-300">{email}</a>
               <a href={`tel:${telefone.replace(/\D/g, '')}`} className="font-sans font-semibold text-sm tracking-tight text-virtu-muted hover:text-virtu-green transition-colors duration-300">{telefone}</a>
               <Link href="/contato" className="font-sans font-semibold text-sm tracking-tight text-virtu-muted hover:text-virtu-green transition-colors duration-300">Fale conosco</Link>
-              <Link href="/politica-privacidade" className="font-sans font-semibold text-sm tracking-tight text-virtu-muted hover:text-virtu-green transition-colors duration-300">Política de privacidade</Link>
+              <Link href="/politica-de-privacidade" className="font-sans font-semibold text-sm tracking-tight text-virtu-muted hover:text-virtu-green transition-colors duration-300">Política de privacidade</Link>
             </div>
           </div>
           
