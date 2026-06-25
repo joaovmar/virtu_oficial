@@ -9,6 +9,11 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
+from rest_framework.authentication import SessionAuthentication
+
+class CsrfExemptSessionAuthentication(SessionAuthentication):
+    def enforce_csrf(self, request):
+        return  # CSRF isento para API pública
 
 from .models import (
     Cidade, StatusEmpreendimento, Diferencial, Depoimento, ConfiguracaoSite,
@@ -467,6 +472,7 @@ class CategoriasContatoView(APIView):
 class ContatoFormularioCreateView(APIView):
     """API pública: Recebe formulário do Fale Conosco e envia e-mail para a categoria"""
     permission_classes = [AllowAny]
+    authentication_classes = [CsrfExemptSessionAuthentication]
 
     def post(self, request):
         import threading
@@ -532,14 +538,17 @@ class PoliticaPrivacidadeView(APIView):
 
     def get(self, request):
         try:
-            from wagtail.rich_text import expand_db_html
             page = PoliticaPrivacidadePage.objects.live().first()
             if not page:
                 return Response({'error': 'Página não encontrada'}, status=404)
+            import re
+            conteudo = str(page.conteudo)
+            # Remove atributos data-block-key do Wagtail
+            conteudo = re.sub(r' data-block-key="[^"]*"', '', conteudo)
             return Response({
                 'titulo': page.hero_titulo,
                 'ultima_atualizacao': page.ultima_atualizacao,
-                'conteudo': expand_db_html(page.conteudo),
+                'conteudo': conteudo,
             })
         except Exception as e:
             return Response({'error': str(e)}, status=500)
