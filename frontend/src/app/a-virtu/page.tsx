@@ -131,8 +131,8 @@ export default function SobreNosPage() {
         </div>
       </section>
 
-      {/* 3. Vídeo */}
-      <section className="py-10 md:py-12 lg:py-16 bg-white">
+      {/* 3. Vídeo — sem espaçamento extra */}
+      <section className="pb-10 md:pb-12 lg:pb-16 bg-white">
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
