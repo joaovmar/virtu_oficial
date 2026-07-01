@@ -21,7 +21,7 @@ CSRF_COOKIE_SECURE = config('SESSION_COOKIE_SECURE', default=False, cast=bool)
 # CSRF trusted origins — necessário quando Nginx faz proxy
 CSRF_TRUSTED_ORIGINS = config(
     'CSRF_TRUSTED_ORIGINS',
-    default='https://brio-staging-web.com.br,https://virtu.com.br,https://www.virtu.com.br,http://localhost:8088',
+    default='https://virtuincorp.com.br,https://www.virtuincorp.com.br,https://virtu.com.br,https://www.virtu.com.br,http://localhost:8088',
     cast=Csv()
 )
 
@@ -87,7 +87,7 @@ LOGGING = {
 }
 
 # --- SEGURANCA: DOMINIOS PERMITIDOS ---
-ALLOWED_HOSTS = ['brio-staging-web.com.br', 'localhost', '127.0.0.1', '*']
+ALLOWED_HOSTS = ['virtuincorp.com.br', 'www.virtuincorp.com.br', 'localhost', '127.0.0.1', '*']
 
 # --- LIMITES DE UPLOAD ---
 # 100MB em bytes

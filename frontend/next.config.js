@@ -3,8 +3,8 @@ const nextConfig = {
   output: 'standalone',
   images: {
     remotePatterns: [
-      { protocol: 'https', hostname: 'brio-staging-web.com.br', pathname: '/**' },
-      { protocol: 'http',  hostname: 'brio-staging-web.com.br', pathname: '/**' },
+      { protocol: 'https', hostname: 'virtuincorp.com.br', pathname: '/**' },
+      { protocol: 'https', hostname: 'www.virtuincorp.com.br', pathname: '/**' },
       { protocol: 'https', hostname: 'virtu.com.br', pathname: '/**' },
       { protocol: 'https', hostname: 'www.virtu.com.br', pathname: '/**' },
       { protocol: 'http',  hostname: 'localhost',    pathname: '/**' },

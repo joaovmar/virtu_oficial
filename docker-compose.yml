@@ -48,16 +48,16 @@ services:
       - DJANGO_SETTINGS_MODULE=virtu.settings.production
       - SECRET_KEY=${SECRET_KEY:-change-me-in-production-use-strong-key}
       - DEBUG=${DEBUG:-False}
-      - ALLOWED_HOSTS=${ALLOWED_HOSTS:-localhost,127.0.0.1,backend,brio-staging-web.com.br,virtu.com.br,www.virtu.com.br}
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS:-localhost,127.0.0.1,backend,virtuincorp.com.br,www.virtuincorp.com.br,virtu.com.br,www.virtu.com.br}
       - DB_NAME=${DB_NAME:-virtu_db}
       - DB_USER=${DB_USER:-virtu_user}
       - DB_PASSWORD=${DB_PASSWORD:-virtu_pass_2024}
       - DB_HOST=db
       - DB_PORT=5432
-      - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS:-https://brio-staging-web.com.br,http://localhost:3000,http://localhost:8088}
-      - WAGTAILADMIN_BASE_URL=${WAGTAILADMIN_BASE_URL:-https://brio-staging-web.com.br}
+      - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS:-https://virtuincorp.com.br,https://www.virtuincorp.com.br,http://localhost:3000,http://localhost:8088}
+      - WAGTAILADMIN_BASE_URL=${WAGTAILADMIN_BASE_URL:-https://virtuincorp.com.br}
       # URL do front Next.js — usada nos botões de Pré-visualizar do Wagtail
-      - WAGTAIL_PREVIEW_FRONTEND_URL=${WAGTAIL_PREVIEW_FRONTEND_URL:-https://brio-staging-web.com.br}
+      - WAGTAIL_PREVIEW_FRONTEND_URL=${WAGTAIL_PREVIEW_FRONTEND_URL:-https://virtuincorp.com.br}
       - DJANGO_SUPERUSER_USERNAME=${DJANGO_SUPERUSER_USERNAME:-admin}
       - DJANGO_SUPERUSER_EMAIL=${DJANGO_SUPERUSER_EMAIL:-admin@virtu.com.br}
       - DJANGO_SUPERUSER_PASSWORD=${DJANGO_SUPERUSER_PASSWORD:-admin123}
@@ -103,7 +103,7 @@ services:
     environment:
       - BACKEND_INTERNAL_URL=http://backend:8000
       - NEXT_PUBLIC_API_URL=/api/v1
-      - NEXT_PUBLIC_SITE_URL=https://brio-staging-web.com.br
+      - NEXT_PUBLIC_SITE_URL=https://virtuincorp.com.br
     # Sem ports: nginx é o único ponto de entrada
 
 volumes:

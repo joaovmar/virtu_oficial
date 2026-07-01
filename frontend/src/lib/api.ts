@@ -21,7 +21,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || '/api/v1';
 //   3. Fallback: string vazia (URL relativa) — só funciona em browser
 // =============================================================================
 function getMediaBaseUrl(): string {
-  // Em prod no Docker: NEXT_PUBLIC_SITE_URL deve ser https://brio-staging-web.com.br
+  // Em prod no Docker: NEXT_PUBLIC_SITE_URL deve ser https://virtuincorp.com.br
   if (process.env.NEXT_PUBLIC_SITE_URL) {
     return process.env.NEXT_PUBLIC_SITE_URL.replace(/\/$/, '');
   }
@@ -30,8 +30,8 @@ function getMediaBaseUrl(): string {
   if (apiUrl && !apiUrl.startsWith('/')) {
     try { return new URL(apiUrl).origin; } catch {}
   }
-  // Fallback hardcoded para staging (garante que nunca retorna string vazia em prod)
-  return 'https://brio-staging-web.com.br';
+  // Fallback hardcoded (garante que nunca retorna string vazia em prod)
+  return 'https://virtuincorp.com.br';
 }
 
 const MEDIA_BASE_URL = getMediaBaseUrl();
