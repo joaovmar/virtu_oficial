@@ -36,13 +36,51 @@
   {# ════════════════════════════════════════════════════════════════════ #}
   {% if tab == 'rdstation' or not tab %}
 
+    {# ── Status de conexão OAuth — primeira coisa que o MKT deve olhar ─── #}
+    <div class="vlog-status-card vlog-status-{{ rd_oauth_status }}">
+      {% if rd_oauth_status == 'ok' %}
+        <div class="vlog-status-badge">🟢 Conectado e funcionando</div>
+        <p>O envio de leads ao RD Station está ativo e sem falhas nas últimas 24h.
+          {% if config.rdstation_token_expira_em %}A conexão se renova sozinha automaticamente.{% endif %}</p>
+      {% elif rd_oauth_status == 'alerta' %}
+        <div class="vlog-status-badge">🟡 Conectado, mas com falhas recentes</div>
+        <p>A conexão com o RD Station está ativa, porém houve falhas de envio nas últimas 24h —
+          <strong>provavelmente um problema do lado do RD Station</strong> (veja a Causa Provável de cada
+          log abaixo: se começar com "[Lado RD Station]", não é algo para corrigir aqui — confira em
+          <a href="https://app.rdstation.com.br" target="_blank" rel="noopener" style="color:var(--w-color-interactive)">app.rdstation.com.br</a>
+          ou <a href="https://status.rdstation.com.br" target="_blank" rel="noopener" style="color:var(--w-color-interactive)">status.rdstation.com.br</a>).
+          Se a causa começar com "[Lado virtú]", clique em Reconectar abaixo.</p>
+      {% else %}
+        <div class="vlog-status-badge">🔴 Desconectado</div>
+        <p>O site não está autorizado a enviar leads ao RD Station no momento. Preencha o Client ID/Client
+          Secret em Configurações do Site → 🔧 RD Station (se ainda não preencheu) e clique no botão abaixo.</p>
+      {% endif %}
+      <a href="/admin/rdstation-connect/" class="button">
+        {% if rd_oauth_status == 'desconectado' %}Conectar com RD Station{% else %}Reconectar com RD Station{% endif %}
+      </a>
+    </div>
+
+    {# ── Ajuda fixa: checklist de autodiagnóstico para o MKT ────────────── #}
+    <details class="vlog-info" style="cursor:default">
+      <summary style="cursor:pointer"><strong>O que fazer quando um lead não chega ao RD Station?</strong></summary>
+      <ol style="margin:8px 0 0 18px; padding:0">
+        <li>Veja o status acima: se estiver 🟢, o envio está funcionando — o lead específico deve estar na
+          tabela abaixo (filtre pelo e-mail).</li>
+        <li>Abra o log daquele e-mail e leia a <strong>Causa Provável</strong>.</li>
+        <li>Se a causa começar com <strong>"[Lado RD Station]"</strong>, o problema não é do nosso site —
+          confira direto na conta RD Station (app.rdstation.com.br) ou no status.rdstation.com.br.</li>
+        <li>Se a causa começar com <strong>"[Lado virtú]"</strong>, clique em "Reconectar com RD Station" acima.</li>
+        <li>Só é preciso acionar a TI se o status continuar 🔴 depois de clicar em Reconectar.</li>
+      </ol>
+    </details>
+
     <div class="vlog-info">
-      <strong>Como interpretar:</strong><br>
+      <strong>Como interpretar a tabela abaixo:</strong><br>
       Cada linha representa uma tentativa de envio de lead ao RD Station.
       Formulários em <code>/contato</code> não são enviados ao RD (ficam apenas no banco).<br>
       <strong>Sucesso</strong> — lead registrado normalmente. &nbsp;
-      <strong>Falha</strong> — leia a Causa Provável e repasse à TI se necessário. &nbsp;
-      <strong>Inativo</strong> — RD Station desabilitado nas Configurações.
+      <strong>Falha</strong> — leia a Causa Provável (ela já diz de qual lado é o problema). &nbsp;
+      <strong>Inativo</strong> — RD Station desabilitado ou desconectado.
     </div>
 
     {# Resumo #}
