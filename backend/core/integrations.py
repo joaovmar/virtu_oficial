@@ -1,45 +1,117 @@
 # -*- coding: utf-8 -*-
 """
-Serviço de integração server-side com RD Station.
+Serviço de integração server-side com RD Station (API V2 — OAuth 2.0).
 
 Regras de uso:
 - Todo formulário do site (EXCETO /contato) dispara envio ao RD Station.
 - Cada tentativa gera um registro em RDStationLog visível no Wagtail.
-- Falhas são registradas com causa provável legivel pelo time de MKT.
-- O api_token NUNCA é exposto ao frontend.
+- Falhas são registradas com causa provável legível pelo time de MKT, indicando
+  se o problema é do nosso lado (reconectar) ou do lado do RD Station (aguardar/checar lá).
+- Client Secret e tokens NUNCA são expostos ao frontend.
+- A conexão é feita via OAuth em /admin/rdstation-connect/ (ver wagtail_hooks.py).
+  O access_token é renovado automaticamente usando o refresh_token — o time de MKT
+  só precisa reconectar manualmente se o refresh_token for revogado/expirar.
 """
 
-import json
 import logging
 import threading
+from datetime import timedelta
+
 import requests
+from django.utils import timezone
 
 logger = logging.getLogger('core.rdstation')
 
-# Mapeamento de código HTTP → causa humana para o MKT
+_OAUTH_TOKEN_URL = 'https://api.rd.services/auth/token'
+_CONVERSIONS_URL = 'https://api.rd.services/platform/conversions'
+
+# Mapeamento de código HTTP → causa humana para o MKT.
+# Cada mensagem já indica de qual lado é o problema: nosso painel (reconectar)
+# ou lado do RD Station (não é bug nosso, checar direto na conta RD).
 _HTTP_CAUSAS = {
-    400: 'Dados inválidos enviados à API do RD Station. Verifique o payload — algum campo pode estar mal formatado.',
-    401: 'Token de autenticação inválido ou expirado. Acesse Configurações > RD Station > API Token e renove.',
-    403: 'Sem permissão para usar este endpoint do RD Station. Verifique as permissões da integração na conta RD.',
-    404: 'Endpoint da API do RD Station não encontrado. Pode ser que a URL da API mudou.',
-    409: 'Conflito: provavelmente o identificador de conversão já existe com configurações diferentes no RD Station.',
-    422: 'Dados não processados pelo RD Station. Verifique se o e-mail do lead é válido.',
-    429: 'Limite de requisições atingido (rate limit). Aguarde alguns minutos ou revise o volume de leads.',
-    500: 'Erro interno do servidor do RD Station. Não é um problema nosso — aguarde e tente novamente.',
-    503: 'Serviço do RD Station indisponível temporariamente. Aguarde e verifique o status em status.rdstation.com.br.',
+    400: '[Lado virtú] Dados inválidos enviados à API do RD Station. Verifique o payload — algum campo pode estar mal formatado. Se persistir, acione a TI.',
+    401: '[Lado virtú] Token OAuth expirado ou revogado e a renovação automática falhou. Acesse Logs de Integrações → RD Station e clique em "Reconectar com RD Station".',
+    403: '[Lado RD Station] Sem permissão para usar este endpoint. Verifique as permissões do Aplicativo em appstore.rdstation.com.br (não é um problema do nosso site).',
+    404: '[Lado virtú] Endpoint da API do RD Station não encontrado. A URL da API pode ter mudado — acione a TI.',
+    409: '[Lado RD Station] Conflito: o identificador de conversão já existe com configurações diferentes. Verifique em RD Station → Automação → Conversões.',
+    422: '[Lado RD Station] Dados não processados pelo RD Station — normalmente e-mail do lead inválido. Não é um problema do nosso site.',
+    429: '[Lado RD Station] Limite de requisições atingido (rate limit) na conta RD Station. Aguarde alguns minutos — não é um problema do nosso site.',
+    500: '[Lado RD Station] Erro interno do servidor do RD Station. Não é um problema nosso — aguarde e tente novamente.',
+    503: '[Lado RD Station] Serviço do RD Station indisponível temporariamente. Verifique status.rdstation.com.br — não é um problema do nosso site.',
 }
 
 _EXCEPTION_CAUSAS = {
-    'ConnectionError': 'Sem conexão com a API do RD Station. Verifique se o servidor tem acesso à internet.',
-    'Timeout': 'A requisição ao RD Station demorou mais de 10 segundos. Pode ser instabilidade na API deles.',
-    'SSLError': 'Erro de certificado SSL ao conectar ao RD Station.',
-    'default': 'Erro desconhecido ao conectar ao RD Station. Verifique os logs técnicos do servidor.',
+    'ConnectionError': '[Lado virtú] Sem conexão com a API do RD Station. Verifique se o servidor tem acesso à internet — acione a TI.',
+    'Timeout': '[Lado RD Station] A requisição ao RD Station demorou mais de 10 segundos. Provável instabilidade na API deles.',
+    'SSLError': '[Lado virtú] Erro de certificado SSL ao conectar ao RD Station. Acione a TI.',
+    'default': '[Lado virtú] Erro desconhecido ao conectar ao RD Station. Verifique os logs técnicos do servidor.',
 }
+
+_NAO_CONECTADO = ('[Lado virtú] RD Station não conectado via OAuth. Acesse Logs de Integrações → '
+                   'RD Station e clique em "Conectar com RD Station".')
+_REFRESH_FALHOU = ('[Lado virtú] Não foi possível renovar automaticamente o token do RD Station '
+                    '(refresh_token revogado ou expirado). Acesse Logs de Integrações → RD Station '
+                    'e clique em "Reconectar com RD Station".')
 
 
 def _get_config():
     from .models import ConfiguracaoSite
     return ConfiguracaoSite.objects.first()
+
+
+def _refresh_access_token(config) -> bool:
+    """
+    Troca o refresh_token por um novo access_token e salva no ConfiguracaoSite.
+    Retorna True em caso de sucesso.
+    """
+    if not (config.rdstation_client_id and config.rdstation_client_secret and config.rdstation_refresh_token):
+        return False
+
+    try:
+        response = requests.post(
+            _OAUTH_TOKEN_URL,
+            json={
+                'client_id': config.rdstation_client_id,
+                'client_secret': config.rdstation_client_secret,
+                'refresh_token': config.rdstation_refresh_token,
+            },
+            timeout=10,
+        )
+    except requests.RequestException as e:
+        logger.error(f'RD Station: falha de rede ao renovar token OAuth: {e}')
+        return False
+
+    if response.status_code not in (200, 201):
+        logger.warning(f'RD Station: falha ao renovar token OAuth [{response.status_code}]: {response.text[:300]}')
+        return False
+
+    data = response.json()
+    config.rdstation_access_token = data.get('access_token', '')
+    config.rdstation_refresh_token = data.get('refresh_token') or config.rdstation_refresh_token
+    expires_in = data.get('expires_in', 3600)
+    config.rdstation_token_expira_em = timezone.now() + timedelta(seconds=expires_in)
+    config.save(update_fields=['rdstation_access_token', 'rdstation_refresh_token', 'rdstation_token_expira_em'])
+    logger.info('RD Station: token OAuth renovado com sucesso.')
+    return True
+
+
+def _get_valid_access_token(config):
+    """
+    Retorna um access_token válido, renovando via refresh_token se necessário.
+    Retorna None se não houver conexão OAuth configurada ou a renovação falhar.
+    """
+    tem_cache_valido = (
+        config.rdstation_access_token
+        and config.rdstation_token_expira_em
+        and config.rdstation_token_expira_em > timezone.now() + timedelta(seconds=60)
+    )
+    if tem_cache_valido:
+        return config.rdstation_access_token
+
+    if _refresh_access_token(config):
+        return config.rdstation_access_token
+
+    return None
 
 
 def _salvar_log(lead_data: dict, identificador: str, status: str, http_code=None,
@@ -79,9 +151,8 @@ def enviar_lead_rdstation(lead_data: dict, identificador: str = None, lead_obj=N
     """
     config = _get_config()
 
-    if not config or not config.rdstation_ativo or not config.rdstation_api_token:
-        motivo = 'RD Station inativo nas configurações' if not config or not config.rdstation_ativo \
-            else 'Token de API não configurado. Acesse Configurações > RD Station > API Token.'
+    if not config or not config.rdstation_ativo:
+        motivo = 'RD Station inativo nas configurações'
         logger.info(f'RD Station: lead não enviado — {motivo}')
         _salvar_log(
             lead_data, identificador or '', 'inativo',
@@ -89,12 +160,21 @@ def enviar_lead_rdstation(lead_data: dict, identificador: str = None, lead_obj=N
         )
         return False
 
-    api_token = config.rdstation_api_token
+    access_token = _get_valid_access_token(config)
+    if not access_token:
+        causa = _REFRESH_FALHOU if config.rdstation_refresh_token else _NAO_CONECTADO
+        logger.info(f'RD Station: lead não enviado — {causa}')
+        _salvar_log(
+            lead_data, identificador or '', 'inativo',
+            causa=causa, lead_obj=lead_obj
+        )
+        return False
+
     conversion_id = identificador or config.rdstation_conversao_identificador or 'site-virtu'
 
-    url = 'https://api.rd.services/platform/conversions'
+    url = _CONVERSIONS_URL
     headers = {
-        'Authorization': f'Bearer {api_token}',
+        'Authorization': f'Bearer {access_token}',
         'Content-Type': 'application/json',
     }
     payload = {

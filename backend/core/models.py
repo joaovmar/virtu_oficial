@@ -5,7 +5,7 @@ from django.http import HttpResponseRedirect
 
 from wagtail.models import Page, Orderable
 from wagtail.fields import RichTextField, StreamField
-from wagtail.admin.panels import FieldPanel, MultiFieldPanel, InlinePanel, FieldRowPanel
+from wagtail.admin.panels import FieldPanel, MultiFieldPanel, InlinePanel, FieldRowPanel, HelpPanel
 from wagtail.snippets.models import register_snippet
 from wagtail import blocks
 from wagtail.images.blocks import ImageChooserBlock
@@ -303,16 +303,41 @@ class ConfiguracaoSite(models.Model):
     )
     rdstation_public_token = models.CharField(
         max_length=100, blank=True, verbose_name="RD Station Token Público",
-        help_text="Token público para o tracking JS (seguro para o frontend)"
+        help_text="Token público para o tracking JS (script de rastreio que aparece no site). "
+                   "Encontrado em RD Station → Configurações → Integrações → API de conversões → Chave pública."
     )
     rdstation_api_token = models.CharField(
-        max_length=200, blank=True, verbose_name="RD Station API Token (PRIVADO)",
-        help_text="⚠️ NUNCA exposto no frontend. Usado apenas server-side para enviar conversões."
+        max_length=200, blank=True, verbose_name="RD Station API Token (LEGADO — não usar)",
+        help_text="⚠️ LEGADO (API V1). Não é mais usado pelo envio de conversões — o envio agora usa "
+                   "OAuth (campos Client ID / Client Secret abaixo). Mantido apenas por histórico."
+    )
+    rdstation_client_id = models.CharField(
+        max_length=200, blank=True, verbose_name="RD Station Client ID (OAuth)",
+        help_text="Obtido ao criar um Aplicativo Privado em appstore.rdstation.com.br. "
+                   "Necessário para conectar via OAuth (botão 'Conectar com RD Station' em Logs de Integrações)."
+    )
+    rdstation_client_secret = models.CharField(
+        max_length=200, blank=True, verbose_name="RD Station Client Secret (OAuth)",
+        help_text="⚠️ NUNCA exposto no frontend. Obtido junto com o Client ID no Aplicativo Privado do RD Station."
+    )
+    rdstation_access_token = models.CharField(
+        max_length=500, blank=True, verbose_name="RD Station Access Token (gerenciado automaticamente)",
+        help_text="Preenchido e renovado automaticamente pelo sistema após clicar em 'Conectar com RD Station'. "
+                   "Não edite manualmente."
+    )
+    rdstation_refresh_token = models.CharField(
+        max_length=500, blank=True, verbose_name="RD Station Refresh Token (gerenciado automaticamente)",
+        help_text="Usado pelo sistema para renovar o Access Token sem precisar reconectar. Não edite manualmente."
+    )
+    rdstation_token_expira_em = models.DateTimeField(
+        null=True, blank=True, verbose_name="RD Station Token expira em (gerenciado automaticamente)",
+        help_text="Data/hora em que o Access Token atual expira. Usado pelo sistema para saber quando renovar."
     )
     rdstation_conversao_identificador = models.CharField(
         max_length=100, blank=True, default="site-virtu",
         verbose_name="Identificador de Conversão",
-        help_text="Identificador da conversão no RD Station (ex: site-virtu)"
+        help_text="Identificador da conversão no RD Station (ex: site-virtu). Aparece em RD Station → "
+                   "Automação → Conversões, agrupando os leads enviados pelo site."
     )
 
     # =====================================================================
@@ -372,10 +397,18 @@ class ConfiguracaoSite(models.Model):
             FieldPanel('gtm_container_id'),
         ], heading="🔧 Google Tag Manager"),
         MultiFieldPanel([
+            HelpPanel(
+                content="<p>Depois de preencher o <strong>Client ID</strong> e <strong>Client Secret</strong> "
+                        "abaixo, vá em <strong>Logs de Integrações → aba RD Station</strong> e clique em "
+                        "<strong>Conectar com RD Station</strong> para autorizar o envio de leads. "
+                        "É lá também que fica o status da conexão e o diagnóstico de eventuais falhas.</p>"
+            ),
             FieldPanel('rdstation_ativo'),
             FieldPanel('rdstation_public_token'),
-            FieldPanel('rdstation_api_token'),
+            FieldPanel('rdstation_client_id'),
+            FieldPanel('rdstation_client_secret'),
             FieldPanel('rdstation_conversao_identificador'),
+            FieldPanel('rdstation_api_token'),
         ], heading="🔧 RD Station"),
         MultiFieldPanel([
             FieldPanel('meta_pixel_ativo'),

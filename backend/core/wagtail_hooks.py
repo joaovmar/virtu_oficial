@@ -1,9 +1,15 @@
 # -*- coding: utf-8 -*-
+from datetime import timedelta
+from urllib.parse import urlencode
+
+import requests
 from django.templatetags.static import static
 from django.utils.html import format_html
 from django.urls import path
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.utils.decorators import method_decorator
+from django.utils import timezone
+from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
 from django.views import View
 
@@ -172,6 +178,23 @@ def virtu_admin_css():
         color: var(--w-color-text-meta); font-size: 15px;
       }}
 
+      /* Card de status de conexão OAuth (RD Station) */
+      .vlog-status-card {{
+        border-radius: 10px; padding: 16px 20px; margin-bottom: 20px;
+        border: 1px solid var(--w-color-border);
+        background: var(--w-color-surface-field);
+      }}
+      .vlog-status-card p {{
+        font-size: 13px; line-height: 1.6; margin: 6px 0 12px;
+        color: var(--w-color-text-label);
+      }}
+      .vlog-status-badge {{
+        font-size: 15px; font-weight: 800; margin-bottom: 2px;
+      }}
+      .vlog-status-ok {{ border-left: 4px solid #1a7a4a; }}
+      .vlog-status-alerta {{ border-left: 4px solid #8a6200; }}
+      .vlog-status-desconectado {{ border-left: 4px solid #c0392b; }}
+
       /* Tabs de integração */
       .vtabs {{ display: flex; gap: 0; margin-bottom: 20px;
         border-bottom: 2px solid var(--w-color-border); }}
@@ -307,8 +330,6 @@ class IntegrationLogsView(View):
     def get(self, request):
         from .models import RDStationLog
         from django.db.models import Count, Q
-        from django.utils import timezone
-        from datetime import timedelta
 
         tab         = request.GET.get('tab', 'rdstation')
         status_f    = request.GET.get('status', '')
@@ -335,16 +356,113 @@ class IntegrationLogsView(View):
         from .models import ConfiguracaoSite
         config = ConfiguracaoSite.objects.first()
 
+        # ── Status de conexão OAuth do RD Station (autodiagnóstico p/ MKT) ──
+        conectado = bool(config and config.rdstation_refresh_token and config.rdstation_access_token)
+        if not conectado:
+            rd_oauth_status = 'desconectado'
+        else:
+            falhas_24h = RDStationLog.objects.filter(
+                criado_em__gte=timezone.now() - timedelta(hours=24),
+                status='falha',
+            ).count()
+            rd_oauth_status = 'alerta' if falhas_24h > 0 else 'ok'
+
         context = {
-            'tab'         : tab,
-            'status_f'    : status_f,
-            'dias_f'      : dias_f,
-            'email_f'     : email_f,
-            'rd_logs'     : rd_qs[:200],
-            'rd_totals'   : rd_totals,
-            'config'      : config,
+            'tab'             : tab,
+            'status_f'        : status_f,
+            'dias_f'          : dias_f,
+            'email_f'         : email_f,
+            'rd_logs'         : rd_qs[:200],
+            'rd_totals'       : rd_totals,
+            'config'          : config,
+            'rd_oauth_status' : rd_oauth_status,
         }
         return render(request, 'wagtailadmin/integration_logs.html', context)
+
+
+class RDStationConnectView(View):
+    """
+    Inicia o fluxo OAuth: redireciona o usuário para a tela de autorização do RD Station.
+    Requer que Client ID/Client Secret já estejam preenchidos em Configurações do Site.
+    """
+
+    @method_decorator(staff_member_required)
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
+
+    def get(self, request):
+        from .models import ConfiguracaoSite
+        config = ConfiguracaoSite.objects.first()
+
+        if not config or not config.rdstation_client_id:
+            messages.error(
+                request,
+                'Preencha o Client ID do RD Station em Configurações do Site → 🔧 RD Station '
+                'antes de conectar.'
+            )
+            return redirect('/admin/integration-logs/?tab=rdstation')
+
+        redirect_uri = request.build_absolute_uri('/admin/rdstation-connect/callback/')
+        params = urlencode({'client_id': config.rdstation_client_id, 'redirect_uri': redirect_uri})
+        return redirect(f'https://api.rd.services/auth/dialog?{params}')
+
+
+class RDStationOAuthCallbackView(View):
+    """
+    Callback do OAuth: troca o `code` recebido do RD Station por access_token/refresh_token
+    e salva em ConfiguracaoSite. A Redirect URI cadastrada no Aplicativo do RD Station deve
+    apontar exatamente para esta rota.
+    """
+
+    @method_decorator(staff_member_required)
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
+
+    def get(self, request):
+        from .models import ConfiguracaoSite
+
+        code = request.GET.get('code')
+        config = ConfiguracaoSite.objects.first()
+
+        if not code or not config or not config.rdstation_client_id or not config.rdstation_client_secret:
+            messages.error(
+                request,
+                'Não foi possível concluir a conexão com o RD Station: código de autorização ausente '
+                'ou Client ID/Secret não configurados.'
+            )
+            return redirect('/admin/integration-logs/?tab=rdstation')
+
+        try:
+            response = requests.post(
+                'https://api.rd.services/auth/token',
+                json={
+                    'client_id': config.rdstation_client_id,
+                    'client_secret': config.rdstation_client_secret,
+                    'code': code,
+                },
+                timeout=10,
+            )
+        except requests.RequestException as e:
+            messages.error(request, f'Falha de rede ao conectar com o RD Station: {e}')
+            return redirect('/admin/integration-logs/?tab=rdstation')
+
+        if response.status_code not in (200, 201):
+            messages.error(
+                request,
+                f'RD Station recusou a conexão (HTTP {response.status_code}). Confira o Client ID/Secret '
+                'e se a Redirect URI cadastrada no Aplicativo bate exatamente com esta URL.'
+            )
+            return redirect('/admin/integration-logs/?tab=rdstation')
+
+        data = response.json()
+        config.rdstation_access_token = data.get('access_token', '')
+        config.rdstation_refresh_token = data.get('refresh_token', '')
+        expires_in = data.get('expires_in', 3600)
+        config.rdstation_token_expira_em = timezone.now() + timedelta(seconds=expires_in)
+        config.save(update_fields=['rdstation_access_token', 'rdstation_refresh_token', 'rdstation_token_expira_em'])
+
+        messages.success(request, 'Conectado ao RD Station com sucesso! Os leads voltam a ser enviados normalmente.')
+        return redirect('/admin/integration-logs/?tab=rdstation')
 
 
 @hooks.register('register_admin_urls')
@@ -353,6 +471,8 @@ def register_integration_urls():
         path('integration-logs/', IntegrationLogsView.as_view(), name='integration_logs'),
         # mantemos o alias antigo para não quebrar bookmarks
         path('rdstation-logs/', IntegrationLogsView.as_view(), name='rdstation_logs'),
+        path('rdstation-connect/', RDStationConnectView.as_view(), name='rdstation_connect'),
+        path('rdstation-connect/callback/', RDStationOAuthCallbackView.as_view(), name='rdstation_oauth_callback'),
     ]
 
 
