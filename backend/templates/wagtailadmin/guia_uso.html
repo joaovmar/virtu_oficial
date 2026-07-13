@@ -1,0 +1,343 @@
+{% extends "wagtailadmin/generic/base.html" %}
+{% load i18n %}
+
+{% block titletag %}Guia de Uso — Virtú{% endblock %}
+
+{% block content %}
+<div class="nice-padding vlog-page">
+
+  <h1>Guia de Uso do Wagtail</h1>
+  <p class="vlog-sub">
+    Onde fica o quê, o que cada campo muda no site, e o que fazer quando algo não aparece como esperado.
+  </p>
+
+  <div class="vtabs" style="flex-wrap:wrap">
+    <a href="?tab=visao"     class="vtab {% if tab == 'visao' %}active{% endif %}">Visão Geral</a>
+    <a href="?tab=paginas"   class="vtab {% if tab == 'paginas' %}active{% endif %}">Páginas do Site</a>
+    <a href="?tab=config"    class="vtab {% if tab == 'config' %}active{% endif %}">Configurações do Site</a>
+    <a href="?tab=snippets"  class="vtab {% if tab == 'snippets' %}active{% endif %}">Snippets</a>
+    <a href="?tab=leads"     class="vtab {% if tab == 'leads' %}active{% endif %}">Leads &amp; Formulários</a>
+    <a href="?tab=usuarios"  class="vtab {% if tab == 'usuarios' %}active{% endif %}">Usuários</a>
+  </div>
+
+  {# ══════════════════════════════════════════════════════════════════ #}
+  {# VISÃO GERAL                                                        #}
+  {# ══════════════════════════════════════════════════════════════════ #}
+  {% if tab == 'visao' %}
+
+    <div class="vlog-info">
+      O conteúdo do site fica em dois lugares dentro deste admin: <strong>Páginas</strong> (menu à esquerda,
+      ícone de página) — textos e imagens específicos de cada página — e <strong>Snippets</strong> (menu à
+      esquerda, ícone de bloco) — conteúdo reutilizável, como Cidades, Leads e Configurações do Site.
+    </div>
+
+    <div class="vlog-summary">
+      <div class="vlog-card" style="text-align:left; min-width:200px; flex:1">
+        <div class="lbl" style="margin-top:0; text-transform:none; font-size:13px; font-weight:700; color:var(--w-color-text-label)">📄 Páginas</div>
+        <p style="font-size:12.5px; color:var(--w-color-text-meta); margin:6px 0 0">
+          Home, Empreendimentos, Sobre Nós, Contato, Blog, Política de Privacidade. Cada uma vira uma URL real do site.
+          Veja a aba <strong>Páginas do Site</strong>.
+        </p>
+      </div>
+      <div class="vlog-card" style="text-align:left; min-width:200px; flex:1">
+        <div class="lbl" style="margin-top:0; text-transform:none; font-size:13px; font-weight:700; color:var(--w-color-text-label)">🧩 Snippets</div>
+        <p style="font-size:12.5px; color:var(--w-color-text-meta); margin:6px 0 0">
+          Cidades, Status, Depoimentos, Leads, Formulários Recebidos, Configuração do Site. Conteúdo usado em
+          várias páginas ao mesmo tempo. Veja as abas <strong>Snippets</strong> e <strong>Configurações</strong>.
+        </p>
+      </div>
+      <div class="vlog-card" style="text-align:left; min-width:200px; flex:1">
+        <div class="lbl" style="margin-top:0; text-transform:none; font-size:13px; font-weight:700; color:var(--w-color-text-label)">📬 Leads</div>
+        <p style="font-size:12.5px; color:var(--w-color-text-meta); margin:6px 0 0">
+          Quem preencheu um formulário no site. Veja a aba <strong>Leads &amp; Formulários</strong> — inclui
+          onde ver o envio ao RD Station.
+        </p>
+      </div>
+    </div>
+
+    <div class="callout-guide">
+      <strong>Duas áreas administrativas diferentes:</strong> este painel (<span class="path">/admin/</span>) é o
+      dia a dia do time de MKT. Existe também uma área técnica separada, o
+      <span class="path">/django-admin/</span>, com relatórios avançados (ex.: exportar Leads em CSV, ver
+      inscritos da Newsletter). Ela é mencionada pontualmente neste guia quando algo só existe lá.
+    </div>
+
+    <div class="callout-guide" style="margin-top:14px">
+      <strong>Integrações (RD Station, GTM, Meta Pixel, GA4):</strong> ficam em
+      <span class="path">Logs de Integrações</span> (menu à esquerda) — status de conexão, histórico de envios
+      e diagnóstico de falhas. Configuração dos números/IDs de cada uma fica em
+      <span class="path">Configurações do Site</span> (aba <strong>Configurações do Site</strong> aqui no guia).
+    </div>
+
+  {% endif %}
+
+  {# ══════════════════════════════════════════════════════════════════ #}
+  {# PÁGINAS DO SITE                                                    #}
+  {# ══════════════════════════════════════════════════════════════════ #}
+  {% if tab == 'paginas' %}
+
+    <div class="vlog-info">
+      Cada página abaixo é editada em <span class="path">Páginas</span> (árvore no menu esquerdo). Campos
+      marcados com <span class="vbadge vbadge-warn">sem efeito hoje</span> existem no formulário de edição mas
+      atualmente <strong>não aparecem em nenhuma tela do site</strong> — preenchê-los não muda nada visível
+      (provavelmente um componente que ainda será conectado pela TPI).
+    </div>
+
+    <details class="page-block" open>
+      <summary><strong>Página Inicial</strong> <span class="path">/</span></summary>
+      <table class="vlog-table">
+        <thead><tr><th>Painel</th><th>Campo</th><th>O que faz no site</th></tr></thead>
+        <tbody>
+          <tr><td rowspan="2">Hero Banner</td><td>Hero (título/imagem) ou carrossel de banners</td><td>Imagem e texto de fundo em tela cheia no topo da Home. Se cadastrar itens no carrossel, ele substitui o hero simples.</td></tr>
+          <tr><td>Vídeo Institucional (URL + thumbnail)</td><td>Player de vídeo com capa (thumbnail recomendado 16:9, mín. 1280×720px).</td></tr>
+          <tr><td>Nossa História</td><td>Texto da seção "Pensamos no futuro"</td><td>Aparece normalmente. A imagem deste bloco <span class="vbadge vbadge-warn">sem efeito hoje</span>.</td></tr>
+          <tr><td>Jornada do Cliente</td><td>Título e etapas</td><td><span class="vbadge vbadge-warn">sem efeito hoje</span> — seção ainda não existe no site publicado.</td></tr>
+          <tr><td>Banner Institucional</td><td>Imagem + texto</td><td>Banner arredondado com frase sobreposta.</td></tr>
+          <tr><td>Empreendimento em Destaque</td><td>Escolha do empreendimento</td><td>Alimenta o bloco final de captação de lead da Home (nome, cidade, imagem). O campo de texto do banner de destaque <span class="vbadge vbadge-warn">sem efeito hoje</span>.</td></tr>
+          <tr><td>Depoimentos / CTA Final</td><td>Título, textos, botão</td><td><span class="vbadge vbadge-warn">sem efeito hoje</span> — essas seções não estão publicadas no site atual.</td></tr>
+        </tbody>
+      </table>
+    </details>
+
+    <details class="page-block">
+      <summary><strong>Página de Empreendimentos</strong> <span class="path">/empreendimentos</span></summary>
+      <table class="vlog-table">
+        <thead><tr><th>Campo</th><th>O que faz no site</th></tr></thead>
+        <tbody>
+          <tr><td>Label + Texto do Banner, Logos</td><td>Texto e logos sobrepostos na imagem de fundo do topo da página.</td></tr>
+          <tr><td>Título do Formulário / Título da seção de projetos</td><td><span class="vbadge vbadge-warn">sem efeito hoje</span> — títulos dessas seções são fixos no site.</td></tr>
+        </tbody>
+      </table>
+      <p style="font-size:12.5px;color:var(--w-color-text-meta);margin:8px 0 0">A listagem de empreendimentos em si (cards) vem de cada <strong>Empreendimento</strong> individual — ver abaixo.</p>
+    </details>
+
+    <details class="page-block">
+      <summary><strong>Empreendimento</strong> (uma página por empreendimento) <span class="path">/empreendimentos/[nome]</span></summary>
+      <table class="vlog-table">
+        <thead><tr><th>Painel</th><th>O que faz no site</th></tr></thead>
+        <tbody>
+          <tr><td>Classificação (Status, Cidade)</td><td>Status vira selo no card; Cidade aparece em vários lugares (card, hero, localização). Parceiros e Diferenciais marcados aqui <span class="vbadge vbadge-warn">sem efeito hoje</span>.</td></tr>
+          <tr><td>Descrição / Informações</td><td>Subtítulo, descrição, preço, metragem, dormitórios aparecem na página. Data de entrega <span class="vbadge vbadge-warn">sem efeito hoje</span>.</td></tr>
+          <tr><td>Localização</td><td>Endereço, bairro e coordenadas alimentam o mapa e o card de endereço.</td></tr>
+          <tr><td>Imagens</td><td>Imagem Principal = capa do card; Imagem Hero = topo do detalhe (se vazia, usa a Principal); Logo substitui o título em texto; Galeria vira carrossel.</td></tr>
+          <tr><td>Plantas / Cronograma de Obra / Fotos da Obra</td><td>Cada InlinePanel vira, respectivamente: abas de planta, barras de progresso, e grade de fotos com zoom.</td></tr>
+          <tr><td>Controle</td><td>"Futuro Lançamento" (checkbox) inclui o empreendimento no slider "Futuros Lançamentos" da Home e da listagem. "Destaque" e "Ordem" <span class="vbadge vbadge-warn">sem efeito hoje</span> — o destaque da Home é escolhido manualmente na Página Inicial.</td></tr>
+        </tbody>
+      </table>
+    </details>
+
+    <details class="page-block">
+      <summary><strong>Página Sobre Nós</strong> <span class="path">/a-virtu</span></summary>
+      <table class="vlog-table">
+        <thead><tr><th>Painel</th><th>O que faz no site</th></tr></thead>
+        <tbody>
+          <tr><td>Hero</td><td>Imagem de fundo. O campo de título deste hero <span class="vbadge vbadge-warn">sem efeito hoje</span> (título é fixo).</td></tr>
+          <tr><td>Nossa História</td><td>Texto aparece na seção "Nosso propósito". O título deste painel <span class="vbadge vbadge-warn">sem efeito hoje</span>.</td></tr>
+          <tr><td>Vídeo Institucional</td><td>Título, vídeo e thumbnail — todos aparecem no player.</td></tr>
+          <tr><td>Missão / Visão / Valores</td><td>Três cards com título, texto e ícone, sobre a imagem de fundo definida aqui.</td></tr>
+          <tr><td>Política de Qualidade</td><td>Texto aparece na seção correspondente. O título deste painel <span class="vbadge vbadge-warn">sem efeito hoje</span>.</td></tr>
+          <tr><td>CTA Final</td><td>Título, subtítulo e imagem aparecem no banner "Trabalhe Conosco". O texto do botão <span class="vbadge vbadge-warn">sem efeito hoje</span> (fixo como "Entrar em contato").</td></tr>
+          <tr><td>Selos de Qualidade</td><td>Logos de certificações na seção "Garantia e qualidade".</td></tr>
+        </tbody>
+      </table>
+    </details>
+
+    <details class="page-block">
+      <summary><strong>Página de Contato</strong> <span class="path">/contato</span></summary>
+      <table class="vlog-table">
+        <thead><tr><th>Campo</th><th>O que faz no site</th></tr></thead>
+        <tbody>
+          <tr><td>Hero (título, subtítulo, imagem)</td><td>Topo da página "Fale Conosco".</td></tr>
+          <tr><td>Horário de atendimento (semana / fim de semana)</td><td>Bloco de horários ao lado do formulário.</td></tr>
+          <tr><td>Título do formulário / Título da seção</td><td><span class="vbadge vbadge-warn">sem efeito hoje</span> (textos fixos no site).</td></tr>
+        </tbody>
+      </table>
+      <p style="font-size:12.5px;color:var(--w-color-text-meta);margin:8px 0 0">
+        As "abas" de assunto do formulário (Dúvida, Reclamação, Trabalhe Conosco etc.) vêm do snippet
+        <strong>Categoria de Contato</strong>, não desta página — ver aba Snippets. Este formulário envia
+        e-mail, mas <strong>não</strong> é enviado ao RD Station (decisão de negócio).
+      </p>
+    </details>
+
+    <details class="page-block">
+      <summary><strong>Blog</strong> <span class="path">— ainda não publicado</span></summary>
+      <div class="callout-guide" style="border-left-color:var(--warn, #8a6200)">
+        A estrutura de Blog existe no Wagtail (posts, categorias, resumo, conteúdo), mas o site ainda não tem
+        uma página <span class="path">/blog</span> funcional — hoje ela mostra apenas um aviso de "em breve".
+        Cadastrar posts agora não os publica no site até que essa página seja conectada pela TPI.
+      </div>
+    </details>
+
+    <details class="page-block">
+      <summary><strong>Política de Privacidade</strong> <span class="path">/politica-de-privacidade</span></summary>
+      <p style="font-size:13px">Título, data de "última atualização" e o texto completo (rich text) — todos usados diretamente na página.</p>
+      <div class="callout-guide" style="border-left-color:var(--warn, #8a6200)">
+        Atenção: existe uma URL parecida, <span class="path">/politica-privacidade</span> (sem "de"), que é uma
+        página antiga e estática, não ligada a este conteúdo. A rota certa/viva é
+        <span class="path">/politica-de-privacidade</span>.
+      </div>
+    </details>
+
+  {% endif %}
+
+  {# ══════════════════════════════════════════════════════════════════ #}
+  {# CONFIGURAÇÕES DO SITE                                              #}
+  {# ══════════════════════════════════════════════════════════════════ #}
+  {% if tab == 'config' %}
+
+    <div class="vlog-info">
+      Tudo isso fica em um único registro: <span class="path">Snippets → Configuração do Site</span>. Vale para
+      o site inteiro — mudou aqui, muda em todas as páginas de uma vez.
+    </div>
+
+    <table class="vlog-table">
+      <thead><tr><th>Seção</th><th>Campos</th><th>Onde aparece</th></tr></thead>
+      <tbody>
+        <tr><td>Contato</td><td>E-mail, telefone, WhatsApp, endereço</td><td>Rodapé do site e página de Contato.</td></tr>
+        <tr><td>Redes Sociais</td><td>Facebook, Instagram, LinkedIn, YouTube</td><td>Ícones do rodapé.</td></tr>
+        <tr><td>—</td><td>Texto de copyright</td><td>Linha final do rodapé.</td></tr>
+        <tr><td>Banner CTA (Breve Lançamento)</td><td>Imagens do card, logos parceiro/virtú, grafismo decorativo</td><td>Bloco "Cadastre-se e saiba mais" reaproveitado em várias páginas (Home, Empreendimentos, página de Empreendimento).</td></tr>
+        <tr><td>🔧 Google Tag Manager</td><td>Ativo, Container ID</td><td>Ativa/desativa o GTM no site inteiro.</td></tr>
+        <tr><td>🔧 RD Station</td><td>Ativo, Token público, Client ID/Secret (OAuth), Identificador de conversão</td><td>Envio de leads ao RD Station. Ver <span class="path">Logs de Integrações → RD Station</span> para status e conexão.</td></tr>
+        <tr><td>🔧 Meta Pixel</td><td>Ativo, Pixel ID</td><td>Rastreamento do Facebook/Instagram Ads.</td></tr>
+        <tr><td>🔧 Google Analytics 4</td><td>Ativo, Measurement ID</td><td>Rastreamento GA4.</td></tr>
+      </tbody>
+    </table>
+
+  {% endif %}
+
+  {# ══════════════════════════════════════════════════════════════════ #}
+  {# SNIPPETS                                                           #}
+  {# ══════════════════════════════════════════════════════════════════ #}
+  {% if tab == 'snippets' %}
+
+    <div class="vlog-info">
+      Acessados em <span class="path">Snippets</span> no menu esquerdo. São blocos de conteúdo reutilizados por
+      várias páginas ao mesmo tempo (diferente de uma Página, que é uma URL específica).
+    </div>
+
+    <table class="vlog-table">
+      <thead><tr><th>Snippet</th><th>Para que serve</th><th>Onde aparece</th></tr></thead>
+      <tbody>
+        <tr><td>Cidade</td><td>Lista de cidades onde há empreendimentos</td><td>Filtro em <span class="path">/empreendimentos</span>, cards, e página de cada empreendimento.</td></tr>
+        <tr><td>Status de Empreendimento</td><td>Ex.: "Lançamento", "Em obras", "Pronto para morar"</td><td>Selo colorido no card do empreendimento.</td></tr>
+        <tr><td>Categoria de Contato</td><td>Define as "abas" e os campos do formulário de <span class="path">/contato</span> (ex.: Dúvida, Trabalhe Conosco)</td><td>Formulário da página de Contato — cada categoria pode ter campos diferentes e um e-mail de destino diferente.</td></tr>
+        <tr><td>Parceiro</td><td>Empresas parceiras de um empreendimento</td><td><span class="vbadge vbadge-warn">sem efeito hoje</span> — cadastrado mas não exibido no site atual.</td></tr>
+        <tr><td>Diferencial</td><td>Diferenciais/amenidades (lazer, segurança, etc.)</td><td><span class="vbadge vbadge-warn">sem efeito hoje</span> — mesma situação do Parceiro.</td></tr>
+        <tr><td>Depoimento</td><td>Depoimento de cliente com nota e foto</td><td><span class="vbadge vbadge-warn">sem efeito hoje</span> — a seção de depoimentos ainda não está publicada no site.</td></tr>
+        <tr><td>Configuração do Site</td><td>Ver aba <strong>Configurações do Site</strong></td><td>—</td></tr>
+        <tr><td>Lead</td><td>Registro de quem preencheu um formulário de captação</td><td>Ver aba <strong>Leads &amp; Formulários</strong>.</td></tr>
+        <tr><td>Formulário Recebido</td><td>Registro de quem enviou o formulário de <span class="path">/contato</span></td><td>Ver aba <strong>Leads &amp; Formulários</strong>.</td></tr>
+      </tbody>
+    </table>
+
+  {% endif %}
+
+  {# ══════════════════════════════════════════════════════════════════ #}
+  {# LEADS & FORMULÁRIOS                                                #}
+  {# ══════════════════════════════════════════════════════════════════ #}
+  {% if tab == 'leads' %}
+
+    <div class="vlog-info">
+      Existem <strong>quatro</strong> registros diferentes, cada um vindo de um formulário diferente do site —
+      e nem todos aparecem no menu deste painel (<span class="path">/admin/</span>).
+    </div>
+
+    <table class="vlog-table">
+      <thead><tr><th>O quê</th><th>Vem de</th><th>Onde ver</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Lead</strong></td>
+          <td>Formulários "Cadastre-se e saiba mais" (Home, Empreendimentos, página de Empreendimento)</td>
+          <td><span class="path">Snippets → Leads</span>, aqui no Wagtail. Também é o que alimenta o envio automático ao RD Station.</td>
+        </tr>
+        <tr>
+          <td><strong>Formulário Recebido</strong></td>
+          <td>Formulário da página <span class="path">/contato</span></td>
+          <td><span class="path">Snippets → Formulários Recebidos</span>, aqui no Wagtail. Envia e-mail automaticamente; <strong>não</strong> vai ao RD Station.</td>
+        </tr>
+        <tr>
+          <td><strong>Newsletter</strong></td>
+          <td>Inscrição de e-mail (funcionalidade sem tela própria no site hoje)</td>
+          <td><span class="vbadge vbadge-warn">só na área técnica</span> — não aparece em nenhum menu deste painel. Precisa acessar <span class="path">/django-admin/</span> para ver inscritos.</td>
+        </tr>
+        <tr>
+          <td><strong>Log de envio ao RD Station</strong></td>
+          <td>Toda tentativa de envio de um <strong>Lead</strong> ao RD Station</td>
+          <td><span class="path">Logs de Integrações → RD Station</span> — status, causa provável de falhas e botão de reconexão.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout-guide" style="margin-top:18px">
+      <strong>Exportar Leads em CSV ou marcar vários como lidos de uma vez:</strong> essas ações em massa só
+      existem na área técnica <span class="path">/django-admin/core/lead/</span>, não no menu Snippets deste
+      painel. O dia a dia (ver, filtrar e atualizar status de um lead) funciona normalmente aqui no
+      <span class="path">/admin/</span>.
+    </div>
+
+  {% endif %}
+
+  {# ══════════════════════════════════════════════════════════════════ #}
+  {# USUÁRIOS                                                           #}
+  {# ══════════════════════════════════════════════════════════════════ #}
+  {% if tab == 'usuarios' %}
+
+    <div class="vlog-info">
+      A gestão de usuários usa o sistema padrão do Wagtail — não há grupos específicos criados para este site
+      (ex.: não existe um grupo "Marketing" pronto). Todo controle de acesso é feito pelos mecanismos nativos
+      abaixo.
+    </div>
+
+    <div class="card-guide">
+      <h3 style="margin:0 0 8px">Adicionar uma pessoa ao Wagtail</h3>
+      <p style="font-size:13.5px">Vá em <span class="path">Settings → Users → Add a user</span> (rodapé do menu
+        esquerdo). Defina um usuário/senha e marque as permissões de acesso desejadas.</p>
+    </div>
+    <div class="card-guide" style="margin-top:12px">
+      <h3 style="margin:0 0 8px">Níveis de acesso padrão do Wagtail</h3>
+      <ul style="font-size:13.5px; margin:0">
+        <li><strong>Editor</strong> — cria e edita conteúdo, mas precisa que alguém publique.</li>
+        <li><strong>Moderator</strong> — edita e também publica.</li>
+        <li><strong>Superusuário</strong> — acesso total, inclusive à área técnica <span class="path">/django-admin/</span>.</li>
+      </ul>
+    </div>
+    <div class="callout-guide" style="margin-top:14px">
+      Dar acesso à área técnica <span class="path">/django-admin/</span> (exportações, Newsletter) exige marcar
+      a pessoa como <strong>superusuário</strong> — vale reservar isso a poucas pessoas, já que essa área não
+      tem as mesmas telas simplificadas do <span class="path">/admin/</span>.
+    </div>
+
+  {% endif %}
+
+</div>
+
+<style>
+  .page-block{
+    border: 1px solid var(--w-color-border); border-radius: 10px;
+    margin-bottom: 14px; overflow:hidden; background: var(--w-color-surface-page);
+  }
+  .page-block summary{
+    cursor:pointer; padding: 12px 16px; font-size: 14px;
+    background: var(--w-color-surface-field); list-style:none;
+    display:flex; align-items:center; gap:8px;
+  }
+  .page-block summary::-webkit-details-marker{ display:none; }
+  .page-block summary::before{ content:'▸'; color: var(--w-color-text-meta); }
+  .page-block[open] summary::before{ content:'▾'; }
+  .page-block .vlog-table{ margin: 0; }
+  .page-block .vlog-table th, .page-block .vlog-table td{ padding-left:16px; }
+  .page-block p{ padding: 0 16px 14px; }
+
+  .callout-guide{
+    border-left: 3px solid #348981; background: var(--w-color-surface-field);
+    border-radius: 0 8px 8px 0; padding: 12px 16px; font-size: 13.5px;
+    color: var(--w-color-text-label); line-height:1.6;
+  }
+  .card-guide{
+    border:1px solid var(--w-color-border); border-radius:10px;
+    padding:16px 18px; background:var(--w-color-surface-field);
+  }
+  .card-guide h3{ font-size:14px; color:var(--w-color-text-label); }
+</style>
+{% endblock %}

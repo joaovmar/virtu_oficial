@@ -465,6 +465,26 @@ class RDStationOAuthCallbackView(View):
         return redirect('/admin/integration-logs/?tab=rdstation')
 
 
+# =============================================================================
+# Guia de Uso — documentação de "onde tá o quê" dentro do próprio Wagtail
+# =============================================================================
+
+class WagtailGuideView(View):
+    """
+    Página estática de referência para o time de MKT: o que cada tipo de
+    página/campo/snippet faz no site, e onde encontrar Leads, Formulários,
+    Newsletter e configurações. Conteúdo fixo — não consulta o banco.
+    """
+
+    @method_decorator(staff_member_required)
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
+
+    def get(self, request):
+        tab = request.GET.get('tab', 'visao')
+        return render(request, 'wagtailadmin/guia_uso.html', {'tab': tab})
+
+
 @hooks.register('register_admin_urls')
 def register_integration_urls():
     return [
@@ -473,6 +493,7 @@ def register_integration_urls():
         path('rdstation-logs/', IntegrationLogsView.as_view(), name='rdstation_logs'),
         path('rdstation-connect/', RDStationConnectView.as_view(), name='rdstation_connect'),
         path('rdstation-connect/callback/', RDStationOAuthCallbackView.as_view(), name='rdstation_oauth_callback'),
+        path('guia-uso/', WagtailGuideView.as_view(), name='guia_uso'),
     ]
 
 
@@ -483,4 +504,14 @@ def register_integration_menu_item():
         url='/admin/integration-logs/',
         icon_name='snippet',
         order=900,
+    )
+
+
+@hooks.register('register_admin_menu_item')
+def register_guia_uso_menu_item():
+    return MenuItem(
+        label='Guia de Uso',
+        url='/admin/guia-uso/',
+        icon_name='help',
+        order=890,
     )
