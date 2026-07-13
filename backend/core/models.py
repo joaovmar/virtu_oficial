@@ -1366,7 +1366,7 @@ class Lead(models.Model):
 class RDStationLog(models.Model):
     """
     Log de envios ao RD Station.
-    Visível no Wagtail para o time de MKT verificar falhas e repassar à TI.
+    Visível no Wagtail para o time de MKT verificar falhas e repassar à TPI.
     """
     STATUS_CHOICES = [
         ('sucesso', '✅ Sucesso'),
@@ -1388,7 +1388,7 @@ class RDStationLog(models.Model):
     http_status_code = models.IntegerField(null=True, blank=True, verbose_name='Código HTTP da Resposta')
     resposta_api = models.TextField(blank=True, verbose_name='Resposta da API RD Station')
     mensagem_erro = models.TextField(blank=True, verbose_name='Mensagem de Erro')
-    causa_provavel = models.TextField(blank=True, verbose_name='Causa Provável (para MKT repassar à TI)')
+    causa_provavel = models.TextField(blank=True, verbose_name='Causa Provável (para MKT repassar à TPI)')
     payload_enviado = models.JSONField(null=True, blank=True, verbose_name='Payload Enviado')
     criado_em = models.DateTimeField(auto_now_add=True, verbose_name='Data/Hora')
 

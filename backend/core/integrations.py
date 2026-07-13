@@ -29,10 +29,10 @@ _CONVERSIONS_URL = 'https://api.rd.services/platform/conversions'
 # Cada mensagem já indica de qual lado é o problema: nosso painel (reconectar)
 # ou lado do RD Station (não é bug nosso, checar direto na conta RD).
 _HTTP_CAUSAS = {
-    400: '[Lado virtú] Dados inválidos enviados à API do RD Station. Verifique o payload — algum campo pode estar mal formatado. Se persistir, acione a TI.',
+    400: '[Lado virtú] Dados inválidos enviados à API do RD Station. Verifique o payload — algum campo pode estar mal formatado. Se persistir, acione a TPI.',
     401: '[Lado virtú] Token OAuth expirado ou revogado e a renovação automática falhou. Acesse Logs de Integrações → RD Station e clique em "Reconectar com RD Station".',
     403: '[Lado RD Station] Sem permissão para usar este endpoint. Verifique as permissões do Aplicativo em appstore.rdstation.com.br (não é um problema do nosso site).',
-    404: '[Lado virtú] Endpoint da API do RD Station não encontrado. A URL da API pode ter mudado — acione a TI.',
+    404: '[Lado virtú] Endpoint da API do RD Station não encontrado. A URL da API pode ter mudado — acione a TPI.',
     409: '[Lado RD Station] Conflito: o identificador de conversão já existe com configurações diferentes. Verifique em RD Station → Automação → Conversões.',
     422: '[Lado RD Station] Dados não processados pelo RD Station — normalmente e-mail do lead inválido. Não é um problema do nosso site.',
     429: '[Lado RD Station] Limite de requisições atingido (rate limit) na conta RD Station. Aguarde alguns minutos — não é um problema do nosso site.',
@@ -41,9 +41,9 @@ _HTTP_CAUSAS = {
 }
 
 _EXCEPTION_CAUSAS = {
-    'ConnectionError': '[Lado virtú] Sem conexão com a API do RD Station. Verifique se o servidor tem acesso à internet — acione a TI.',
+    'ConnectionError': '[Lado virtú] Sem conexão com a API do RD Station. Verifique se o servidor tem acesso à internet — acione a TPI.',
     'Timeout': '[Lado RD Station] A requisição ao RD Station demorou mais de 10 segundos. Provável instabilidade na API deles.',
-    'SSLError': '[Lado virtú] Erro de certificado SSL ao conectar ao RD Station. Acione a TI.',
+    'SSLError': '[Lado virtú] Erro de certificado SSL ao conectar ao RD Station. Acione a TPI.',
     'default': '[Lado virtú] Erro desconhecido ao conectar ao RD Station. Verifique os logs técnicos do servidor.',
 }
 
@@ -214,7 +214,7 @@ def enviar_lead_rdstation(lead_data: dict, identificador: str = None, lead_obj=N
         else:
             causa = _HTTP_CAUSAS.get(
                 response.status_code,
-                f'Erro HTTP {response.status_code} desconhecido. Repasse o código à TI.'
+                f'Erro HTTP {response.status_code} desconhecido. Repasse o código à TPI.'
             )
             logger.warning(
                 f'RD Station FALHOU [{response.status_code}] para {lead_data.get("email")}: {resp_text[:300]}'
