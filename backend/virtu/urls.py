@@ -13,12 +13,18 @@ from wagtail.admin import urls as wagtailadmin_urls
 from wagtail import urls as wagtail_urls
 from wagtail.documents import urls as wagtaildocs_urls
 
+from core.wagtail_hooks import RDStationOAuthCallbackView
+
 urlpatterns = [
     # Django Admin (para superusuários)
     path('django-admin/', admin.site.urls),
 
     # Wagtail Admin (CMS para equipe de Marketing)
     path('admin/', include(wagtailadmin_urls)),
+
+    # Callback OAuth do RD Station — precisa bater exatamente com a Redirect URI
+    # cadastrada pelo time de MKT no Aplicativo do RD Station (fora de /admin/).
+    path('rdstation/callback/', RDStationOAuthCallbackView.as_view(), name='rdstation_public_callback'),
 
     # Documentos do Wagtail
     path('documents/', include(wagtaildocs_urls)),

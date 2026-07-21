@@ -402,7 +402,7 @@ class RDStationConnectView(View):
             )
             return redirect('/admin/integration-logs/?tab=rdstation')
 
-        redirect_uri = request.build_absolute_uri('/admin/rdstation-connect/callback/')
+        redirect_uri = request.build_absolute_uri('/rdstation/callback/')
         params = urlencode({'client_id': config.rdstation_client_id, 'redirect_uri': redirect_uri})
         return redirect(f'https://api.rd.services/auth/dialog?{params}')
 
@@ -410,8 +410,11 @@ class RDStationConnectView(View):
 class RDStationOAuthCallbackView(View):
     """
     Callback do OAuth: troca o `code` recebido do RD Station por access_token/refresh_token
-    e salva em ConfiguracaoSite. A Redirect URI cadastrada no Aplicativo do RD Station deve
-    apontar exatamente para esta rota.
+    e salva em ConfiguracaoSite.
+
+    Registrada em `virtu/urls.py` como `/rdstation/callback/` (fora do namespace /admin/)
+    porque essa é a Redirect URI exata já cadastrada pelo time de MKT no Aplicativo do
+    RD Station — não pode divergir, OAuth exige correspondência exata.
     """
 
     @method_decorator(staff_member_required)
@@ -492,7 +495,8 @@ def register_integration_urls():
         # mantemos o alias antigo para não quebrar bookmarks
         path('rdstation-logs/', IntegrationLogsView.as_view(), name='rdstation_logs'),
         path('rdstation-connect/', RDStationConnectView.as_view(), name='rdstation_connect'),
-        path('rdstation-connect/callback/', RDStationOAuthCallbackView.as_view(), name='rdstation_oauth_callback'),
+        # O callback (/rdstation/callback/) é registrado fora do /admin/ em virtu/urls.py,
+        # pois precisa bater exatamente com a Redirect URI cadastrada no RD Station.
         path('guia-uso/', WagtailGuideView.as_view(), name='guia_uso'),
     ]
 
