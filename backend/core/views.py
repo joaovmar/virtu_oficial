@@ -4,6 +4,8 @@ Views da API REST do site Virtú
 Conforme documentação: APIs públicas e internas
 """
 
+from django.core.cache import cache
+from django.db.models import Prefetch
 from rest_framework import viewsets, generics, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -14,6 +16,23 @@ from rest_framework.authentication import SessionAuthentication
 class CsrfExemptSessionAuthentication(SessionAuthentication):
     def enforce_csrf(self, request):
         return  # CSRF isento para API pública
+
+
+_CONFIGURACAO_SITE_CACHE_KEY = 'configuracao_site_singleton'
+_CONFIGURACAO_SITE_CACHE_TTL = 30  # segundos — curto o bastante pra refletir edições rápido
+
+
+def _get_configuracao_site():
+    """
+    ConfiguracaoSite é lido em praticamente toda navegação (config pública,
+    tracking, envio de lead). Cache curto evita reconsultar o banco a cada
+    request sem risco de servir dado desatualizado por muito tempo.
+    """
+    config = cache.get(_CONFIGURACAO_SITE_CACHE_KEY)
+    if config is None:
+        config = ConfiguracaoSite.objects.first()
+        cache.set(_CONFIGURACAO_SITE_CACHE_KEY, config, _CONFIGURACAO_SITE_CACHE_TTL)
+    return config
 
 from .models import (
     Cidade, StatusEmpreendimento, Diferencial, Depoimento, ConfiguracaoSite,
@@ -29,7 +48,8 @@ from .serializers import (
     EmpreendimentosIndexPageSerializer,
     PlantaSerializer, GaleriaImagemSerializer, AndamentoObraSerializer,
     HomePageSerializer, SobreNosSerializer,
-    LeadSerializer, LeadListSerializer, NewsletterSerializer
+    LeadSerializer, LeadListSerializer, NewsletterSerializer,
+    get_image_url,
 )
 
 
@@ -96,7 +116,11 @@ class EmpreendimentoViewSet(viewsets.ReadOnlyModelViewSet):
         return EmpreendimentoCardSerializer
 
     def get_queryset(self):
-        queryset = EmpreendimentoPage.objects.live().public().order_by('ordem', '-first_published_at')
+        queryset = (
+            EmpreendimentoPage.objects.live().public()
+            .select_related('status', 'cidade', 'imagem_principal', 'imagem_futuros_lancamentos')
+            .order_by('ordem', '-first_published_at')
+        )
 
         # Filtro por cidade
         cidade = self.request.query_params.get('cidade')
@@ -117,11 +141,22 @@ class EmpreendimentoViewSet(viewsets.ReadOnlyModelViewSet):
 
     def retrieve(self, request, pk=None):
         """Detalhamento completo do empreendimento"""
+        base_qs = (
+            EmpreendimentoPage.objects.live().public()
+            .select_related('status', 'cidade', 'imagem_principal', 'imagem_hero', 'logo')
+            .prefetch_related(
+                'parceiros', 'diferenciais',
+                Prefetch('galeria_imagens', queryset=GaleriaImagem.objects.select_related('imagem')),
+                Prefetch('plantas', queryset=Planta.objects.select_related('imagem')),
+                'andamentos_obra',
+                Prefetch('fotos_obra', queryset=FotoObra.objects.select_related('imagem')),
+            )
+        )
         try:
             if pk.isdigit():
-                emp = EmpreendimentoPage.objects.live().public().get(id=pk)
+                emp = base_qs.get(id=pk)
             else:
-                emp = EmpreendimentoPage.objects.live().public().get(slug=pk)
+                emp = base_qs.get(slug=pk)
         except EmpreendimentoPage.DoesNotExist:
             return Response({'error': 'Empreendimento não encontrado'}, status=status.HTTP_404_NOT_FOUND)
 
@@ -141,7 +176,10 @@ class EmpreendimentoViewSet(viewsets.ReadOnlyModelViewSet):
         result = []
         cidades = Cidade.objects.filter(ativo=True)
         for cidade in cidades:
-            emps = EmpreendimentoPage.objects.live().public().filter(cidade=cidade)
+            emps = (
+                EmpreendimentoPage.objects.live().public().filter(cidade=cidade)
+                .select_related('status', 'cidade', 'imagem_principal', 'imagem_futuros_lancamentos')
+            )
             if emps.exists():
                 result.append({
                     'cidade': CidadeSerializer(cidade).data,
@@ -234,12 +272,7 @@ class ContatoPageView(APIView):
             page = ContatoPage.objects.live().first()
             if not page:
                 return Response({}, status=status.HTTP_404_NOT_FOUND)
-            hero_imagem = None
-            if page.hero_imagem:
-                try:
-                    hero_imagem = {'url': page.hero_imagem.file.url, 'alt': page.hero_imagem.title}
-                except Exception:
-                    pass
+            hero_imagem = get_image_url(page.hero_imagem, 'width-1920')
             return Response({
                 'hero_titulo': page.hero_titulo,
                 'hero_subtitulo': page.hero_subtitulo,
@@ -272,7 +305,7 @@ class ConfiguracaoView(APIView):
     permission_classes = [AllowAny]
 
     def get(self, request):
-        config = ConfiguracaoSite.objects.first()
+        config = _get_configuracao_site()
         if config:
             return Response(ConfiguracaoSerializer(config).data)
         return Response({
@@ -293,7 +326,7 @@ class TrackingView(APIView):
     permission_classes = [AllowAny]
 
     def get(self, request):
-        config = ConfiguracaoSite.objects.first()
+        config = _get_configuracao_site()
         if not config:
             return Response({
                 'gtm_ativo': False, 'gtm_container_id': '',

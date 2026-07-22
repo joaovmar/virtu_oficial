@@ -99,7 +99,6 @@ export default function FuturosLancamentosSection() {
                 alt={activeEmp?.title || 'Futuro lançamento'}
                 fill
                 className="object-cover"
-                priority
               />
             ) : (
               <div className="absolute inset-0 bg-gradient-to-br from-virtu-green-dark via-virtu-green to-[#1a4a40]" />
