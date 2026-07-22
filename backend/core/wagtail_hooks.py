@@ -356,26 +356,28 @@ class IntegrationLogsView(View):
         from .models import ConfiguracaoSite
         config = ConfiguracaoSite.objects.first()
 
-        # ── Status de conexão OAuth do RD Station (autodiagnóstico p/ MKT) ──
-        conectado = bool(config and config.rdstation_refresh_token and config.rdstation_access_token)
-        if not conectado:
-            rd_oauth_status = 'desconectado'
+        # ── Status do envio de conversões (autodiagnóstico p/ MKT) ──
+        # O envio de leads depende só da API Key de Conversões — o OAuth
+        # (Client ID/Secret) é independente e não afeta isso.
+        configurado = bool(config and config.rdstation_api_key_conversao)
+        if not configurado:
+            rd_status = 'desconectado'
         else:
             falhas_24h = RDStationLog.objects.filter(
                 criado_em__gte=timezone.now() - timedelta(hours=24),
                 status='falha',
             ).count()
-            rd_oauth_status = 'alerta' if falhas_24h > 0 else 'ok'
+            rd_status = 'alerta' if falhas_24h > 0 else 'ok'
 
         context = {
-            'tab'             : tab,
-            'status_f'        : status_f,
-            'dias_f'          : dias_f,
-            'email_f'         : email_f,
-            'rd_logs'         : rd_qs[:200],
-            'rd_totals'       : rd_totals,
-            'config'          : config,
-            'rd_oauth_status' : rd_oauth_status,
+            'tab'        : tab,
+            'status_f'   : status_f,
+            'dias_f'     : dias_f,
+            'email_f'    : email_f,
+            'rd_logs'    : rd_qs[:200],
+            'rd_totals'  : rd_totals,
+            'config'     : config,
+            'rd_status'  : rd_status,
         }
         return render(request, 'wagtailadmin/integration_logs.html', context)
 
