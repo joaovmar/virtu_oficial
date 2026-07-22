@@ -173,8 +173,12 @@ def enviar_lead_rdstation(lead_data: dict, identificador: str = None, lead_obj=N
     conversion_id = identificador or config.rdstation_conversao_identificador or 'site-virtu'
 
     url = _CONVERSIONS_URL
+    # A API de Conversões do RD Station (diferente de outros endpoints V2) não aceita
+    # o access_token via header Authorization — ela exige o token como parâmetro
+    # `api_key` na query string. Confirmado em produção: enviar só via Bearer resulta
+    # em 401 "Unauthorized api_key provided" com path "query_string.api_key".
+    params = {'api_key': access_token}
     headers = {
-        'Authorization': f'Bearer {access_token}',
         'Content-Type': 'application/json',
     }
     payload = {
@@ -198,7 +202,7 @@ def enviar_lead_rdstation(lead_data: dict, identificador: str = None, lead_obj=N
     }
 
     try:
-        response = requests.post(url, json=payload, headers=headers, timeout=10)
+        response = requests.post(url, json=payload, headers=headers, params=params, timeout=10)
         resp_text = response.text[:2000]
 
         if response.status_code in (200, 201):
