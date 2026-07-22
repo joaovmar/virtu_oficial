@@ -198,7 +198,7 @@
         <tr><td>—</td><td>Texto de copyright</td><td>Linha final do rodapé.</td></tr>
         <tr><td>Banner CTA (Breve Lançamento)</td><td>Imagens do card, logos parceiro/virtú, grafismo decorativo</td><td>Bloco "Cadastre-se e saiba mais" reaproveitado em várias páginas (Home, Empreendimentos, página de Empreendimento).</td></tr>
         <tr><td>🔧 Google Tag Manager</td><td>Ativo, Container ID</td><td>Ativa/desativa o GTM no site inteiro.</td></tr>
-        <tr><td>🔧 RD Station</td><td>Ativo, Token público, Client ID/Secret (OAuth), Identificador de conversão</td><td>Envio de leads ao RD Station. Ver <span class="path">Logs de Integrações → RD Station</span> para status e conexão.</td></tr>
+        <tr><td>🔧 RD Station</td><td>Ativo, Token público, <strong>API Key (Conversões)</strong>, Identificador de conversão, Client ID/Secret (OAuth)</td><td>Quem efetivamente envia os leads é a <strong>API Key (Conversões)</strong> — gerada em RD Station → App Store → App Publisher → "Gerar chave de API". O Client ID/Secret (OAuth) é independente, para eventuais integrações futuras. Ver <span class="path">Logs de Integrações → RD Station</span> para status.</td></tr>
         <tr><td>🔧 Meta Pixel</td><td>Ativo, Pixel ID</td><td>Rastreamento do Facebook/Instagram Ads.</td></tr>
         <tr><td>🔧 Google Analytics 4</td><td>Ativo, Measurement ID</td><td>Rastreamento GA4.</td></tr>
       </tbody>
@@ -264,7 +264,7 @@
         <tr>
           <td><strong>Log de envio ao RD Station</strong></td>
           <td>Toda tentativa de envio de um <strong>Lead</strong> ao RD Station</td>
-          <td><span class="path">Logs de Integrações → RD Station</span> — status, causa provável de falhas e botão de reconexão.</td>
+          <td><span class="path">Logs de Integrações → RD Station</span> — status e causa provável de cada falha.</td>
         </tr>
       </tbody>
     </table>
