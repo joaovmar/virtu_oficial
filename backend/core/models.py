@@ -311,19 +311,17 @@ class ConfiguracaoSite(models.Model):
         help_text="⚠️ LEGADO (API V1). Não é mais usado pelo envio de conversões. Mantido apenas por histórico."
     )
     rdstation_api_key_conversao = models.CharField(
-        max_length=255, blank=True, verbose_name="RD Station API Key (Conversões) — usada no envio de leads",
-        help_text="⚠️ Este é o campo que efetivamente envia os leads ao RD Station. É uma chave própria, "
-                   "que NÃO expira, gerada em RD Station → App Store → App Publisher → 'Gerar chave de API'. "
-                   "Diferente do Client ID/Client Secret (OAuth) abaixo — não use o mesmo valor."
+        max_length=255, blank=True, verbose_name="RD Station API Key (NÃO UTILIZADO)",
+        help_text="⚠️ Não utilizado — o envio de leads usa OAuth (Client ID/Client Secret abaixo). "
+                   "Campo mantido apenas por histórico de uma tentativa anterior; pode ficar vazio."
     )
     rdstation_client_id = models.CharField(
-        max_length=200, blank=True, verbose_name="RD Station Client ID (OAuth — não usado no envio de leads)",
-        help_text="OAuth é usado apenas para eventuais integrações futuras (contatos, webhooks etc.), não para "
-                   "o envio de leads — isso é feito pela 'API Key (Conversões)' acima. Obtido ao criar um "
-                   "Aplicativo Privado em appstore.rdstation.com.br."
+        max_length=200, blank=True, verbose_name="RD Station Client ID (OAuth)",
+        help_text="Obtido ao criar um Aplicativo Privado em appstore.rdstation.com.br. "
+                   "Necessário para conectar via OAuth (botão 'Conectar com RD Station' em Logs de Integrações)."
     )
     rdstation_client_secret = models.CharField(
-        max_length=200, blank=True, verbose_name="RD Station Client Secret (OAuth — não usado no envio de leads)",
+        max_length=200, blank=True, verbose_name="RD Station Client Secret (OAuth)",
         help_text="⚠️ NUNCA exposto no frontend. Obtido junto com o Client ID no Aplicativo Privado do RD Station."
     )
     rdstation_access_token = models.TextField(
@@ -404,20 +402,16 @@ class ConfiguracaoSite(models.Model):
         ], heading="🔧 Google Tag Manager"),
         MultiFieldPanel([
             HelpPanel(
-                content="<p>O envio de leads depende apenas do campo <strong>API Key (Conversões)</strong> "
-                        "abaixo — cole a chave gerada em RD Station → App Store → App Publisher → "
-                        "'Gerar chave de API' e o envio já funciona, sem nenhum passo extra.</p>"
-                        "<p>Os campos <strong>Client ID/Client Secret (OAuth)</strong> são independentes — "
-                        "servem só para eventuais integrações futuras (ex: sincronizar contatos), não para "
-                        "o envio de leads. Status e diagnóstico de falhas ficam em "
-                        "<strong>Logs de Integrações → aba RD Station</strong>.</p>"
+                content="<p>Depois de preencher o <strong>Client ID</strong> e <strong>Client Secret</strong> "
+                        "abaixo, vá em <strong>Logs de Integrações → aba RD Station</strong> e clique em "
+                        "<strong>Conectar com RD Station</strong> para autorizar o envio de leads. "
+                        "É lá também que fica o status da conexão e o diagnóstico de eventuais falhas.</p>"
             ),
             FieldPanel('rdstation_ativo'),
             FieldPanel('rdstation_public_token'),
-            FieldPanel('rdstation_api_key_conversao'),
-            FieldPanel('rdstation_conversao_identificador'),
             FieldPanel('rdstation_client_id'),
             FieldPanel('rdstation_client_secret'),
+            FieldPanel('rdstation_conversao_identificador'),
             FieldPanel('rdstation_api_token'),
         ], heading="🔧 RD Station"),
         MultiFieldPanel([
