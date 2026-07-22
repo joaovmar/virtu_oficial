@@ -36,6 +36,9 @@ DATABASES = {
         'PASSWORD': config('DB_PASSWORD', default='virtu_pass'),
         'HOST': config('DB_HOST', default='db'),
         'PORT': config('DB_PORT', default='5432'),
+        # Reaproveita a conexão TCP com o Postgres entre requests (evita reconectar/
+        # reautenticar a cada request), sem nenhuma mudança de comportamento da API.
+        'CONN_MAX_AGE': 60,
     }
 }
 

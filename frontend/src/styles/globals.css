@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Sora:wght@100;200;300;400;500;600;700;800&family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&family=Montserrat:wght@400;500;600;700&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -43,7 +41,7 @@ html {
 }
 
 body {
-  font-family: 'Sora', sans-serif;
+  font-family: var(--font-sora), sans-serif;
   color: var(--virtu-dark);
   background-color: #fff;
   line-height: 1.6;
@@ -53,12 +51,12 @@ body {
 
 /* Newsreader para títulos display itálicos */
 .font-display {
-  font-family: 'Newsreader', serif;
+  font-family: var(--font-newsreader), serif;
 }
 
 /* Montserrat para copyright */
 .font-copyright {
-  font-family: 'Montserrat', sans-serif;
+  font-family: var(--font-montserrat), sans-serif;
 }
 
 h1,
@@ -67,7 +65,7 @@ h3,
 h4,
 h5,
 h6 {
-  font-family: 'Sora', sans-serif;
+  font-family: var(--font-sora), sans-serif;
   font-weight: 300;
 }
 

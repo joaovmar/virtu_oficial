@@ -30,9 +30,9 @@ module.exports = {
          Sora (principal), Newsreader (display italic), Montserrat (copyright)
          ==================================================== */
       fontFamily: {
-        'sans': ['"Sora"', 'sans-serif'],
-        'display': ['"Newsreader"', 'serif'],
-        'copyright': ['"Montserrat"', 'sans-serif'],
+        'sans': ['var(--font-sora)', 'sans-serif'],
+        'display': ['var(--font-newsreader)', 'serif'],
+        'copyright': ['var(--font-montserrat)', 'sans-serif'],
       },
       /* ====================================================
          BORDER RADIUS - Do Figma

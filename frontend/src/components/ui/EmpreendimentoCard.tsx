@@ -11,7 +11,13 @@ export default function EmpreendimentoCard({ empreendimento }: { empreendimento:
       <Link href={`/empreendimentos/${empreendimento.slug}`}>
         <div className="relative aspect-[3/4] rounded-xl md:rounded-2xl overflow-hidden shadow-sm">
           {empreendimento.imagem_principal ? (
-            <Image src={empreendimento.imagem_principal.url} alt={empreendimento.imagem_principal.alt || empreendimento.title} fill className="object-cover group-hover:scale-105 transition-transform duration-700" />
+            <Image
+              src={empreendimento.imagem_principal.url}
+              alt={empreendimento.imagem_principal.alt || empreendimento.title}
+              fill
+              sizes="(max-width:640px) 90vw, (max-width:1024px) 50vw, (max-width:1280px) 33vw, 320px"
+              className="object-cover group-hover:scale-105 transition-transform duration-700"
+            />
           ) : (
             <div className="w-full h-full bg-gradient-to-br from-virtu-green-dark to-virtu-dark flex items-center justify-center"><span className="text-white/50 font-sans text-xs">Sem imagem</span></div>
           )}

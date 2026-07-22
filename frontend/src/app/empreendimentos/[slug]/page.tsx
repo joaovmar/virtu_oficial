@@ -140,7 +140,7 @@ export default function EmpreendimentoDetalhePage() {
               {plantaAtual?.imagem ? (
                 <motion.div key={plantaAtiva} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }}
                   className="relative w-full" style={{ aspectRatio: '2.2 / 1' }}>
-                  <Image src={plantaAtual.imagem.url} alt={plantaAtual.nome} fill className="object-contain" />
+                  <Image src={plantaAtual.imagem.url} alt={plantaAtual.nome} fill sizes="(max-width:1024px) 100vw, 1024px" className="object-contain" />
                 </motion.div>
               ) : null}
               {plantaAtual?.caracteristicas && plantaAtual.caracteristicas.length > 0 && (
@@ -279,6 +279,7 @@ export default function EmpreendimentoDetalhePage() {
                       src={foto.imagem.url}
                       alt={foto.descricao || ''}
                       fill
+                      sizes="(max-width:640px) 90vw, (max-width:768px) 50vw, 33vw"
                       className="object-cover group-hover:scale-105 transition-transform duration-500"
                     />
                   )}

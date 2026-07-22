@@ -100,16 +100,16 @@ class ConfiguracaoSerializer(serializers.ModelSerializer):
         exclude = ['rdstation_api_token']  # ⚠️ Token privado NUNCA exposto
 
     def get_banner_cta_imagem(self, obj):
-        return get_image_url(obj.banner_cta_imagem)
+        return get_image_url(obj.banner_cta_imagem, 'width-1920')
 
     def get_banner_cta_wrapper_imagem(self, obj):
-        return get_image_url(obj.banner_cta_wrapper_imagem)
+        return get_image_url(obj.banner_cta_wrapper_imagem, 'width-1920')
 
     def get_banner_logo_parceiro(self, obj):
-        return get_image_url(obj.banner_logo_parceiro)
+        return get_image_url(obj.banner_logo_parceiro, 'max-320x120')
 
     def get_banner_logo_virtu(self, obj):
-        return get_image_url(obj.banner_logo_virtu)
+        return get_image_url(obj.banner_logo_virtu, 'max-320x120')
 
 
 class TrackingSerializer(serializers.Serializer):
@@ -141,7 +141,7 @@ class PlantaSerializer(serializers.ModelSerializer):
         fields = ['id', 'nome', 'dormitorios', 'metragem', 'imagem', 'descricao', 'caracteristicas']
 
     def get_imagem(self, obj):
-        return get_image_url(obj.imagem)
+        return get_image_url(obj.imagem, 'width-1600')
 
     def get_caracteristicas(self, obj):
         return obj.get_caracteristicas_list()
@@ -205,9 +205,10 @@ class EmpreendimentoCardSerializer(serializers.ModelSerializer):
 
     def get_imagem_futuros_lancamentos(self, obj):
         # Usa imagem específica se cadastrada, senão fallback para imagem principal
+        # (fundo full-bleed do slider "Futuros Lançamentos" — width-1920)
         if obj.imagem_futuros_lancamentos:
-            return get_image_url(obj.imagem_futuros_lancamentos)
-        return get_image_url(obj.imagem_principal)
+            return get_image_url(obj.imagem_futuros_lancamentos, 'width-1920')
+        return get_image_url(obj.imagem_principal, 'width-1920')
 
     def get_url(self, obj):
         return obj.url
@@ -244,13 +245,13 @@ class EmpreendimentoDetalheSerializer(serializers.ModelSerializer):
         ]
 
     def get_imagem_principal(self, obj):
-        return get_image_url(obj.imagem_principal)
+        return get_image_url(obj.imagem_principal, 'width-1920')
 
     def get_imagem_hero(self, obj):
-        return get_image_url(obj.imagem_hero)
+        return get_image_url(obj.imagem_hero, 'width-1920')
 
     def get_logo(self, obj):
-        return get_image_url(obj.logo)
+        return get_image_url(obj.logo, 'max-560x200')
 
     def get_video_thumbnail(self, obj):
         return get_image_url(obj.video_thumbnail, 'fill-800x450')
@@ -287,13 +288,13 @@ class HomePageSerializer(serializers.ModelSerializer):
         ]
 
     def get_hero_imagem(self, obj):
-        return get_image_url(obj.hero_imagem)
+        return get_image_url(obj.hero_imagem, 'width-1920')
 
     def get_secao_futuro_imagem(self, obj):
-        return get_image_url(obj.secao_futuro_imagem)
+        return get_image_url(obj.secao_futuro_imagem, 'width-1600')
 
     def get_banner_institucional_imagem(self, obj):
-        return get_image_url(obj.banner_institucional_imagem)
+        return get_image_url(obj.banner_institucional_imagem, 'width-1920')
 
     def get_etapas_jornada(self, obj):
         result = []
@@ -304,7 +305,7 @@ class HomePageSerializer(serializers.ModelSerializer):
                     'numero': block.value.get('numero', ''),
                     'titulo': block.value.get('titulo', ''),
                     'descricao': block.value.get('descricao', ''),
-                    'icone': get_image_url(icone_img) if icone_img else None,
+                    'icone': get_image_url(icone_img, 'max-200x200') if icone_img else None,
                 })
         return result
 
@@ -312,7 +313,7 @@ class HomePageSerializer(serializers.ModelSerializer):
         banners = []
         for b in obj.hero_banners.all():
             banners.append({
-                'imagem': get_image_url(b.imagem),
+                'imagem': get_image_url(b.imagem, 'width-1920'),
                 'titulo': b.titulo,
                 'subtitulo': b.subtitulo,
             })
@@ -348,32 +349,32 @@ class SobreNosSerializer(serializers.ModelSerializer):
         ]
 
     def get_hero_imagem(self, obj):
-        return get_image_url(obj.hero_imagem)
+        return get_image_url(obj.hero_imagem, 'width-1920')
 
     def get_video_thumbnail(self, obj):
         return get_image_url(obj.video_thumbnail, 'fill-800x450')
 
     def get_cta_imagem(self, obj):
-        return get_image_url(obj.cta_imagem)
+        return get_image_url(obj.cta_imagem, 'width-1920')
 
     def get_missao_icone(self, obj):
-        return get_image_url(obj.missao_icone)
+        return get_image_url(obj.missao_icone, 'max-200x200')
 
     def get_visao_icone(self, obj):
-        return get_image_url(obj.visao_icone)
+        return get_image_url(obj.visao_icone, 'max-200x200')
 
     def get_valores_icone(self, obj):
-        return get_image_url(obj.valores_icone)
+        return get_image_url(obj.valores_icone, 'max-200x200')
 
     def get_mvv_background(self, obj):
-        return get_image_url(obj.mvv_background)
+        return get_image_url(obj.mvv_background, 'width-1920')
 
     def get_selos_qualidade(self, obj):
         selos = []
         for s in obj.selos_qualidade.all():
             selos.append({
                 'nome': s.nome,
-                'imagem': get_image_url(s.imagem),
+                'imagem': get_image_url(s.imagem, 'max-400x200'),
             })
         return selos
 
@@ -397,13 +398,13 @@ class EmpreendimentosIndexPageSerializer(serializers.ModelSerializer):
         ]
 
     def get_hero_imagem(self, obj):
-        return get_image_url(obj.hero_imagem)
+        return get_image_url(obj.hero_imagem, 'width-1920')
 
     def get_banner_logo_parceiro(self, obj):
-        return get_image_url(obj.banner_logo_parceiro)
+        return get_image_url(obj.banner_logo_parceiro, 'max-320x120')
 
     def get_banner_logo_virtu(self, obj):
-        return get_image_url(obj.banner_logo_virtu)
+        return get_image_url(obj.banner_logo_virtu, 'max-320x120')
 
 
 class LeadSerializer(serializers.ModelSerializer):
