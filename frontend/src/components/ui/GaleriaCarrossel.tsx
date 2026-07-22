@@ -8,6 +8,44 @@ interface GaleriaCarrosselProps {
   imagens: GaleriaImagem[];
   titulo?: string;
 }
+
+/**
+ * Mostra a miniatura leve (thumb) borrada por baixo enquanto a imagem grande
+ * carrega, com fade-in suave — evita a sensação de travamento/flash em branco
+ * quando a foto é pesada, sem precisar esperar o carregamento completo pra
+ * mostrar algo na tela.
+ */
+function SlideImage({
+  src, thumbSrc, alt, sizes, priority, fit = 'cover',
+}: {
+  src: string; thumbSrc?: string; alt: string; sizes?: string; priority?: boolean; fit?: 'cover' | 'contain';
+}) {
+  const [loaded, setLoaded] = useState(false);
+  const fitClass = fit === 'cover' ? 'object-cover' : 'object-contain';
+  return (
+    <>
+      {thumbSrc && (
+        <Image
+          src={thumbSrc}
+          alt=""
+          fill
+          aria-hidden
+          className={`${fitClass} scale-105 blur-lg transition-opacity duration-300 ${loaded ? 'opacity-0' : 'opacity-100'}`}
+        />
+      )}
+      <Image
+        src={src}
+        alt={alt}
+        fill
+        sizes={sizes}
+        priority={priority}
+        quality={82}
+        className={`${fitClass} transition-opacity duration-500 ${loaded ? 'opacity-100' : 'opacity-0'}`}
+        onLoad={() => setLoaded(true)}
+      />
+    </>
+  );
+}
 export default function GaleriaCarrossel({ imagens, titulo = "Galeria" }: GaleriaCarrosselProps) {
   const [active, setActive] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -68,13 +106,12 @@ export default function GaleriaCarrossel({ imagens, titulo = "Galeria" }: Galeri
                 transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
                 onClick={() => isActive ? setLightboxOpen(true) : setActive(index)}
               >
-                <div className={`relative w-full h-full ${isActive ? 'shadow-2xl' : 'shadow-md'}`}>
+                <div className={`relative w-full h-full overflow-hidden ${isActive ? 'shadow-2xl' : 'shadow-md'}`}>
                   {getSrc(img) && (
-                    <Image
+                    <SlideImage
                       src={getSrc(img)}
+                      thumbSrc={img.thumb?.url}
                       alt={getAlt(img)}
-                      fill
-                      className="object-cover"
                       sizes="(max-width:768px) 90vw, 50vw"
                       priority={isActive}
                     />
@@ -126,15 +163,16 @@ export default function GaleriaCarrossel({ imagens, titulo = "Galeria" }: Galeri
             <ChevronLeft className="w-5 h-5 text-white" />
           </button>
           <motion.div key={active} initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
-            className="relative max-w-5xl max-h-[80vh] w-full mx-12 md:mx-16"
+            className="relative max-w-5xl max-h-[80vh] w-full mx-12 md:mx-16 overflow-hidden"
+            style={{ aspectRatio: `${imagens[active]?.imagem?.width || 1200} / ${imagens[active]?.imagem?.height || 800}` }}
             onClick={(e) => e.stopPropagation()}>
             {imagens[active]?.imagem && (
-              <Image
+              <SlideImage
                 src={imagens[active].imagem!.url}
+                thumbSrc={imagens[active].thumb?.url}
                 alt={getAlt(imagens[active])}
-                width={imagens[active].imagem!.width || 1200}
-                height={imagens[active].imagem!.height || 800}
-                className="object-contain w-full h-full max-h-[80vh]"
+                fit="contain"
+                sizes="(max-width:1024px) 90vw, 1024px"
               />
             )}
           </motion.div>
