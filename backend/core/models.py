@@ -320,13 +320,13 @@ class ConfiguracaoSite(models.Model):
         max_length=200, blank=True, verbose_name="RD Station Client Secret (OAuth)",
         help_text="⚠️ NUNCA exposto no frontend. Obtido junto com o Client ID no Aplicativo Privado do RD Station."
     )
-    rdstation_access_token = models.CharField(
-        max_length=500, blank=True, verbose_name="RD Station Access Token (gerenciado automaticamente)",
+    rdstation_access_token = models.TextField(
+        blank=True, verbose_name="RD Station Access Token (gerenciado automaticamente)",
         help_text="Preenchido e renovado automaticamente pelo sistema após clicar em 'Conectar com RD Station'. "
                    "Não edite manualmente."
     )
-    rdstation_refresh_token = models.CharField(
-        max_length=500, blank=True, verbose_name="RD Station Refresh Token (gerenciado automaticamente)",
+    rdstation_refresh_token = models.TextField(
+        blank=True, verbose_name="RD Station Refresh Token (gerenciado automaticamente)",
         help_text="Usado pelo sistema para renovar o Access Token sem precisar reconectar. Não edite manualmente."
     )
     rdstation_token_expira_em = models.DateTimeField(
