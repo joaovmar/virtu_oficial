@@ -356,11 +356,9 @@ class IntegrationLogsView(View):
         from .models import ConfiguracaoSite
         config = ConfiguracaoSite.objects.first()
 
-        # ── Status do envio de conversões (autodiagnóstico p/ MKT) ──
-        # O envio de leads depende só da API Key de Conversões — o OAuth
-        # (Client ID/Secret) é independente e não afeta isso.
-        configurado = bool(config and config.rdstation_api_key_conversao)
-        if not configurado:
+        # ── Status de conexão OAuth do RD Station (autodiagnóstico p/ MKT) ──
+        conectado = bool(config and config.rdstation_refresh_token and config.rdstation_access_token)
+        if not conectado:
             rd_status = 'desconectado'
         else:
             falhas_24h = RDStationLog.objects.filter(

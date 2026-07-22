@@ -1,35 +1,42 @@
 # -*- coding: utf-8 -*-
 """
-Serviço de integração server-side com RD Station.
+Serviço de integração server-side com RD Station (API V2 — OAuth 2.0).
 
 Regras de uso:
 - Todo formulário do site (EXCETO /contato) dispara envio ao RD Station.
 - Cada tentativa gera um registro em RDStationLog visível no Wagtail.
 - Falhas são registradas com causa provável legível pelo time de MKT, indicando
-  se o problema é do nosso lado ou do lado do RD Station (aguardar/checar lá).
-- O envio de conversões usa a "API Key" dedicada do RD Station (campo
-  rdstation_api_key_conversao), enviada como parâmetro `api_key` na query
-  string — mecanismo próprio da API de Conversões, independente do OAuth
-  (Client ID/Secret) usado em /admin/rdstation-connect/ para outras integrações.
-  Essa API Key não expira, então não há renovação automática a fazer aqui.
+  se o problema é do nosso lado (reconectar) ou do lado do RD Station (aguardar/checar lá).
+- Client Secret e tokens NUNCA são expostos ao frontend.
+- A conexão é feita via OAuth em /admin/rdstation-connect/ (ver wagtail_hooks.py).
+  O access_token é renovado automaticamente usando o refresh_token — o time de MKT
+  só precisa reconectar manualmente se o refresh_token for revogado/expirar.
+- Endpoint e autenticação confirmados no guia oficial de migração V1->V2 da
+  RD Station (developers.rdstation.com/reference/rdsm-como-migrar-api-v1-para-api-v2):
+  POST https://api.rd.services/platform/events, com Authorization: Bearer access_token.
+  (O endpoint /platform/conversions é o antigo/legado, que usa outro mecanismo
+  de autenticação — usá-lo por engano gera 401 "Unauthorized api_key provided".)
 """
 
 import logging
 import threading
+from datetime import timedelta
 
 import requests
+from django.utils import timezone
 
 logger = logging.getLogger('core.rdstation')
 
-_CONVERSIONS_URL = 'https://api.rd.services/platform/conversions'
+_OAUTH_TOKEN_URL = 'https://api.rd.services/auth/token'
+_EVENTS_URL = 'https://api.rd.services/platform/events'
 
 # Mapeamento de código HTTP → causa humana para o MKT.
-# Cada mensagem já indica de qual lado é o problema: nosso painel (corrigir a API Key)
+# Cada mensagem já indica de qual lado é o problema: nosso painel (reconectar)
 # ou lado do RD Station (não é bug nosso, checar direto na conta RD).
 _HTTP_CAUSAS = {
     400: '[Lado virtú] Dados inválidos enviados à API do RD Station. Verifique o payload — algum campo pode estar mal formatado. Se persistir, acione a TPI.',
-    401: '[Lado virtú] API Key de conversão inválida ou revogada. Gere uma nova em RD Station → App Store → App Publisher → "Gerar chave de API" e cole em Configurações do Site → 🔧 RD Station → API Key (Conversões).',
-    403: '[Lado RD Station] Sem permissão para usar este endpoint. Verifique as permissões da API Key na conta RD Station (não é um problema do nosso site).',
+    401: '[Lado virtú] Token OAuth expirado ou revogado e a renovação automática falhou. Acesse Logs de Integrações → RD Station e clique em "Reconectar com RD Station".',
+    403: '[Lado RD Station] Sem permissão para usar este endpoint. Verifique as permissões do Aplicativo em appstore.rdstation.com.br (não é um problema do nosso site).',
     404: '[Lado virtú] Endpoint da API do RD Station não encontrado. A URL da API pode ter mudado — acione a TPI.',
     409: '[Lado RD Station] Conflito: o identificador de conversão já existe com configurações diferentes. Verifique em RD Station → Automação → Conversões.',
     422: '[Lado RD Station] Dados não processados pelo RD Station — normalmente e-mail do lead inválido. Não é um problema do nosso site.',
@@ -45,14 +52,71 @@ _EXCEPTION_CAUSAS = {
     'default': '[Lado virtú] Erro desconhecido ao conectar ao RD Station. Verifique os logs técnicos do servidor.',
 }
 
-_API_KEY_NAO_CONFIGURADA = ('[Lado virtú] API Key de conversão do RD Station não configurada. Gere uma em '
-                            'RD Station → App Store → App Publisher → "Gerar chave de API" e cole em '
-                            'Configurações do Site → 🔧 RD Station → API Key (Conversões).')
+_NAO_CONECTADO = ('[Lado virtú] RD Station não conectado via OAuth. Acesse Logs de Integrações → '
+                   'RD Station e clique em "Conectar com RD Station".')
+_REFRESH_FALHOU = ('[Lado virtú] Não foi possível renovar automaticamente o token do RD Station '
+                    '(refresh_token revogado ou expirado). Acesse Logs de Integrações → RD Station '
+                    'e clique em "Reconectar com RD Station".')
 
 
 def _get_config():
     from .models import ConfiguracaoSite
     return ConfiguracaoSite.objects.first()
+
+
+def _refresh_access_token(config) -> bool:
+    """
+    Troca o refresh_token por um novo access_token e salva no ConfiguracaoSite.
+    Retorna True em caso de sucesso.
+    """
+    if not (config.rdstation_client_id and config.rdstation_client_secret and config.rdstation_refresh_token):
+        return False
+
+    try:
+        response = requests.post(
+            _OAUTH_TOKEN_URL,
+            json={
+                'client_id': config.rdstation_client_id,
+                'client_secret': config.rdstation_client_secret,
+                'refresh_token': config.rdstation_refresh_token,
+            },
+            timeout=10,
+        )
+    except requests.RequestException as e:
+        logger.error(f'RD Station: falha de rede ao renovar token OAuth: {e}')
+        return False
+
+    if response.status_code not in (200, 201):
+        logger.warning(f'RD Station: falha ao renovar token OAuth [{response.status_code}]: {response.text[:300]}')
+        return False
+
+    data = response.json()
+    config.rdstation_access_token = data.get('access_token', '')
+    config.rdstation_refresh_token = data.get('refresh_token') or config.rdstation_refresh_token
+    expires_in = data.get('expires_in', 3600)
+    config.rdstation_token_expira_em = timezone.now() + timedelta(seconds=expires_in)
+    config.save(update_fields=['rdstation_access_token', 'rdstation_refresh_token', 'rdstation_token_expira_em'])
+    logger.info('RD Station: token OAuth renovado com sucesso.')
+    return True
+
+
+def _get_valid_access_token(config):
+    """
+    Retorna um access_token válido, renovando via refresh_token se necessário.
+    Retorna None se não houver conexão OAuth configurada ou a renovação falhar.
+    """
+    tem_cache_valido = (
+        config.rdstation_access_token
+        and config.rdstation_token_expira_em
+        and config.rdstation_token_expira_em > timezone.now() + timedelta(seconds=60)
+    )
+    if tem_cache_valido:
+        return config.rdstation_access_token
+
+    if _refresh_access_token(config):
+        return config.rdstation_access_token
+
+    return None
 
 
 def _salvar_log(lead_data: dict, identificador: str, status: str, http_code=None,
@@ -101,23 +165,21 @@ def enviar_lead_rdstation(lead_data: dict, identificador: str = None, lead_obj=N
         )
         return False
 
-    api_key = config.rdstation_api_key_conversao
-    if not api_key:
-        logger.info(f'RD Station: lead não enviado — {_API_KEY_NAO_CONFIGURADA}')
+    access_token = _get_valid_access_token(config)
+    if not access_token:
+        causa = _REFRESH_FALHOU if config.rdstation_refresh_token else _NAO_CONECTADO
+        logger.info(f'RD Station: lead não enviado — {causa}')
         _salvar_log(
             lead_data, identificador or '', 'inativo',
-            causa=_API_KEY_NAO_CONFIGURADA, lead_obj=lead_obj
+            causa=causa, lead_obj=lead_obj
         )
         return False
 
     conversion_id = identificador or config.rdstation_conversao_identificador or 'site-virtu'
 
-    url = _CONVERSIONS_URL
-    # A API de Conversões do RD Station usa uma "API Key" própria (não expira),
-    # enviada como parâmetro `api_key` na query string — não é o mesmo mecanismo
-    # do OAuth (Client ID/Secret) usado em outras integrações.
-    params = {'api_key': api_key}
+    url = _EVENTS_URL
     headers = {
+        'Authorization': f'Bearer {access_token}',
         'Content-Type': 'application/json',
     }
     payload = {
@@ -141,7 +203,7 @@ def enviar_lead_rdstation(lead_data: dict, identificador: str = None, lead_obj=N
     }
 
     try:
-        response = requests.post(url, json=payload, headers=headers, params=params, timeout=10)
+        response = requests.post(url, json=payload, headers=headers, timeout=10)
         resp_text = response.text[:2000]
 
         if response.status_code in (200, 201):
