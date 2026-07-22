@@ -156,7 +156,10 @@ class GaleriaImagemSerializer(serializers.ModelSerializer):
         fields = ['id', 'imagem', 'thumb', 'descricao']
 
     def get_imagem(self, obj):
-        return get_image_url(obj.imagem)
+        # width-2000 é de sobra tanto pro card do carrossel (object-cover, max ~728px,
+        # ~1456px em telas retina) quanto pro lightbox em tela cheia — evita servir o
+        # arquivo original sem nenhum redimensionamento (podendo ter vários MB).
+        return get_image_url(obj.imagem, 'width-2000')
 
     def get_thumb(self, obj):
         return get_image_url(obj.imagem, 'fill-400x300')
