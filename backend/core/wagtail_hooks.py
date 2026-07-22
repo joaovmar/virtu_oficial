@@ -439,6 +439,7 @@ class RDStationOAuthCallbackView(View):
             response = requests.post(
                 'https://api.rd.services/auth/token',
                 json={
+                    'grant_type': 'authorization_code',
                     'client_id': config.rdstation_client_id,
                     'client_secret': config.rdstation_client_secret,
                     'code': code,

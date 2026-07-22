@@ -68,34 +68,63 @@ def _refresh_access_token(config) -> bool:
     """
     Troca o refresh_token por um novo access_token e salva no ConfiguracaoSite.
     Retorna True em caso de sucesso.
+
+    Usa select_for_update para serializar renovações concorrentes (ex: dois leads
+    enviados ao mesmo tempo logo que o token expira): a RD Station rotaciona o
+    refresh_token a cada uso, então duas renovações simultâneas com o mesmo
+    refresh_token fariam uma delas falhar por usar um refresh_token já consumido.
     """
+    from django.db import transaction
+    from .models import ConfiguracaoSite
+
     if not (config.rdstation_client_id and config.rdstation_client_secret and config.rdstation_refresh_token):
         return False
 
-    try:
-        response = requests.post(
-            _OAUTH_TOKEN_URL,
-            json={
-                'client_id': config.rdstation_client_id,
-                'client_secret': config.rdstation_client_secret,
-                'refresh_token': config.rdstation_refresh_token,
-            },
-            timeout=10,
+    with transaction.atomic():
+        locked = ConfiguracaoSite.objects.select_for_update().get(pk=config.pk)
+
+        # Outra thread/processo pode já ter renovado enquanto esperávamos o lock.
+        ja_renovado = (
+            locked.rdstation_access_token
+            and locked.rdstation_token_expira_em
+            and locked.rdstation_token_expira_em > timezone.now() + timedelta(seconds=60)
         )
-    except requests.RequestException as e:
-        logger.error(f'RD Station: falha de rede ao renovar token OAuth: {e}')
-        return False
+        if ja_renovado:
+            config.rdstation_access_token = locked.rdstation_access_token
+            config.rdstation_refresh_token = locked.rdstation_refresh_token
+            config.rdstation_token_expira_em = locked.rdstation_token_expira_em
+            return True
 
-    if response.status_code not in (200, 201):
-        logger.warning(f'RD Station: falha ao renovar token OAuth [{response.status_code}]: {response.text[:300]}')
-        return False
+        try:
+            response = requests.post(
+                _OAUTH_TOKEN_URL,
+                json={
+                    'grant_type': 'refresh_token',
+                    'client_id': locked.rdstation_client_id,
+                    'client_secret': locked.rdstation_client_secret,
+                    'refresh_token': locked.rdstation_refresh_token,
+                },
+                timeout=10,
+            )
+        except requests.RequestException as e:
+            logger.error(f'RD Station: falha de rede ao renovar token OAuth: {e}')
+            return False
 
-    data = response.json()
-    config.rdstation_access_token = data.get('access_token', '')
-    config.rdstation_refresh_token = data.get('refresh_token') or config.rdstation_refresh_token
-    expires_in = data.get('expires_in', 3600)
-    config.rdstation_token_expira_em = timezone.now() + timedelta(seconds=expires_in)
-    config.save(update_fields=['rdstation_access_token', 'rdstation_refresh_token', 'rdstation_token_expira_em'])
+        if response.status_code not in (200, 201):
+            logger.warning(f'RD Station: falha ao renovar token OAuth [{response.status_code}]: {response.text[:300]}')
+            return False
+
+        data = response.json()
+        locked.rdstation_access_token = data.get('access_token', '')
+        locked.rdstation_refresh_token = data.get('refresh_token') or locked.rdstation_refresh_token
+        expires_in = data.get('expires_in', 3600)
+        locked.rdstation_token_expira_em = timezone.now() + timedelta(seconds=expires_in)
+        locked.save(update_fields=['rdstation_access_token', 'rdstation_refresh_token', 'rdstation_token_expira_em'])
+
+        config.rdstation_access_token = locked.rdstation_access_token
+        config.rdstation_refresh_token = locked.rdstation_refresh_token
+        config.rdstation_token_expira_em = locked.rdstation_token_expira_em
+
     logger.info('RD Station: token OAuth renovado com sucesso.')
     return True
 
