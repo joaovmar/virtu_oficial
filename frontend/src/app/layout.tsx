@@ -33,7 +33,7 @@ const montserrat = Montserrat({
 });
 
 export const metadata: Metadata = {
-  title: 'virtú | Incorporações e Urbanismo',
+  title: 'virtú | Incorporação e Urbanismo',
   description:
     'O seu futuro é o nosso propósito. Empreendimentos de médio e alto padrão em Ribeirão Preto e região.',
   keywords: ['virtú', 'incorporadora', 'urbanismo', 'empreendimentos', 'Ribeirão Preto', 'imóveis'],
@@ -45,7 +45,7 @@ export const metadata: Metadata = {
     apple: '/favicon.svg',
   },
   openGraph: {
-    title: 'virtú | Incorporações e Urbanismo',
+    title: 'virtú | Incorporação e Urbanismo',
     description: 'O seu futuro é o nosso propósito.',
     type: 'website',
     locale: 'pt_BR',
