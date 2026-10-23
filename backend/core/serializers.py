@@ -97,7 +97,17 @@ class ConfiguracaoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ConfiguracaoSite
-        exclude = ['rdstation_api_token']  # ⚠️ Token privado NUNCA exposto
+        fields = [
+            'id',
+            'banner_cta_imagem', 'banner_cta_wrapper_imagem',
+            'banner_logo_parceiro', 'banner_logo_virtu',
+            'banner_cta_bg_cor', 'grafismo_imagem',
+            'email', 'telefone', 'whatsapp', 'endereco',
+            'facebook', 'instagram', 'linkedin', 'youtube', 'copyright_texto',
+            'gtm_ativo', 'gtm_container_id',
+            'rdstation_ativo', 'rdstation_public_token', 'rdstation_conversao_identificador',
+            'meta_pixel_ativo', 'meta_pixel_id', 'ga4_ativo', 'ga4_measurement_id',
+        ]  # allowlist: apenas campos publicos de exibicao/tracking (segredos nunca entram)
 
     def get_banner_cta_imagem(self, obj):
         return get_image_url(obj.banner_cta_imagem, 'width-1920')
